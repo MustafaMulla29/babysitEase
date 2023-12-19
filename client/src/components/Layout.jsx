@@ -97,7 +97,6 @@ const Layout = ({ children }) => {
     ? adminMenu
     : (user?.role == "babysitter" && babysitterMenu) ||
       (user?.role == "nurse" ? newNurseMenu : userMenu);
-  console.log(user?.profilePicture);
   return (
     <>
       <section className="main ">

@@ -153,6 +153,20 @@ const Profile = () => {
             </div>
           </div>
           <hr className="mb-8" />
+          <div className="mb-8">
+            <Typography variant="h6">Certifications</Typography>
+            <div className="flex flex-wrap gap-4">
+              {caregiver?.certifications?.map((certificate, index) => (
+                <Avatar
+                  key={index}
+                  alt="certificate"
+                  src={`http://localhost:8070/${certificate}`}
+                  sx={{ width: 80, height: 80 }}
+                />
+              ))}
+            </div>
+          </div>
+          <hr className="mb-8" />
 
           {/* Reviews Section */}
           <div>

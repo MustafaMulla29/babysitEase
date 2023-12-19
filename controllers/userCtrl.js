@@ -309,7 +309,6 @@ const applyCaregiverController = async (req, res) => {
     try {
         // Extract certificates from req.files
         const certifications = req.files ? req.files.map(file => file.path) : null;
-        console.log(certifications);
 
         // Extract other form data from req.body
         const ageRange = JSON.parse(req.body.ageRange)
@@ -322,6 +321,14 @@ const applyCaregiverController = async (req, res) => {
             specialisation,
             userId,
         } = req.body;
+        const existingCaregiver = await caregiverModel.findOne({ userId: userId })
+
+        if (existingCaregiver) {
+            return res.status(200).send({
+                success: true,
+                message: "You have already applied"
+            })
+        }
 
         const newCaregiver = await caregiverModel({
             experience,

@@ -10,6 +10,10 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { AiOutlineCloudUpload } from "react-icons/ai";
+import { useDispatch, useSelector } from "react-redux";
+import { hideLoading, showLoading } from "../../redux/features/alertSlice";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 // ... existing imports
 
@@ -36,6 +40,9 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
     yearsExperience: caregiver?.yearsExperience,
     profilePicture: caregiver?.profilePicture,
   });
+
+  const { user } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
 
   const [profilePictureDisplay, setProfilePictureDisplay] = useState(null);
 
@@ -64,10 +71,6 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
       profilePicture: caregiver?.profilePicture,
     });
   }, [caregiver]);
-  useEffect(() => {
-    console.log("Caregiver Data:", caregiver);
-    console.log("Certifications in State:", editedData.certifications);
-  }, [caregiver, editedData.certifications]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -113,183 +116,254 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
     // You can perform additional checks or image processing here if needed
     setProfilePictureDisplay(URL.createObjectURL(file));
     setEditedData((prevData) => ({
-      ...prevData,
-      profilePicture: file.name,
+      profilePicture: file,
     }));
   };
 
   const handleCertificateImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    const fileNames = files.map((file) => file.name);
+    const files = e.target.files;
+    const fileList = Array.from(files);
 
     setEditedData((prevData) => ({
       ...prevData,
-      certifications: [...prevData.certifications, ...fileNames],
+      certifications: [...prevData.certifications, ...fileList],
     }));
-    console.log("Selected Files:", files);
-    console.log("File Names:", fileNames);
   };
-  console.log(editedData.certifications);
+
+  const removeCertificate = (certificate) => {
+    setEditedData((prevData) => ({
+      ...prevData,
+      certifications: prevData.certifications.filter(
+        (cert) => cert !== certificate
+      ),
+    }));
+  };
+
+  const handleSumbit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+
+    formData.append("user[profilePicture]", editedData.profilePicture);
+    formData.append("userId", user._id);
+
+    formData.append("caregiver[yearsExperience]", editedData.yearsExperience);
+    formData.append("caregiver[feesPerDay]", editedData.feesPerDay);
+    formData.append("caregiver[preferredCities]", editedData.preferredCities);
+    formData.append("caregiver[description]", editedData.description);
+    formData.append("caregiver[qualification]", editedData.qualification);
+    formData.append("caregiver[specialisation]", editedData.specialisation);
+    formData.append("caregiver[ageRange]", JSON.stringify(editedData.ageRange));
+    formData.append("caregiver[availability]", editedData.availability);
+
+    // Append certifications as an array
+    editedData.certifications.forEach((file, index) => {
+      formData.append(`caregiver[certifications][${index}]`, file);
+    });
+    try {
+      console.log(formData);
+      dispatch(showLoading());
+      const res = await axios.patch(
+        "http://localhost:8070/api/v1/caregiver/updateCaregiver",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "multipart/form-data", // Set content type to multipart/form-data
+          },
+        }
+      );
+      dispatch(hideLoading());
+      if (res.data.success) {
+        toast.success(res.data.message, {
+          position: toast.POSITION.TOP_CENTER,
+        });
+        onClose();
+      } else {
+        toast.error(res.data.message, {
+          position: toast.POSITION.TOP_CENTER,
+        });
+      }
+    } catch (error) {
+      dispatch(hideLoading());
+      console.log(error);
+      toast.error("Something went wrong", {
+        position: toast.POSITION.TOP_CENTER,
+      });
+    }
+  };
 
   return (
     <>
-      <Modal
-        open={isOpen}
-        onClose={onClose}
-        className="flex items-center justify-center "
-      >
-        <Box className="w-full max-w-4xl p-4 h-[80%] overflow-y-scroll">
-          <Paper elevation={3} className="p-6">
-            <div className="bg-white p-4">
-              {/* Profile Picture and Avatar */}
-              <div className="flex items-center space-x-4">
-                <div className="bg-white p-3 rounded shadow-md w-full">
-                  <div className="mt-1 bg-[#f3f4f6] flex items-center justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                    <div className="space-y-1 text-center">
-                      <label
-                        htmlFor="file-upload"
-                        className="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:border-indigo-300"
-                      >
-                        <span className="flex items-center justify-center gap-1">
-                          <AiOutlineCloudUpload /> Upload a profile picture
-                        </span>
-                        <input
-                          id="file-upload"
-                          name="file-upload"
-                          type="file"
-                          accept="image/png,jpg,jpeg"
-                          className="sr-only"
-                          onChange={handleFileChange}
+      <div className="">
+        <Modal
+          open={isOpen}
+          onClose={onClose}
+          className="flex items-center justify-center pt-44  overflow-y-scroll"
+        >
+          <div className="">
+            <form
+              action=""
+              method="patch"
+              className="max-w-4xl"
+              onSubmit={handleSumbit}
+            >
+              <Box className="mt-14">
+                <Paper elevation={3} className="p-6">
+                  <div className="bg-white p-4">
+                    {/* Profile Picture and Avatar */}
+                    <div className="flex items-center space-x-4">
+                      <div className="bg-white p-3 rounded shadow-md w-full">
+                        <div className="mt-1 bg-[#f3f4f6] flex items-center justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                          <div className="space-y-1 text-center">
+                            <label
+                              htmlFor="file-upload"
+                              className="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:border-indigo-300"
+                            >
+                              <span className="flex items-center justify-center gap-1">
+                                <AiOutlineCloudUpload /> Upload a profile
+                                picture
+                              </span>
+                              <input
+                                id="file-upload"
+                                name="file-upload"
+                                type="file"
+                                accept="image/png,jpg,jpeg"
+                                className="sr-only"
+                                onChange={handleFileChange}
+                              />
+                            </label>
+                            <p className="text-xs text-gray-500">
+                              PNG, JPG, JPEG up to 10MB
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <Box>
+                        <Avatar
+                          alt="Profile Picture"
+                          src={`http://localhost:8070/${editedData.profilePicture}`}
+                          sx={{ width: 100, height: 100 }}
                         />
-                      </label>
-                      <p className="text-xs text-gray-500">
-                        PNG, JPG, JPEG up to 10MB
-                      </p>
+                      </Box>
                     </div>
-                  </div>
-                </div>
-                <Box>
-                  <Avatar
-                    alt="Profile Picture"
-                    src={`http://localhost:5173/nurse/profile/${encodeURIComponent(
-                      editedData.profilePicture
-                    )}`}
-                    sx={{ width: 100, height: 100 }}
-                  />
-                </Box>
-              </div>
 
-              <div className=" flex items-start justify-start gap-3">
-                {/* Name */}
-                <TextField
-                  label="Name"
-                  name="name"
-                  value={editedData.name}
-                  onChange={handleInputChange}
-                  fullWidth
-                  className="mb-2"
-                />
+                    <div className=" flex items-start justify-start gap-3">
+                      {/* Name */}
+                      <TextField
+                        label="Name"
+                        name="name"
+                        value={editedData.name}
+                        onChange={handleInputChange}
+                        fullWidth
+                        className="mb-2"
+                      />
 
-                {/* Address */}
-                <TextField
-                  label="Address"
-                  name="address"
-                  value={editedData.address}
-                  onChange={handleInputChange}
-                  fullWidth
-                  className="mb-2"
-                />
-              </div>
-
-              <TextField
-                label="Years of experience"
-                name="yearsExperience"
-                value={editedData.yearsExperience}
-                onChange={handleInputChange}
-                fullWidth
-                className="mb-2"
-              />
-              <div className=" flex items-start justify-start gap-3">
-                {/* Age Range */}
-                <TextField
-                  label="Age Range Lower Limit"
-                  name="ageRange.lowerLimit"
-                  value={editedData.ageRange.lowerLimit}
-                  onChange={handleInputChange}
-                  fullWidth
-                  className="mb-2"
-                />
-                <TextField
-                  label="Age Range Upper Limit"
-                  name="ageRange.upperLimit"
-                  value={editedData.ageRange.upperLimit}
-                  onChange={handleInputChange}
-                  fullWidth
-                  className="mb-2"
-                />
-              </div>
-
-              {/* Availability */}
-              <TextField
-                label="Availability"
-                name="availability"
-                value={editedData.availability}
-                onChange={handleInputChange}
-                fullWidth
-                className="mb-2"
-              />
-
-              {/* Certifications */}
-              <div className="flex items-start justify-center flex-col space-y-2 ">
-                <div className="bg-white p-3 rounded shadow-md  w-full">
-                  <div className="mt-1 bg-[#f3f4f6] flex items-center justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                    <div className="space-y-1 text-center ">
-                      <label
-                        htmlFor="file-upload"
-                        className="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:border-indigo-300"
-                      >
-                        <span className="flex items-center justify-center gap-1">
-                          <AiOutlineCloudUpload />
-                          Upload a file (certificates if any)
-                        </span>
-                        <input
-                          id="file-upload"
-                          name="certifications"
-                          multiple
-                          type="file"
-                          accept="image/png,jpg,jpeg"
-                          className="sr-only"
-                          onChange={handleCertificateImageChange}
-                        />
-                      </label>
-                      <p className="text-xs text-gray-500">
-                        PNG, JPG, JPEG up to 10MB
-                      </p>
+                      {/* Address */}
+                      <TextField
+                        label="Address"
+                        name="address"
+                        value={editedData.address}
+                        onChange={handleInputChange}
+                        fullWidth
+                        className="mb-2"
+                      />
                     </div>
-                  </div>
-                </div>
-                <div className="h-4">
-                  <span className="text-red-500 text-sm mt-1"></span>
-                </div>
-                <div className="flex items-center justify-start gap-2 w-full flex-wrap">
-                  {editedData.certifications &&
-                    editedData.certifications.map((img, index) => {
-                      return (
-                        <>
-                          <Chip
-                            key={index}
-                            label={img}
-                            src={`http://localhost:5173/nurse/profile/${encodeURIComponent(
-                              img
-                            )}`}
-                            // onDelete={() => removeElement(img, "certificate")}
-                          />
-                        </>
-                      );
-                    })}
-                </div>
-              </div>
-              {/* <TextField
+
+                    <TextField
+                      label="Years of experience"
+                      name="yearsExperience"
+                      value={editedData.yearsExperience}
+                      onChange={handleInputChange}
+                      fullWidth
+                      className="mb-2"
+                    />
+                    <div className=" flex items-start justify-start gap-3">
+                      {/* Age Range */}
+                      <TextField
+                        label="Age Range Lower Limit"
+                        name="ageRange.lowerLimit"
+                        value={editedData.ageRange.lowerLimit}
+                        onChange={handleInputChange}
+                        fullWidth
+                        className="mb-2"
+                      />
+                      <TextField
+                        label="Age Range Upper Limit"
+                        name="ageRange.upperLimit"
+                        value={editedData.ageRange.upperLimit}
+                        onChange={handleInputChange}
+                        fullWidth
+                        className="mb-2"
+                      />
+                    </div>
+
+                    {/* Availability */}
+                    <TextField
+                      label="Availability"
+                      name="availability"
+                      value={editedData.availability}
+                      onChange={handleInputChange}
+                      fullWidth
+                      className="mb-2"
+                    />
+
+                    {/* Certifications */}
+                    <div className="flex items-start justify-center flex-col space-y-2 ">
+                      <div className="bg-white p-3 rounded shadow-md  w-full">
+                        <div className="mt-1 bg-[#f3f4f6] flex items-center justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                          <div className="space-y-1 text-center ">
+                            <label
+                              htmlFor="file-upload"
+                              className="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:border-indigo-300"
+                            >
+                              <span className="flex items-center justify-center gap-1">
+                                <AiOutlineCloudUpload />
+                                Upload a file (certificates if any)
+                              </span>
+                              <input
+                                id="file-upload"
+                                name="certifications"
+                                multiple
+                                type="file"
+                                accept="image/png,jpg,jpeg"
+                                className="sr-only"
+                                onChange={handleCertificateImageChange}
+                              />
+                            </label>
+                            <p className="text-xs text-gray-500">
+                              PNG, JPG, JPEG up to 10MB
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="h-4">
+                        <span className="text-red-500 text-sm mt-1"></span>
+                      </div>
+                      <div className="flex items-center justify-start gap-2 w-full flex-wrap">
+                        {editedData.certifications &&
+                          editedData.certifications.map((img, index) => {
+                            return (
+                              <>
+                                <div>
+                                  <Chip
+                                    key={index}
+                                    label={img}
+                                    onDelete={() => removeCertificate(img)}
+                                  />
+                                  <a
+                                    href={`http://localhost:8070/${img}`}
+                                    rel="noreferrer"
+                                    target="_blank"
+                                  >
+                                    Veiw
+                                  </a>
+                                </div>
+                              </>
+                            );
+                          })}
+                      </div>
+                    </div>
+                    {/* <TextField
                   label="Certifications"
                   name="certifications"
                   value={editedData.certifications.join(", ")}
@@ -298,62 +372,65 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                   className="mb-2"
                 /> */}
 
-              {/* <div className=" flex items-start justify-start gap-3"> */}
-              {/* City */}
-              <TextField
-                label="City"
-                name="city"
-                value={editedData.city}
-                onChange={handleInputChange}
-                fullWidth
-                className="mb-2"
-              />
+                    {/* <div className=" flex items-start justify-start gap-3"> */}
+                    {/* City */}
+                    <TextField
+                      label="City"
+                      name="city"
+                      value={editedData.city}
+                      onChange={handleInputChange}
+                      fullWidth
+                      className="mb-2"
+                    />
 
-              {/* Preferred Cities */}
-              <div className="mb-2">
-                <TextField
-                  label="Preferred cities"
-                  name="preferredCities"
-                  value={editedData.preferredCities.join(", ")}
-                  onChange={handleInputChange}
-                  fullWidth
-                  className="mb-2"
-                />
-                <TextField
-                  label="Qualification"
-                  name="qualification"
-                  value={editedData.qualification.join(", ")}
-                  onChange={handleInputChange}
-                  fullWidth
-                  className="mb-2"
-                />
-                {/* <div>
+                    {/* Preferred Cities */}
+                    <div className="mb-2">
+                      <TextField
+                        label="Preferred cities"
+                        name="preferredCities"
+                        value={editedData.preferredCities.join(", ")}
+                        onChange={handleInputChange}
+                        fullWidth
+                        className="mb-2"
+                      />
+                      <TextField
+                        label="Qualification"
+                        name="qualification"
+                        value={editedData.qualification.join(", ")}
+                        onChange={handleInputChange}
+                        fullWidth
+                        className="mb-2"
+                      />
+                      {/* <div>
                     {editedData.preferredCities.map((city, index) => (
                       <Chip key={index} label={city} className="mr-1 mb-1" />
                     ))}
                   </div> */}
-              </div>
-              {/* </div> */}
-              <TextField
-                label="Specialisation"
-                name="specialisation"
-                value={editedData.specialisation.join(", ")}
-                onChange={handleInputChange}
-                fullWidth
-                className="mb-2"
-              />
+                    </div>
+                    {/* </div> */}
+                    <TextField
+                      label="Specialisation"
+                      name="specialisation"
+                      value={editedData.specialisation.join(", ")}
+                      onChange={handleInputChange}
+                      fullWidth
+                      className="mb-2"
+                    />
 
-              <Button
-                variant="contained"
-                className="py-2 px-4 w-full bg-[#1976d2] hover:bg-[#1565c0]"
-                onClick={handleSaveChanges}
-              >
-                Save Changes
-              </Button>
-            </div>
-          </Paper>
-        </Box>
-      </Modal>
+                    <Button
+                      variant="contained"
+                      type="submit"
+                      className="py-2 px-4 w-full bg-[#1976d2] hover:bg-[#1565c0]"
+                    >
+                      Save Changes
+                    </Button>
+                  </div>
+                </Paper>
+              </Box>
+            </form>
+          </div>
+        </Modal>
+      </div>
     </>
   );
 };

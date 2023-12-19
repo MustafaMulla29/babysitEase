@@ -8,7 +8,7 @@ import { Button, Typography, TextField, Box, Chip } from "@mui/material";
 import axios from "axios";
 
 const ApplyNurse = () => {
-  const [experience, setExperience] = useState();
+  const [experience, setExperience] = useState(null);
   const [feesPerDay, setFeesPerDay] = useState("");
   const [ageRange, setAgeRange] = useState({
     lowerLimit: 1,
@@ -285,7 +285,7 @@ const ApplyNurse = () => {
 
     // Append certificates to the form data
     certificatesArray.forEach((file, index) => {
-      formData.append(`certifications`, file);
+      formData.append(`certifications[${index}]`, file);
     });
 
     try {
