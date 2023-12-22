@@ -14,74 +14,89 @@ import { useDispatch, useSelector } from "react-redux";
 import { hideLoading, showLoading } from "../../redux/features/alertSlice";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useParams } from "react-router-dom";
 
 // ... existing imports
 
 const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
-  const [editedData, setEditedData] = useState({
-    name: caregiver?.name,
-    address: caregiver?.address,
-    ageRange: {
-      lowerLimit: caregiver?.ageRange?.lowerLimit,
-      upperLimit: caregiver?.ageRange?.upperLimit,
-    },
-    availability: caregiver?.availability,
-    certifications: caregiver?.certifications || [],
-    city: caregiver?.city,
-    dependents: caregiver?.dependents || [],
-    description: caregiver?.description,
-    feesPerDay: caregiver?.feesPerDay,
-    gender: caregiver?.gender,
-    preferredCities: caregiver?.preferredCities || [],
-    qualification: caregiver?.qualification || [],
-    rating: caregiver?.rating,
-    role: caregiver?.role,
-    specialisation: caregiver?.specialisation || [],
-    yearsExperience: caregiver?.yearsExperience,
-    profilePicture: caregiver?.profilePicture,
+  const [editedData, setEditedData] = useState(null);
+  const [ageRange, setAgeRange] = useState({
+    lowerLimit: caregiver?.ageRange?.lowerLimit,
+    upperLimit: caregiver?.ageRange?.upperLimit,
   });
+  const [profilePictureDisplay, setProfilePictureDisplay] = useState(null);
+  const [deleteCertificates, setDeleteCertificates] = useState([]);
+  const [deleteProfilePicture, setDeleteProfilePicture] = useState(null);
 
   const { user } = useSelector((state) => state.user);
   const dispatch = useDispatch();
-
-  const [profilePictureDisplay, setProfilePictureDisplay] = useState(null);
+  const params = useParams();
 
   useEffect(() => {
-    // Update editedData when caregiver prop changes
-    setEditedData({
-      name: caregiver?.name,
-      address: caregiver?.address,
-      ageRange: {
-        lowerLimit: caregiver?.ageRange?.lowerLimit,
-        upperLimit: caregiver?.ageRange?.upperLimit,
-      },
-      availability: caregiver?.availability,
-      certifications: caregiver?.certifications || [],
-      city: caregiver?.city,
-      dependents: caregiver?.dependents || [],
-      description: caregiver?.description,
-      feesPerDay: caregiver?.feesPerDay,
-      gender: caregiver?.gender,
-      preferredCities: caregiver?.preferredCities || [],
-      qualification: caregiver?.qualification || [],
-      rating: caregiver?.rating,
-      role: caregiver?.role,
-      specialisation: caregiver?.specialisation || [],
-      yearsExperience: caregiver?.yearsExperience,
-      profilePicture: caregiver?.profilePicture,
-    });
-  }, [caregiver]);
+    const getNurseInfo = async () => {
+      try {
+        const res = await axios.post(
+          "http://localhost:8070/api/v1/caregiver/getCaregiverInfo",
+          { userId: params.id },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        if (res.data.success) {
+          setEditedData(res.data.data);
+          setAgeRange(() => ({
+            lowerLimit: caregiver?.ageRange?.lowerLimit,
+            upperLimit: caregiver?.ageRange?.upperLimit,
+          }));
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getNurseInfo();
+  }, [params.id, caregiver]);
+
+  // useEffect(() => {
+  //   // Update editedData when caregiver prop changes
+  //   setEditedData({
+  //     name: caregiver?.name,
+  //     address: caregiver?.address,
+  //     ageRange: {
+  //       lowerLimit: caregiver?.ageRange?.lowerLimit,
+  //       upperLimit: caregiver?.ageRange?.upperLimit,
+  //     },
+  //     availability: caregiver?.availability,
+  //     certifications: caregiver?.certifications || [],
+  //     city: caregiver?.city,
+  //     dependents: caregiver?.dependents || [],
+  //     description: caregiver?.description,
+  //     feesPerDay: caregiver?.feesPerDay,
+  //     gender: caregiver?.gender,
+  //     preferredCities: caregiver?.preferredCities || [],
+  //     qualification: caregiver?.qualification || [],
+  //     rating: caregiver?.rating,
+  //     role: caregiver?.role,
+  //     specialisation: caregiver?.specialisation || [],
+  //     yearsExperience: caregiver?.yearsExperience,
+  //     profilePicture: caregiver?.profilePicture,
+  //   });
+  // }, [caregiver]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
     // Special handling for preferredCities to convert the string to an array
     if (name === "preferredCities") {
+      // Split the string based on commas and trim each city
       const citiesArray = value.split(",").map((city) => city.trim());
+
       setEditedData((prevData) => ({
         ...prevData,
-        [name]: citiesArray,
+        preferredCities: citiesArray,
       }));
+      console.log(editedData?.preferredCities);
     } else if (name === "qualification") {
       const qualArray = value.split(",").map((qual) => qual.trim());
       setEditedData((prevData) => ({
@@ -113,17 +128,22 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    // You can perform additional checks or image processing here if needed
-    setProfilePictureDisplay(URL.createObjectURL(file));
-    setEditedData((prevData) => ({
-      profilePicture: file,
-    }));
+    if (file) {
+      // You can perform additional checks or image processing here if needed
+      setProfilePictureDisplay(URL.createObjectURL(file));
+
+      // Update state with the selected file
+      setEditedData((prevData) => ({
+        ...prevData,
+        profilePicture: file,
+      }));
+    }
   };
 
   const handleCertificateImageChange = (e) => {
     const files = e.target.files;
     const fileList = Array.from(files);
-
+    console.log("fileList:", fileList);
     setEditedData((prevData) => ({
       ...prevData,
       certifications: [...prevData.certifications, ...fileList],
@@ -137,40 +157,118 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
         (cert) => cert !== certificate
       ),
     }));
+    setDeleteCertificates((prevData) => [...prevData, certificate]);
   };
+
+  // const handleSumbit = async (e) => {
+  //   e.preventDefault();
+  //   const formData = new FormData();
+
+  //   formData.append("user[profilePicture]", editedData.profilePicture);
+  //   formData.append("userId", user._id);
+
+  //   formData.append("caregiver[yearsExperience]", editedData.yearsExperience);
+  //   formData.append("caregiver[feesPerDay]", editedData.feesPerDay);
+  //   formData.append("caregiver[preferredCities]", editedData.preferredCities);
+  //   formData.append("caregiver[description]", editedData.description);
+  //   formData.append("caregiver[qualification]", editedData.qualification);
+  //   formData.append("caregiver[specialisation]", editedData.specialisation);
+  //   formData.append("caregiver[ageRange]", JSON.stringify(editedData.ageRange));
+  //   formData.append("caregiver[availability]", editedData.availability);
+
+  //   // Append certifications as an array
+  //   editedData.certifications.forEach((file, index) => {
+  //     formData.append(`caregiver[certifications][${index}]`, file);
+  //   });
+  //   console.log(Object.fromEntries(formData));
+  //   try {
+  //     console.log(formData);
+  //     dispatch(showLoading());
+  //     const res = await axios.patch(
+  //       "http://localhost:8070/api/v1/caregiver/updateCaregiver",
+  //       formData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //           "Content-Type": "multipart/form-data", // Set content type to multipart/form-data
+  //         },
+  //       }
+  //     );
+  //     dispatch(hideLoading());
+  //     if (res.data.success) {
+  //       toast.success(res.data.message, {
+  //         position: toast.POSITION.TOP_CENTER,
+  //       });
+  //       onClose();
+  //     } else {
+  //       toast.error(res.data.message, {
+  //         position: toast.POSITION.TOP_CENTER,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     dispatch(hideLoading());
+  //     console.log(error);
+  //     toast.error("Something went wrong", {
+  //       position: toast.POSITION.TOP_CENTER,
+  //     });
+  //   }
+  // };
 
   const handleSumbit = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
 
-    formData.append("user[profilePicture]", editedData.profilePicture);
-    formData.append("userId", user._id);
-
-    formData.append("caregiver[yearsExperience]", editedData.yearsExperience);
-    formData.append("caregiver[feesPerDay]", editedData.feesPerDay);
-    formData.append("caregiver[preferredCities]", editedData.preferredCities);
-    formData.append("caregiver[description]", editedData.description);
-    formData.append("caregiver[qualification]", editedData.qualification);
-    formData.append("caregiver[specialisation]", editedData.specialisation);
-    formData.append("caregiver[ageRange]", JSON.stringify(editedData.ageRange));
-    formData.append("caregiver[availability]", editedData.availability);
-
-    // Append certifications as an array
-    editedData.certifications.forEach((file, index) => {
-      formData.append(`caregiver[certifications][${index}]`, file);
+    const formdata = new FormData();
+    formdata.append("userId", user._id);
+    formdata.append("name", editedData.name);
+    formdata.append("address", editedData.address);
+    formdata.append("yearsExperience", editedData.yearsExperience);
+    formdata.append("feesPerDay", editedData.feesPerDay);
+    formdata.append("description", editedData.description);
+    formdata.append("availability", editedData.availability);
+    formdata.append("ageRange", JSON.stringify(ageRange));
+    editedData.preferredCities.forEach((city, index) => {
+      formdata.append(`preferredCities[]`, city);
     });
+    editedData.qualification.forEach((qual, index) => {
+      formdata.append("qualification[]", qual);
+    });
+    editedData.specialisation.forEach((spec, index) => {
+      formdata.append("specialisation[]", spec);
+    });
+    deleteCertificates.forEach((cert, index) => {
+      formdata.append("deleteCertificates[]", cert);
+    });
+
+    if (editedData.profilePicture instanceof File) {
+      formdata.append("profilePicture", editedData.profilePicture);
+    }
+    // if (editedData.certifications instanceof File) {
+    //   editedData?.certifications?.forEach((certification, index) => {
+    //     formdata.append(`certifications[]`, certification);
+    //   });
+    //   console.log(editedData.certifications);
+    // }
+
+    if (Array.isArray(editedData.certifications)) {
+      // Iterate and append files to FormData
+      editedData.certifications.forEach((certification, index) => {
+        formdata.append(`certifications[]`, certification);
+      });
+    }
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "multipart/form-data",
+      },
+    };
+
     try {
-      console.log(formData);
       dispatch(showLoading());
       const res = await axios.patch(
         "http://localhost:8070/api/v1/caregiver/updateCaregiver",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "multipart/form-data", // Set content type to multipart/form-data
-          },
-        }
+        formdata,
+        config
       );
       dispatch(hideLoading());
       if (res.data.success) {
@@ -204,6 +302,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
             <form
               action=""
               method="patch"
+              encType="multipart/form-data"
               className="max-w-4xl"
               onSubmit={handleSumbit}
             >
@@ -225,9 +324,9 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                               </span>
                               <input
                                 id="file-upload"
-                                name="file-upload"
+                                name="profilePicture"
                                 type="file"
-                                accept="image/png,jpg,jpeg"
+                                accept="image/png,image/jpg,image/jpeg"
                                 className="sr-only"
                                 onChange={handleFileChange}
                               />
@@ -241,7 +340,8 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                       <Box>
                         <Avatar
                           alt="Profile Picture"
-                          src={`http://localhost:8070/${editedData.profilePicture}`}
+                          name="profilePicture"
+                          src={`http://localhost:8070/${editedData?.profilePicture}`}
                           sx={{ width: 100, height: 100 }}
                         />
                       </Box>
@@ -252,7 +352,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                       <TextField
                         label="Name"
                         name="name"
-                        value={editedData.name}
+                        value={editedData?.name}
                         onChange={handleInputChange}
                         fullWidth
                         className="mb-2"
@@ -262,7 +362,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                       <TextField
                         label="Address"
                         name="address"
-                        value={editedData.address}
+                        value={editedData?.address}
                         onChange={handleInputChange}
                         fullWidth
                         className="mb-2"
@@ -272,7 +372,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                     <TextField
                       label="Years of experience"
                       name="yearsExperience"
-                      value={editedData.yearsExperience}
+                      value={editedData?.yearsExperience}
                       onChange={handleInputChange}
                       fullWidth
                       className="mb-2"
@@ -281,17 +381,29 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                       {/* Age Range */}
                       <TextField
                         label="Age Range Lower Limit"
-                        name="ageRange.lowerLimit"
-                        value={editedData.ageRange.lowerLimit}
-                        onChange={handleInputChange}
+                        // id="lowerLimit"
+                        value={ageRange?.lowerLimit}
+                        name="ageRange"
+                        onChange={(e) =>
+                          setAgeRange((prevAgeRange) => ({
+                            ...prevAgeRange,
+                            lowerLimit: e.target.value,
+                          }))
+                        }
                         fullWidth
                         className="mb-2"
                       />
                       <TextField
                         label="Age Range Upper Limit"
-                        name="ageRange.upperLimit"
-                        value={editedData.ageRange.upperLimit}
-                        onChange={handleInputChange}
+                        // id="upperLimit"
+                        value={ageRange?.upperLimit}
+                        name="ageRange"
+                        onChange={(e) =>
+                          setAgeRange((prevAgeRange) => ({
+                            ...prevAgeRange,
+                            upperLimit: e.target.value,
+                          }))
+                        }
                         fullWidth
                         className="mb-2"
                       />
@@ -301,7 +413,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                     <TextField
                       label="Availability"
                       name="availability"
-                      value={editedData.availability}
+                      value={editedData?.availability}
                       onChange={handleInputChange}
                       fullWidth
                       className="mb-2"
@@ -313,7 +425,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         <div className="mt-1 bg-[#f3f4f6] flex items-center justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                           <div className="space-y-1 text-center ">
                             <label
-                              htmlFor="file-upload"
+                              htmlFor="certifications"
                               className="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:border-indigo-300"
                             >
                               <span className="flex items-center justify-center gap-1">
@@ -321,11 +433,11 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                                 Upload a file (certificates if any)
                               </span>
                               <input
-                                id="file-upload"
+                                id="certifications"
                                 name="certifications"
                                 multiple
                                 type="file"
-                                accept="image/png,jpg,jpeg"
+                                accept="image/png,image/jpg,image/jpeg"
                                 className="sr-only"
                                 onChange={handleCertificateImageChange}
                               />
@@ -339,9 +451,9 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                       <div className="h-4">
                         <span className="text-red-500 text-sm mt-1"></span>
                       </div>
-                      <div className="flex items-center justify-start gap-2 w-full flex-wrap">
-                        {editedData.certifications &&
-                          editedData.certifications.map((img, index) => {
+                      {/* <div className="flex items-center justify-start gap-2 w-full flex-wrap">
+                        {editedData?.certifications &&
+                          editedData?.certifications?.map((img, index) => {
                             return (
                               <>
                                 <div>
@@ -361,7 +473,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                               </>
                             );
                           })}
-                      </div>
+                      </div> */}
                     </div>
                     {/* <TextField
                   label="Certifications"
@@ -377,7 +489,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                     <TextField
                       label="City"
                       name="city"
-                      value={editedData.city}
+                      value={editedData?.city}
                       onChange={handleInputChange}
                       fullWidth
                       className="mb-2"
@@ -388,7 +500,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                       <TextField
                         label="Preferred cities"
                         name="preferredCities"
-                        value={editedData.preferredCities.join(", ")}
+                        value={editedData?.preferredCities.join(", ")}
                         onChange={handleInputChange}
                         fullWidth
                         className="mb-2"
@@ -396,7 +508,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                       <TextField
                         label="Qualification"
                         name="qualification"
-                        value={editedData.qualification.join(", ")}
+                        value={editedData?.qualification.join(", ")}
                         onChange={handleInputChange}
                         fullWidth
                         className="mb-2"
@@ -411,7 +523,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                     <TextField
                       label="Specialisation"
                       name="specialisation"
-                      value={editedData.specialisation.join(", ")}
+                      value={editedData?.specialisation.join(", ")}
                       onChange={handleInputChange}
                       fullWidth
                       className="mb-2"
