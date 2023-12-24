@@ -14,13 +14,12 @@ connnectDB();
 //rest object
 const app = express();
 
-//allow requests from frontend
+// middlewares
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors({
   origin: ['http://localhost:5173']
 }))
-
-// middlewares
-app.use(express.json());
 app.use(morgan("dev"));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 

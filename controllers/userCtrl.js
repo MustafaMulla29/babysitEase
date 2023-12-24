@@ -423,4 +423,61 @@ const deleteNotificationsController = async (req, res) => {
     }
 }
 
-module.exports = { loginController, registerController, authController, applyCaregiverController, getNotificationsController, deleteNotificationsController }
+
+//ADD DEPENDENT CONTROLLER
+const addDependentController = async (req, res) => {
+    try {
+        const { _id, type, gender, name, age, allergies, medicalConditions } = req.body;
+
+        // Find the user by _id
+        const existingUser = await userModel.findOne({ _id });
+
+        // Check if the user already has a parent or child dependent
+        const hasParentDependent = existingUser.dependents.some(
+            (dependent) => dependent.type === "Parent"
+        );
+
+        const hasChildDependent = existingUser.dependents.some(
+            (dependent) => dependent.type === "Child"
+        );
+
+        // If trying to add a parent dependent and already has one, or trying to add a child dependent and already has one, return an error
+        if (
+            (type === "Parent" && hasParentDependent) ||
+            (type === "Child" && hasChildDependent)
+        ) {
+            return res.status(400).send({
+                success: false,
+                message: `User already has a ${dependentType} dependent`,
+            });
+        }
+
+        // If the user doesn't have a dependent of the same type, proceed to add the new dependent
+        const updatedUser = await userModel.findByIdAndUpdate(
+            { _id },
+            {
+                $push: {
+                    dependents: {
+                        type, gender, name, age, allergies, medicalConditions
+                    },
+                },
+            },
+            { new: true }
+        );
+
+        return res.status(200).send({
+            success: true,
+            message: "Dependent added successfully",
+            data: updatedUser,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error while adding dependent",
+            error,
+        });
+    }
+};
+
+module.exports = { loginController, registerController, authController, applyCaregiverController, getNotificationsController, deleteNotificationsController, addDependentController }

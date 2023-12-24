@@ -500,7 +500,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                       <TextField
                         label="Preferred cities"
                         name="preferredCities"
-                        value={editedData?.preferredCities.join(", ")}
+                        value={editedData?.preferredCities?.join(", ")}
                         onChange={handleInputChange}
                         fullWidth
                         className="mb-2"
@@ -508,7 +508,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                       <TextField
                         label="Qualification"
                         name="qualification"
-                        value={editedData?.qualification.join(", ")}
+                        value={editedData?.qualification?.join(", ")}
                         onChange={handleInputChange}
                         fullWidth
                         className="mb-2"
@@ -523,7 +523,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                     <TextField
                       label="Specialisation"
                       name="specialisation"
-                      value={editedData?.specialisation.join(", ")}
+                      value={editedData?.specialisation?.join(", ")}
                       onChange={handleInputChange}
                       fullWidth
                       className="mb-2"

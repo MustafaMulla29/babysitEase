@@ -1,5 +1,5 @@
 const express = require('express')
-const { loginController, registerController, authController, getNotificationsController, deleteNotificationsController, applyCaregiverController } = require('../controllers/userCtrl')
+const { loginController, registerController, authController, getNotificationsController, deleteNotificationsController, applyCaregiverController, addDependentController } = require('../controllers/userCtrl')
 const authMiddleware = require('../middlewares/authMiddleware')
 const upload = require('../multerConfig')
 
@@ -25,5 +25,8 @@ router.post("/apply-caregiver", upload.array("certifications"), authMiddleware, 
 router.post("/get-notifications", authMiddleware, getNotificationsController)
 //DELETE ALL NOTIFICATIONS || POST
 router.post("/delete-notifications", authMiddleware, deleteNotificationsController)
+
+//ADD DEPENDENT ROUTE || POST
+router.post("/addDependent", authMiddleware, addDependentController)
 
 module.exports = router

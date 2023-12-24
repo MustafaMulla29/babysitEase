@@ -93,6 +93,31 @@ const Layout = ({ children }) => {
   ];
   //*************BABYSITTER MENU */
 
+  //*************USER MENU */
+  const userMenu = [
+    {
+      name: "Home",
+      path: "/",
+      icon: "fa-solid fa-house",
+    },
+    {
+      name: "My Bookings",
+      path: "/mybookings",
+      icon: "fa-solid fa-list",
+    },
+    {
+      name: "Book a caregiver",
+      path: "/bookcaregiver",
+      icon: "fa-solid fa-user-nurse",
+    },
+    {
+      name: "Profile",
+      path: `/client/profile/${user?._id}`,
+      icon: "fa-solid fa-user",
+    },
+  ];
+  //*************USER MENU */
+
   const sidebarMenu = user?.isAdmin
     ? adminMenu
     : (user?.role == "babysitter" && babysitterMenu) ||

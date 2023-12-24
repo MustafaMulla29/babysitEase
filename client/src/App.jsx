@@ -17,6 +17,7 @@ import ApplyNurse from "./pages/ApplyNurse";
 import Users from "./pages/admin/Users";
 import Caregivers from "./pages/admin/Caregivers";
 import Profile from "./pages/caregiver/Profile";
+import UserProfile from "./pages/client/Profile";
 
 function App() {
   const dispatch = useDispatch();
@@ -120,6 +121,14 @@ function App() {
                 element={
                   <ProtectedRoutes>
                     <Profile />
+                  </ProtectedRoutes>
+                }
+              />
+              <Route
+                path={`/client/profile/:id`}
+                element={
+                  <ProtectedRoutes>
+                    <UserProfile />
                   </ProtectedRoutes>
                 }
               />
