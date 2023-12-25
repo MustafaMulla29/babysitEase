@@ -480,4 +480,72 @@ const addDependentController = async (req, res) => {
     }
 };
 
-module.exports = { loginController, registerController, authController, applyCaregiverController, getNotificationsController, deleteNotificationsController, addDependentController }
+const getAllCaregiversController = async (req, res) => {
+    try {
+        // Find caregivers with status "Approved"
+        const caregivers = await caregiverModel.find({ status: "Approved" });
+
+        // Extract userIds from the caregivers
+        const userIds = caregivers.map(caregiver => caregiver.userId);
+
+        // Find users with isCaregiver set to true and matching userIds
+        const caregiverUsers = await userModel.find({
+            isCaregiver: true,
+            _id: { $in: userIds },
+        });
+
+        // Create a mapping of userId to user information
+        const userMap = {};
+        caregiverUsers.forEach(user => {
+            userMap[user._id] = user;
+        });
+
+        // Combine user and caregiver information into one object
+        const caregiversCombined = caregivers.map(caregiver => ({
+            ...caregiver.toObject(),  // Convert Mongoose document to plain JavaScript object
+            user: userMap[caregiver.userId], // Add user information
+        }));
+
+
+        // Send the combined data in the response
+        res.status(200).send({
+            success: true,
+            message: "Caregivers and users retrieved successfully",
+            data: caregiversCombined,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({
+            success: false,
+            message: "Error while getting caregivers and users",
+            error,
+        });
+    }
+};
+
+
+const getCaregiverDetails = async (req, res) => {
+    try {
+        const caregiver = await caregiverModel.findOne({ userId: req.params.userId })
+        const user = await userModel.findOne({ _id: req.params.userId })
+        let caregiverData = {
+            ...caregiver?.toObject(),
+            ...user?.toObject(),
+        }
+        res.status(200).send({
+            success: true,
+            message: "Caregiver data fetched successfully",
+            data: caregiverData
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error while adding dependent",
+            error,
+        });
+    }
+}
+
+
+module.exports = { loginController, registerController, authController, applyCaregiverController, getNotificationsController, deleteNotificationsController, addDependentController, getAllCaregiversController, getCaregiverDetails }

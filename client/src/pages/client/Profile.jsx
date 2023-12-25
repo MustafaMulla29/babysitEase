@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import { AiFillEdit } from "react-icons/ai";
-import { Avatar, Typography } from "@mui/material";
+import { Avatar, Skeleton, Typography } from "@mui/material";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import DependentInputModal from "./DependentInputModal";
 import DependentCard from "./DependentCard";
-import { FaPen } from "react-icons/fa6";
+import { FaPen, FaS } from "react-icons/fa6";
 
 const Profile = () => {
   const [client, setClient] = useState(null);
   const params = useParams();
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const handleEditClick = () => {
     setEditModalOpen(true);
@@ -33,6 +34,7 @@ const Profile = () => {
   useEffect(() => {
     const getNurseInfo = async () => {
       try {
+        setLoading(true);
         const res = await axios.post(
           "http://localhost:8070/api/v1/caregiver/getCaregiverInfo",
           { userId: params.id },
@@ -45,7 +47,9 @@ const Profile = () => {
         if (res.data.success) {
           setClient(res.data.data);
         }
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         console.log(error);
       }
     };
@@ -57,23 +61,67 @@ const Profile = () => {
         <div className="bg-white p-6 rounded-md shadow-md">
           {/* Header Section */}
           <div className="flex items-center gap-4 mb-8">
-            <Avatar
-              alt="Profile Picture"
-              src={`http://localhost:8070/${client?.profilePicture}`}
-              sx={{ width: 80, height: 80 }}
-            />
+            {loading ? (
+              <Skeleton
+                variant="circular"
+                width={80}
+                height={80}
+                animation="wave"
+              />
+            ) : (
+              <Avatar
+                alt="Profile Picture"
+                src={`http://localhost:8070/${client?.profilePicture}`}
+                sx={{ width: 80, height: 80 }}
+              />
+            )}
+
             <div>
               <Typography variant="h4" className="mb-2 font-bold">
-                {client?.name}
+                {loading ? (
+                  <Skeleton
+                    animation="wave"
+                    variant="text"
+                    sx={{ fontSize: "2rem" }}
+                  />
+                ) : (
+                  client?.name
+                )}
               </Typography>
-              <Typography>{client?.address}</Typography>
-              <Typography>{client?.city}</Typography>
+              <Typography>
+                {loading ? (
+                  <Skeleton
+                    animation="wave"
+                    variant="text"
+                    sx={{ fontSize: "1rem" }}
+                    width={200}
+                  />
+                ) : (
+                  client?.address
+                )}
+              </Typography>
+              <Typography>
+                {loading ? (
+                  <Skeleton
+                    animation="wave"
+                    variant="text"
+                    sx={{ fontSize: "1rem" }}
+                    width={80}
+                  />
+                ) : (
+                  client?.city
+                )}
+              </Typography>
             </div>
             <div className="items-start">
-              <FaPen
-                className="text-base cursor-pointer"
-                onClick={handleEditClick}
-              />
+              {loading ? (
+                <Skeleton animation="wave" width={40} />
+              ) : (
+                <FaPen
+                  className="text-base cursor-pointer"
+                  onClick={handleEditClick}
+                />
+              )}
             </div>
           </div>
           {/* Divider */}
@@ -82,14 +130,35 @@ const Profile = () => {
           {/* Other Details Section */}
           <div className="mb-8">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <Typography>Gender: {client?.gender}</Typography>
+              <Typography>
+                {loading ? (
+                  <Skeleton
+                    animation="wave"
+                    variant="text"
+                    sx={{ fontSize: "1rem" }}
+                  />
+                ) : (
+                  `Gender: ${client?.gender}`
+                )}
+              </Typography>
             </div>
           </div>
           <hr className="mb-8" />
 
           <div className="mb-8">
             <Typography variant="h6" className="flex items-center gap-3">
-              <span>Dependents</span>
+              <span>
+                {loading ? (
+                  <Skeleton
+                    animation="wave"
+                    variant="text"
+                    sx={{ fontSize: "1rem" }}
+                    width={100}
+                  />
+                ) : (
+                  "Dependents"
+                )}
+              </span>
               {!client?.dependents.length >= 2 && (
                 <span>
                   <FaPen
@@ -102,7 +171,11 @@ const Profile = () => {
 
             <div className="flex flex-wrap gap-7">
               {client?.dependents?.map((dependent, index) => (
-                <DependentCard dependent={dependent} key={index} />
+                <DependentCard
+                  dependent={dependent}
+                  key={index}
+                  loading={loading}
+                />
               ))}
             </div>
           </div>

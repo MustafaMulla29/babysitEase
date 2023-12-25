@@ -10,11 +10,6 @@ export const userMenu = [
     icon: "fa-solid fa-list",
   },
   {
-    name: "Book a caregiver",
-    path: "/bookcaregiver",
-    icon: "fa-solid fa-user-nurse",
-  },
-  {
     name: "Profile",
     path: "/profile",
     icon: "fa-solid fa-user",

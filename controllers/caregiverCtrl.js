@@ -19,7 +19,7 @@ const getCaregiverInfoController = async (req, res) => {
         }
         res.status(200).send({
             success: true,
-            message: "Nurse data fetched successfully",
+            message: "Caregiver data fetched successfully",
             data: caregiverData
         })
     } catch (error) {
