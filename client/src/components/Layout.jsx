@@ -65,11 +65,11 @@ const Layout = ({ children }) => {
       path: "/bookings",
       icon: "fa-solid fa-user-nurse",
     },
-    {
-      name: "Profile",
-      path: `/nurse/profile/${user?._id}`,
-      icon: "fa-solid fa-user",
-    },
+    // {
+    //   name: "Profile",
+    //   path: `/nurse/profile/${user?._id}`,
+    //   icon: "fa-solid fa-user",
+    // },
   ];
   // *********NURSE MENU******
 
@@ -85,11 +85,11 @@ const Layout = ({ children }) => {
       path: "/bookings",
       icon: "fa-solid fa-user-nurse",
     },
-    {
-      name: "Profile",
-      path: `/babysitter/profile/${user?._id}`,
-      icon: "fa-solid fa-user",
-    },
+    // {
+    //   name: "Profile",
+    //   path: `/babysitter/profile/${user?._id}`,
+    //   icon: "fa-solid fa-user",
+    // },
   ];
   //*************BABYSITTER MENU */
 
@@ -104,11 +104,6 @@ const Layout = ({ children }) => {
       name: "My Bookings",
       path: "/mybookings",
       icon: "fa-solid fa-list",
-    },
-    {
-      name: "Book a caregiver",
-      path: "/bookcaregiver",
-      icon: "fa-solid fa-user-nurse",
     },
     {
       name: "Profile",

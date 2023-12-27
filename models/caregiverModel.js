@@ -3,6 +3,8 @@ const mongoose = require('mongoose')
 const caregiverSchema = new mongoose.Schema({
     userId: {
         type: String,
+        ref: "user",
+        required: [true, "User id is required"]
     },
     createdAt: {
         type: Date,
@@ -18,8 +20,8 @@ const caregiverSchema = new mongoose.Schema({
         trim: true
     },
     review: {
-        type: Array,
-        default: [Object],
+        type: [Object],
+        default: [],
     },
     rating: {
         type: Number,

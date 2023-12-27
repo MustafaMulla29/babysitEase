@@ -3,9 +3,13 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import CaregiverCard from "./client/CaregiverCard";
+import CaregiverCardSkeleton from "./client/CaregiverCardSkeleton";
+import { useSelector } from "react-redux";
+import Profile from "./caregiver/Profile";
 
 const HomePage = () => {
   const [caregivers, setCaregivers] = useState([]);
+  const { user } = useSelector((state) => state.user);
   //login user data
   const getUserData = async () => {
     try {
@@ -53,11 +57,28 @@ const HomePage = () => {
 
   return (
     <Layout>
-      <div className="flex flex-wrap justify-start items-center gap-6 ml-5">
-        {caregivers?.map((caregiver) => (
-          <CaregiverCard key={caregiver._id} caregiver={caregiver} />
-        ))}
-      </div>
+      {user?.role === "client" ? (
+        <div className="flex flex-wrap justify-start items-center gap-6 ml-5">
+          {caregivers && caregivers.length > 0 ? (
+            caregivers.map((caregiver) => (
+              <CaregiverCard key={caregiver._id} caregiver={caregiver} />
+            ))
+          ) : (
+            <div className="flex flex-wrap justify-start items-center gap-6">
+              <CaregiverCardSkeleton />
+              <CaregiverCardSkeleton />
+              <CaregiverCardSkeleton />
+              <CaregiverCardSkeleton />
+              <CaregiverCardSkeleton />
+              <CaregiverCardSkeleton />
+              <CaregiverCardSkeleton />
+              <CaregiverCardSkeleton />
+            </div>
+          )}
+        </div>
+      ) : (
+        <Profile />
+      )}
     </Layout>
   );
 };

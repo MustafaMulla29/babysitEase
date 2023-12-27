@@ -109,7 +109,7 @@ function App() {
                   </ProtectedRoutes>
                 }
               />
-              <Route
+              {/* <Route
                 path={`/nurse/profile/:id`}
                 element={
                   <ProtectedRoutes>
@@ -124,7 +124,7 @@ function App() {
                     <Profile />
                   </ProtectedRoutes>
                 }
-              />
+              /> */}
 
               <Route
                 path={`/client/profile/:id`}

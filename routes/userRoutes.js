@@ -1,5 +1,5 @@
 const express = require('express')
-const { loginController, registerController, authController, getNotificationsController, deleteNotificationsController, applyCaregiverController, addDependentController, getAllCaregiversController, getCaregiverDetails } = require('../controllers/userCtrl')
+const { loginController, registerController, authController, getNotificationsController, deleteNotificationsController, applyCaregiverController, addDependentController, getAllCaregiversController, getCaregiverDetails, bookCaregiverController, getBookingsController } = require('../controllers/userCtrl')
 const authMiddleware = require('../middlewares/authMiddleware')
 const upload = require('../multerConfig')
 
@@ -34,5 +34,11 @@ router.get("/getAllCaregivers", authMiddleware, getAllCaregiversController)
 
 //GET A CAREGIVER DETAILS|| GET
 router.get("/getCaregiverDetails/:userId", authMiddleware, getCaregiverDetails)
+
+//BOOK CAREGIVER || POST
+router.post("/bookCaregiver", authMiddleware, bookCaregiverController)
+
+//GET BOOKINGS 
+router.get("/getBookings", authMiddleware, getBookingsController)
 
 module.exports = router

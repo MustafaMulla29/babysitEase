@@ -7,81 +7,8 @@ const authMiddleware = require('../middlewares/authMiddleware')
 const nodemailer = require('nodemailer')
 const Mailgen = require('mailgen')
 const caregiverModel = require('../models/caregiverModel')
+const bookingModel = require('../models/bookingModel')
 
-
-//register callback
-// const registerController = async (req, res) => {
-//     try {
-//         const existingUser = await userModel.findOne({ email: req.body.email })
-//         if (existingUser) {
-//             return res.status(200).send({
-//                 message: 'User already exists', success: false
-//             })
-//         }
-//         const password = req.body.password
-//         const salt = await bcrypt.genSalt(10)
-//         const hashedPassword = await bcrypt.hash(password, salt)
-//         req.body.password = hashedPassword
-//         const newUser = new userModel(req.body)
-//         await newUser.save()
-//         //email
-//         let config = {
-//             service: 'gmail',
-//             auth: {
-//                 // user: 'babysitease@gmail.com',
-//                 // pass: 'nazm oaib xcsz hxow',
-//                 user: process.env.BABYSITEASE_EMAIL,
-//                 pass: process.env.BABYSITEASE_APP_PASSWORD,
-//             }
-//         }
-
-//         let transporter = nodemailer.createTransport(config)
-
-//         let mailGenerator = new Mailgen({
-//             theme: 'default',
-//             product: {
-//                 name: 'Mailgen',
-//                 link: 'https://mailgen.js/'
-//             }
-//         })
-
-//         let response = {
-//             body: {
-//                 name: req.body.name,
-//                 intro: 'You are registered successfully with BabysitEase',
-//                 outro: 'Looking forward to see you at BabysitEase'
-//             }
-//         }
-//         // if (!existingUser) {
-//         let mail = mailGenerator.generate(response)
-
-//         let message = {
-//             from: 'babysitease@gmail.com',
-//             to: req.body.email,
-//             subject: 'Registered successully!',
-//             html: mail
-//         }
-
-//         transporter.sendMail(message, (error, info) => {
-//             if (error) {
-//                 console.log(error)
-//             } else {
-//                 console.log(info)
-//             }
-//         })
-//         // }
-
-//         res.status(201).send({
-//             message: 'Registered sccessfully', success: true
-//         })
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).send({
-//             success: false,
-//             message: `Register controller: ${error.message}`
-//         })
-//     }
-// }
 
 const registerController = async (req, res) => {
     try {
@@ -242,68 +169,6 @@ const authController = async (req, res) => {
     }
 }
 
-
-// previous login controller
-// const loginController = async (req, res) => {
-//     try {
-//         const user = await userModel.findOne({ email: req.body.email })
-//         if (!user) {
-//             return res.status(200).send({
-//                 message: 'User not found',
-//                 success: false
-//             })
-//         }
-//         const isPasswordMatch = await bcrypt.compare(req.body.password, user.password)
-//         if (!isPasswordMatch) {
-//             return res.status(200).send({
-//                 message: 'Invalid email or password',
-//                 success: false
-//             })
-//         }
-//         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' })
-//         res.status(200).send({
-//             message: 'Login success', success: true,
-//             token
-//         })
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).send({
-//             message: `Error in login ctrl ${error.message}`
-//         })
-//     }
-
-// }
-
-// const applyCaregiverController = async (req, res) => {
-//     try {
-//         const newCaregiver = await caregiverModel({ ...req.body, status: "Pending" })
-//         await newCaregiver.save()
-//         const existingUser = await userModel.findOne({ _id: req.body.userId })
-//         const adminUser = await userModel.findOne({ isAdmin: true })
-//         const notification = adminUser.notification
-//         notification.push({
-//             type: "apply-nurse-request",
-//             message: `${existingUser.name} has applied for a nurse account`,
-//             data: {
-//                 caregiverId: newCaregiver._id,
-//                 name: existingUser.name,
-//                 onClickPath: "/admin/nurses",
-//             }
-//         })
-//         await userModel.findByIdAndUpdate(adminUser._id, { notification })
-//         res.status(201).send({
-//             success: true,
-//             message: "Applied for nurse successfully"
-//         })
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).send({
-//             success: false,
-//             error: error,
-//             message: "Error while applying for nurse"
-//         })
-//     }
-// }
 
 const applyCaregiverController = async (req, res) => {
     try {
@@ -547,5 +412,92 @@ const getCaregiverDetails = async (req, res) => {
     }
 }
 
+const bookCaregiverController = async (req, res) => {
+    try {
+        const user = await userModel.findOne({ _id: req.body.bookingId })
+        const caregiver = await caregiverModel.findOne({ userId: req.body.caregiverId })
 
-module.exports = { loginController, registerController, authController, applyCaregiverController, getNotificationsController, deleteNotificationsController, addDependentController, getAllCaregiversController, getCaregiverDetails }
+        if (user.role !== "client") {
+            return res.status(200).send({
+                success: false,
+                message: "You cannot book caregiver"
+            })
+        }
+
+        if (!caregiver.availability) {
+            return res.status(200).send({
+                success: false,
+                message: "Caregiver is unavailable right now"
+            })
+        }
+
+        const existingBooking = await bookingModel.findOne({
+            bookingId: req.body.bookingId,
+            date: req.body.date,
+        });
+
+        if (existingBooking) {
+            return res.status(200).send({
+                success: false,
+                message: "You already have a booking for the same day"
+            });
+        }
+
+
+        // Check if the caregiver is already booked on the specified date
+        const existingCaregiverBooking = await bookingModel.findOne({
+            caregiverId: req.body.caregiverId,
+            date: req.body.date,
+        });
+
+        if (existingCaregiverBooking) {
+            return res.status(200).send({
+                success: false,
+                message: "Caregiver is already booked on the specified date"
+            });
+        }
+        const booking = await bookingModel(req.body)
+
+        await booking.save()
+        res.status(200).send({
+            success: true,
+            message: "You have successfully booked a caregiver"
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error while booking caregiver",
+            error,
+        });
+    }
+}
+
+const getBookingsController = async (req, res) => {
+    try {
+        const bookings = await bookingModel.find({ bookingId: req.body.bookingId })
+
+        if (!bookings) {
+            return res.status(200).send({
+                success: false,
+                message: "You don't any bookings as of now"
+            })
+        }
+
+        res.status(200).send({
+            success: true,
+            message: "Successfully fetched your bookings",
+            data: bookings
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error while booking caregiver",
+            error,
+        });
+    }
+}
+
+
+module.exports = { loginController, registerController, authController, applyCaregiverController, getNotificationsController, deleteNotificationsController, addDependentController, getAllCaregiversController, getCaregiverDetails, bookCaregiverController, getBookingsController }
