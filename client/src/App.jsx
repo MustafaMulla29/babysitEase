@@ -19,6 +19,7 @@ import Caregivers from "./pages/admin/Caregivers";
 import Profile from "./pages/caregiver/Profile";
 import UserProfile from "./pages/client/Profile";
 import CaregiverDetails from "./pages/client/CaregiverDetails";
+import Bookings from "./pages/Bookings";
 
 function App() {
   const dispatch = useDispatch();
@@ -127,7 +128,7 @@ function App() {
               /> */}
 
               <Route
-                path={`/client/profile/:id`}
+                path={`/client/:id`}
                 element={
                   <ProtectedRoutes>
                     <UserProfile />
@@ -139,6 +140,14 @@ function App() {
                 element={
                   <ProtectedRoutes>
                     <CaregiverDetails />
+                  </ProtectedRoutes>
+                }
+              />
+              <Route
+                path={`/bookings`}
+                element={
+                  <ProtectedRoutes>
+                    <Bookings />
                   </ProtectedRoutes>
                 }
               />

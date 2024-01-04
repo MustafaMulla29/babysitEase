@@ -176,15 +176,16 @@ const applyCaregiverController = async (req, res) => {
         const certifications = req.files ? req.files.map(file => file.path) : null;
 
         // Extract other form data from req.body
-        const ageRange = JSON.parse(req.body.ageRange)
+        // const ageRange = JSON.parse(req.body.ageRange)
         const {
-            experience,
+            yearsExperience,
             feesPerDay,
             preferredCities,
             description,
             qualification,
             specialisation,
             userId,
+            ageRange
         } = req.body;
         const existingCaregiver = await caregiverModel.findOne({ userId: userId })
 
@@ -196,7 +197,7 @@ const applyCaregiverController = async (req, res) => {
         }
 
         const newCaregiver = await caregiverModel({
-            experience,
+            yearsExperience,
             feesPerDay,
             preferredCities,
             description,
@@ -293,7 +294,6 @@ const deleteNotificationsController = async (req, res) => {
 const addDependentController = async (req, res) => {
     try {
         const { _id, type, gender, name, age, allergies, medicalConditions } = req.body;
-
         // Find the user by _id
         const existingUser = await userModel.findOne({ _id });
 
@@ -327,7 +327,7 @@ const addDependentController = async (req, res) => {
                     },
                 },
             },
-            { new: true }
+            { new: true, runValidators: true }
         );
 
         return res.status(200).send({
@@ -414,10 +414,12 @@ const getCaregiverDetails = async (req, res) => {
 
 const bookCaregiverController = async (req, res) => {
     try {
-        const user = await userModel.findOne({ _id: req.body.bookingId })
-        const caregiver = await caregiverModel.findOne({ userId: req.body.caregiverId })
+        const { clientId, caregiverId, date, } = req.body
+        const user = await userModel.findOne({ _id: clientId })
+        const caregiver = await caregiverModel.findOne({ userId: caregiverId })
+        const bookedFor = caregiver?.role === "babysitter" ? "Child" : "Parent"
 
-        if (user.role !== "client") {
+        if (!user?.role === "client") {
             return res.status(200).send({
                 success: false,
                 message: "You cannot book caregiver"
@@ -432,8 +434,8 @@ const bookCaregiverController = async (req, res) => {
         }
 
         const existingBooking = await bookingModel.findOne({
-            bookingId: req.body.bookingId,
-            date: req.body.date,
+            clientId: user?._id,
+            date: date,
         });
 
         if (existingBooking) {
@@ -443,11 +445,10 @@ const bookCaregiverController = async (req, res) => {
             });
         }
 
-
         // Check if the caregiver is already booked on the specified date
         const existingCaregiverBooking = await bookingModel.findOne({
-            caregiverId: req.body.caregiverId,
-            date: req.body.date,
+            caregiverId: caregiverId,
+            date: date,
         });
 
         if (existingCaregiverBooking) {
@@ -456,13 +457,23 @@ const bookCaregiverController = async (req, res) => {
                 message: "Caregiver is already booked on the specified date"
             });
         }
-        const booking = await bookingModel(req.body)
+        const booking = await bookingModel({ clientId, caregiverId, date, bookedFor })
 
         await booking.save()
+        //FIXME: USER NOTIFICATIONS
+        const userNotif = await userModel.findOne({ _id: caregiverId })
+        userNotif.notification.push({
+            type: "New-booking-request",
+            message: `You have a booking from ${user.name}`,
+            onClickPath: "/booking"
+        });
+
+        await userNotif.save();
         res.status(200).send({
             success: true,
             message: "You have successfully booked a caregiver"
         })
+
     } catch (error) {
         console.log(error);
         res.status(500).send({
@@ -475,7 +486,8 @@ const bookCaregiverController = async (req, res) => {
 
 const getBookingsController = async (req, res) => {
     try {
-        const bookings = await bookingModel.find({ bookingId: req.body.bookingId })
+        const clientId = req.query.clientId;
+        const bookings = await bookingModel.find({ clientId: clientId })
 
         if (!bookings) {
             return res.status(200).send({

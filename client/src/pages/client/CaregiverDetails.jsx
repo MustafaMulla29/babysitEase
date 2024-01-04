@@ -2,14 +2,33 @@ import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import { Avatar, Chip, Rating, Skeleton, Typography } from "@mui/material";
+import {
+  Avatar,
+  Button,
+  Chip,
+  Rating,
+  Skeleton,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+// import { DateFnsUtils } from "@date-io/date-fns";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { showLoading, hideLoading } from "./../../redux/features/alertSlice";
 
 const CaregiverDetails = () => {
   const [caregiver, setCaregiver] = useState(null);
+  const [bookingDate, setBookingDate] = useState(null);
+  const [bookingError, setBookingError] = useState(false);
   const params = useParams();
+  const { user } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const getNurseInfo = async () => {
+    const getUserInfo = async () => {
       try {
         const res = await axios.get(
           `http://localhost:8070/api/v1/user/getCaregiverDetails/${params.userId}`,
@@ -26,9 +45,69 @@ const CaregiverDetails = () => {
         console.log(error);
       }
     };
-    getNurseInfo();
+    getUserInfo();
   }, [params.userId]);
-  console.log(caregiver?.availability);
+
+  //TODO: NEED TO FORMAT THE DATE USING MOMENT JS
+  const handleDateChange = (date) => {
+    console.log(date);
+    const currentDate = new Date();
+
+    if (date < currentDate) {
+      setBookingError("Please select a valid date");
+      return;
+    }
+
+    if (
+      date.getDate() === currentDate.getDate() &&
+      currentDate.getHours() >= 9
+    ) {
+      setBookingError("You cannot book today! Select another date");
+      return;
+    }
+    setBookingDate(date);
+    setBookingError("");
+  };
+
+  const handleBooking = async (e) => {
+    e.preventDefault();
+    if (bookingError) {
+      return;
+    }
+    try {
+      dispatch(showLoading());
+      const res = await axios.post(
+        "http://localhost:8070/api/v1/user/bookCaregiver",
+        {
+          clientId: user?._id,
+          caregiverId: params.userId,
+          date: bookingDate,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      dispatch(hideLoading());
+      if (res.data.success) {
+        toast.success(res.data.message, {
+          position: toast.POSITION.TOP_CENTER,
+        });
+      } else {
+        toast.info(res.data.message, {
+          position: toast.POSITION.TOP_CENTER,
+        });
+      }
+    } catch (error) {
+      dispatch(hideLoading());
+      console.log(error);
+      toast.error("Something went wrong", {
+        position: toast.POSITION.TOP_CENTER,
+      });
+    }
+  };
   return (
     <Layout>
       <div className="container mx-auto p-4">
@@ -65,11 +144,26 @@ const CaregiverDetails = () => {
                 )}
               </Typography>
               {caregiver ? (
-                <Chip
-                  className="mb-2"
-                  label={caregiver?.availability ? "Available" : "Unavailable"}
-                  color={caregiver?.availability ? "success" : "error"}
-                />
+                <div className="flex items-start gap-3">
+                  <Chip
+                    className="mb-2"
+                    label={
+                      caregiver?.availability ? "Available" : "Unavailable"
+                    }
+                    color={caregiver?.availability ? "success" : "error"}
+                  />
+                  {user?.role === "client" && (
+                    <a href="#booking">
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        className="rounded-3xl text-sm"
+                      >
+                        Book Me
+                      </Button>
+                    </a>
+                  )}
+                </div>
               ) : (
                 <Skeleton
                   animation="wave"
@@ -368,6 +462,46 @@ const CaregiverDetails = () => {
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          )}
+          {user?.role === "client" && (
+            <div id="booking">
+              <Typography variant="h6">
+                {caregiver ? (
+                  "Booking"
+                ) : (
+                  <Skeleton animation="wave" width={150} />
+                )}
+              </Typography>
+              <div className="p-2 flex items-start gap-5 flex-col ">
+                <Typography>
+                  Nothing much to do! Just select the date.
+                </Typography>
+                <div>
+                  <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                      className={`${
+                        bookingError && "outline outline-1 outline-red-400"
+                      }`}
+                      value={bookingDate}
+                      onChange={handleDateChange}
+                      name="date"
+                    />
+                  </LocalizationProvider>
+                  <div className="h-4">
+                    <Typography className="text-red-500 text-sm mt-1">
+                      {bookingError}
+                    </Typography>
+                  </div>
+                </div>
+                <Button
+                  onClick={handleBooking}
+                  variant="outlined"
+                  color="primary"
+                >
+                  Book Now
+                </Button>
               </div>
             </div>
           )}

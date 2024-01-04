@@ -36,6 +36,7 @@ const Notification = () => {
         toast.success(res.data.message, {
           position: toast.POSITION.TOP_CENTER,
         });
+        window.location.reload();
       } else {
         toast.error(res.data.message, {
           position: toast.POSITION.TOP_CENTER,
@@ -66,6 +67,7 @@ const Notification = () => {
         toast.success(res.data.message, {
           position: toast.POSITION.TOP_CENTER,
         });
+        window.location.reload();
       } else {
         toast.error(res.data.message, {
           position: toast.POSITION.TOP_CENTER,

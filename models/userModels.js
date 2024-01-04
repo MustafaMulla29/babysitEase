@@ -6,7 +6,7 @@ const userDependentSchema = mongoose.Schema({
         required: true,
         trim: true,
         enum: {
-            values: ['parent', 'child'],
+            values: ['Parent', 'Child'],
             message: 'Type must be parent or child'
         }
     },

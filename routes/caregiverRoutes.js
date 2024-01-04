@@ -5,7 +5,7 @@ const upload = require("../multerConfig")
 const router = express.Router()
 
 //GET || SINGLE NURSE DETAILS
-router.post('/getCaregiverInfo', authMiddleware, getCaregiverInfoController)
+router.get('/getCaregiverInfo/:id', authMiddleware, getCaregiverInfoController)
 
 const fieldsConfig = [
     { name: 'profilePicture', maxCount: 1 },

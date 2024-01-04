@@ -102,12 +102,12 @@ const Layout = ({ children }) => {
     },
     {
       name: "My Bookings",
-      path: "/mybookings",
+      path: "/bookings",
       icon: "fa-solid fa-list",
     },
     {
       name: "Profile",
-      path: `/client/profile/${user?._id}`,
+      path: `/client/${user?._id}`,
       icon: "fa-solid fa-user",
     },
   ];

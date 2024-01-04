@@ -36,9 +36,9 @@ const Profile = () => {
   useEffect(() => {
     const getNurseInfo = async () => {
       try {
-        const res = await axios.post(
-          "http://localhost:8070/api/v1/caregiver/getCaregiverInfo",
-          { userId: user?._id },
+        const res = await axios.get(
+          `http://localhost:8070/api/v1/caregiver/getCaregiverInfo/${user?._id}`,
+          // { userId: user?._id },
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -206,7 +206,7 @@ const Profile = () => {
             </Typography>
             <div className="flex flex-wrap gap-2">
               {caregiver ? (
-                caregiver.preferredCities.map((city, index) => (
+                caregiver?.preferredCities?.map((city, index) => (
                   <Chip
                     key={index}
                     label={city}
@@ -256,7 +256,7 @@ const Profile = () => {
             </Typography>
             <div className="flex flex-wrap gap-2">
               {caregiver ? (
-                caregiver.qualification.map((qual, index) => (
+                caregiver?.qualification?.map((qual, index) => (
                   <Chip
                     key={index}
                     label={qual}
@@ -306,7 +306,7 @@ const Profile = () => {
             </Typography>
             <div className="flex flex-wrap gap-2">
               {caregiver ? (
-                caregiver.specialisation?.map((spec, index) => (
+                caregiver?.specialisation?.map((spec, index) => (
                   <Chip
                     key={index}
                     label={spec}
@@ -354,7 +354,7 @@ const Profile = () => {
             </Typography>
             <div className="flex flex-wrap gap-4">
               {caregiver ? (
-                caregiver.certifications?.map((certificate, index) => (
+                caregiver?.certifications?.map((certificate, index) => (
                   <Avatar
                     key={index}
                     alt="certificate"

@@ -5,8 +5,8 @@ const fs = require("fs").promises
 
 const getCaregiverInfoController = async (req, res) => {
     try {
-        const caregiver = await caregiverModel.findOne({ userId: req.body.userId })
-        const user = await userModel.findOne({ _id: req.body.userId })
+        const caregiver = await caregiverModel.findOne({ userId: req.params.id })
+        const user = await userModel.findOne({ _id: req.params.id })
         let caregiverData
 
         if (caregiver && user) {

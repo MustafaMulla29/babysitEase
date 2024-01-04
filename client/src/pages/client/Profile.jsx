@@ -35,9 +35,9 @@ const Profile = () => {
     const getNurseInfo = async () => {
       try {
         setLoading(true);
-        const res = await axios.post(
-          "http://localhost:8070/api/v1/caregiver/getCaregiverInfo",
-          { userId: params.id },
+        const res = await axios.get(
+          `http://localhost:8070/api/v1/caregiver/getCaregiverInfo/${params.id}`,
+          // { userId: params.id },
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -159,7 +159,7 @@ const Profile = () => {
                   "Dependents"
                 )}
               </span>
-              {!client?.dependents.length >= 2 && (
+              {client?.dependents.length < 2 && (
                 <span>
                   <FaPen
                     className="text-base cursor-pointer"

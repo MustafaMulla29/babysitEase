@@ -6,16 +6,24 @@ const bookingSchema = new mongoose.Schema({
         default: Date.now()
     },
     //this will be the id of user who booked
-    bookingId: {
+    clientId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
-        required: [true, "Booking id is required"],
+        required: [true, "Client id is required"],
     },
     //id of the caregiver
     caregiverId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "caregiver",
         required: [true, "Caregiver id is required"]
+    },
+    bookedFor: {
+        type: String,
+        required: true,
+        enum: {
+            values: ['Parent', 'Child'],
+            message: 'BookedFor must be Parent or Child'
+        }
     },
     date: {
         type: Date,
