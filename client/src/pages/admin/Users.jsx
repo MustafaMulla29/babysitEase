@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { useDispatch } from "react-redux";
-import { hideLoading, showLoading } from "../../redux/features/alertSlice";
 import {
   Table,
   TableBody,
@@ -22,24 +20,18 @@ import { useNavigate } from "react-router-dom";
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const handleChangePage = (e) => {
-    setPage((prev) => prev + 1);
+  const handleChangePage = (event, value) => {
+    setPage(value);
   };
   const navigate = useNavigate();
-
-  const handleViewDetails = (userId) => {
-    // Add logic to handle the view details action (e.g., navigate to a user details page)
-    console.log(`View details for user with ID: ${userId}`);
-  };
 
   useEffect(() => {
     const getUsers = async () => {
       try {
-        // dispatch(showLoading());
         const res = await axios.get(
-          "http://localhost:8070/api/v1/admin/getAllUsers",
+          `http://localhost:8070/api/v1/admin/getAllUsers?page=${page}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -48,18 +40,17 @@ const Users = () => {
         );
         if (res.data.success) {
           setUsers(res.data.data);
+          setTotalPages(res.data.totalPages);
         }
-        // dispatch(hideLoading());
       } catch (error) {
         console.log(error);
-        // dispatch(hideLoading());
         toast.success("Something went wrong", {
           position: toast.POSITION.TOP_CENTER,
         });
       }
     };
     getUsers();
-  }, []);
+  }, [page]);
   return (
     <Layout>
       <div>

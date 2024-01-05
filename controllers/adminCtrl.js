@@ -1,28 +1,101 @@
 const caregiverModel = require("../models/caregiverModel")
 const userModel = require("../models/userModels")
 
+// const getAllUsersController = async (req, res) => {
+//     try {
+//         const users = await userModel.find({ role: "client" })
+//         res.status(200).send({
+//             success: true,
+//             message: "Successfully fetched users",
+//             data: users
+//         })
+//     } catch (error) {
+//         console.log(error)
+//         res.status(500).send({
+//             success: false,
+//             message: "Error while fetching users",
+//             error
+//         })
+//     }
+// }
+
 const getAllUsersController = async (req, res) => {
+    const perPage = 10;
+    const page = req.query.page || 1;
+
     try {
-        const users = await userModel.find({ role: "client" })
+        const users = await userModel
+            .find({ role: "client" })
+            .skip((page - 1) * perPage)
+            .limit(perPage);
+
+        const totalUsersCount = await userModel.countDocuments({ role: "client" });
+        const totalPages = Math.ceil(totalUsersCount / perPage);
+
         res.status(200).send({
             success: true,
             message: "Successfully fetched users",
-            data: users
-        })
+            data: users,
+            totalPages: totalPages,
+        });
     } catch (error) {
-        console.log(error)
+        console.log(error);
         res.status(500).send({
             success: false,
             message: "Error while fetching users",
-            error
-        })
+            error,
+        });
     }
-}
+};
+
+
+// const getAllCaregiversController = async (req, res) => {
+//     try {
+//         const users = await userModel.find({ role: { $in: ["nurse", "babysitter"] } })
+//         const nurses = await caregiverModel.find({})
+
+//         const nurseDetailsMap = {};
+//         nurses.forEach(nurse => {
+//             nurseDetailsMap[nurse.userId] = nurse;
+//         });
+
+//         // Combine user details with caregiver-specific details
+//         const caregivers = users.map(user => {
+//             const nurseDetails = nurseDetailsMap[user._id];
+//             // Combine common details from user and nurse-specific details
+//             return {
+//                 ...user._doc,
+//                 ...(nurseDetails ? { ...nurseDetails._doc } : {})
+//             };
+//         });
+//         //TODO: CREATING BABYSITTER APPLY ROUTES AND FETCHING THEM
+//         res.status(200).send({
+//             success: true,
+//             message: "Successfully fetched caregivers",
+//             data: caregivers
+//         })
+//     } catch (error) {
+//         console.log(error)
+//         res.status(500).send({
+//             success: false,
+//             message: "Error while fetching caregivers",
+//             error
+//         })
+//     }
+// }
+
 
 const getAllCaregiversController = async (req, res) => {
+    const perPage = 10;
+    const page = req.query.page || 1;
+
     try {
-        const users = await userModel.find({ role: { $in: ["nurse", "babysitter"] } })
-        const nurses = await caregiverModel.find({})
+        const users = await userModel
+            .find({ role: { $in: ["nurse", "babysitter"] } })
+            .skip((page - 1) * perPage)
+            .limit(perPage);
+
+        const nurses = await caregiverModel.find({});
 
         const nurseDetailsMap = {};
         nurses.forEach(nurse => {
@@ -38,21 +111,29 @@ const getAllCaregiversController = async (req, res) => {
                 ...(nurseDetails ? { ...nurseDetails._doc } : {})
             };
         });
-        //TODO: CREATING BABYSITTER APPLY ROUTES AND FETCHING THEM
+
+        // Fetch the total count of caregivers
+        const totalCaregiversCount = await userModel
+            .find({ role: { $in: ["nurse", "babysitter"] } })
+            .countDocuments();
+
+        const totalPages = Math.ceil(totalCaregiversCount / perPage);
+
         res.status(200).send({
             success: true,
             message: "Successfully fetched caregivers",
-            data: caregivers
-        })
+            data: caregivers,
+            totalPages: totalPages,
+        });
     } catch (error) {
-        console.log(error)
+        console.log(error);
         res.status(500).send({
             success: false,
             message: "Error while fetching caregivers",
-            error
-        })
+            error,
+        });
     }
-}
+};
 
 
 //CAREGIVER ACCOUNT STATUS

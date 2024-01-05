@@ -12,11 +12,15 @@ import {
   Paper,
   Button,
   Skeleton,
+  Stack,
+  Pagination,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 const Caregivers = () => {
   const [caregivers, setCaregivers] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const navigate = useNavigate();
 
@@ -45,11 +49,15 @@ const Caregivers = () => {
     }
   };
 
+  const handleChangePage = (event, value) => {
+    setPage(value);
+  };
+
   useEffect(() => {
     const getCaregivers = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:8070/api/v1/admin/getAllCaregivers",
+          `http://localhost:8070/api/v1/admin/getAllCaregivers?page=${page}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -58,6 +66,7 @@ const Caregivers = () => {
         );
         if (res.data.success) {
           setCaregivers(res.data.data);
+          setTotalPages(res.data.totalPages);
         }
       } catch (error) {
         console.log(error);
@@ -67,7 +76,7 @@ const Caregivers = () => {
       }
     };
     getCaregivers();
-  }, []);
+  }, [page]);
   return (
     <Layout>
       <div>
@@ -255,6 +264,15 @@ const Caregivers = () => {
             )}
           </Table>
         </TableContainer>
+        <Stack spacing={2}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handleChangePage}
+            variant="outlined"
+            color="primary"
+          />
+        </Stack>
       </div>
     </Layout>
   );
