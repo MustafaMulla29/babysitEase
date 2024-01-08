@@ -1,7 +1,9 @@
+const bookingModel = require("../models/bookingModel");
 const caregiverModel = require("../models/caregiverModel");
 const userModel = require("../models/userModels");
 const path = require('path');
 const fs = require("fs").promises
+const moment = require("moment");
 
 const getCaregiverInfoController = async (req, res) => {
     try {
@@ -92,6 +94,7 @@ const getCaregiverInfoController = async (req, res) => {
 //         })
 //     }
 // }
+
 const updateCaregiverController = async (req, res) => {
     try {
         const user = await userModel.findOne({ _id: req.body.userId })
@@ -199,4 +202,93 @@ const updateCaregiverController = async (req, res) => {
     }
 }
 
-module.exports = { getCaregiverInfoController, updateCaregiverController }
+const getBookingsController = async (req, res) => {
+    try {
+        const caregiverId = req.query.caregiverId;
+        const bookings = await bookingModel.find({ caregiverId: caregiverId });
+
+        if (!bookings || bookings.length === 0) {
+            return res.status(200).send({
+                success: false,
+                message: "You don't have any bookings as of now"
+            });
+        }
+
+        // Extract caregiverIds from the bookings
+        const clientIds = bookings.map(booking => booking.clientId);
+
+        // Fetch caregiver details using the caregiverIds
+        const clients = await userModel.find({ _id: { $in: clientIds } });
+
+        // Map caregiver details to corresponding bookings
+        const bookingsWithClientDetails = bookings.map(booking => {
+            const client = clients.find(c => c._id.toString() === booking.clientId.toString());
+            return {
+                _id: booking._id,
+                clientId: booking.clientId,
+                bookedFor: booking.bookedFor,
+                date: booking.date,
+                status: booking.status,
+                createdAt: booking.createdAt,
+                clientId: client ? client._id.toString() : null,
+                clientName: client ? client.name : null,
+                clientProfilePicture: client ? client.profilePicture : null
+            };
+        });
+
+        res.status(200).send({
+            success: true,
+            message: "Successfully fetched your bookings",
+            data: bookingsWithClientDetails
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error while fetching bookings",
+            error,
+        });
+    }
+};
+
+//mark booking status complete if booking is complete
+const bookingStatusController = async (req, res) => {
+    try {
+        const currentDate = moment().format("YYYY-MM-DD");
+
+        // Find bookings that are Approved and have an end date less than the current date
+        const bookingsToComplete = await bookingModel.find({
+            status: "Approved",
+            date: { $lt: currentDate },
+        });
+
+        if (bookingsToComplete.length === 0) {
+            return res.status(200).send({
+                success: true,
+                message: "No bookings to complete.",
+            });
+        }
+
+        // Update the status of each booking to "completed"
+        const updatePromises = bookingsToComplete.map(async (booking) => {
+            booking.status = "Completed";
+            await booking.save();
+        });
+
+        await Promise.all(updatePromises);
+
+        return res.status(200).send({
+            success: true,
+            message: "Bookings marked as completed.",
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error while completing bookings.",
+            error,
+        });
+    }
+};
+
+module.exports = { getCaregiverInfoController, updateCaregiverController, getBookingsController, bookingStatusController }

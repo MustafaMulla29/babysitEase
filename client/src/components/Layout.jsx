@@ -62,7 +62,7 @@ const Layout = ({ children }) => {
     },
     {
       name: "Bookings",
-      path: "/bookings",
+      path: "/caregiver/bookings",
       icon: "fa-solid fa-user-nurse",
     },
     // {
@@ -82,7 +82,7 @@ const Layout = ({ children }) => {
     },
     {
       name: "Bookings",
-      path: "/bookings",
+      path: "/caregiver/bookings",
       icon: "fa-solid fa-user-nurse",
     },
     // {
@@ -102,7 +102,7 @@ const Layout = ({ children }) => {
     },
     {
       name: "My Bookings",
-      path: "/bookings",
+      path: "/client/bookings",
       icon: "fa-solid fa-list",
     },
     {
@@ -120,93 +120,141 @@ const Layout = ({ children }) => {
   return (
     <>
       <section className="main ">
-        <nav>
-          <ul className="flex items-center justify-between w-[75%] m-auto p-4">
-            <li>
-              <a href="/">Logo</a>
-            </li>
-            <div className="">
-              <div className="header flex items-center justify-center gap-7">
-                <Chip className="uppercase" label={user?.role} />
-                <Link to="/profile" className="text-lg uppercase">
-                  {user?.name}
-                </Link>
-                {/* <i className="fa-solid fa-bell text-xl"></i> */}
-                <Tooltip title="Notification" arrow>
-                  <IconButton onClick={handleClick}>
-                    <Badge
-                      badgeContent={user?.notification?.length}
-                      className=""
-                      color="primary"
-                    >
-                      <AiFillBell
-                      // onClick={() => {
-                      //   navigate("/notification");
-                      // }}
-                      />
-                    </Badge>
-                  </IconButton>
-                </Tooltip>
-                <Popover
-                  id={id}
-                  open={open}
-                  anchorEl={anchorEl}
-                  onClose={handleClose}
-                  anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "right",
-                  }}
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
+        <nav className="flex w-[80%] m-auto items-center justify-between">
+          <div className="py-2 px-[2px] cursor-pointer">
+            <a href="/">
+              <img
+                src="./../../img/babysitEase_logo.png"
+                className="w-20 max-w-full h-auto"
+                alt="logo"
+              />
+            </a>
+          </div>
+          <ul className="flex flex-row gap-3 items-start p-4">
+            {sidebarMenu.map((menu, index) => {
+              const isActive = location.pathname === menu.path;
+              return (
+                <li
+                  className={`menu-items relative ${
+                    isActive ? "bg-gray-200" : "hover:bg-gray-100"
+                  } px-4 flex items-center gap-2 rounded-full transition-all py-2 mb-2`}
+                  key={index}
                 >
-                  <List>
-                    {user?.notification && user.notification.length > 0 ? (
-                      user.notification.map((notification, index) => (
-                        <div key={index}>
-                          <ListItem>
-                            <ListItemText primary={notification.message} />
-                          </ListItem>
-                          <ListItem
-                            button
-                            onClick={() => navigate("/notification")}
-                          ></ListItem>
-                        </div>
-                      ))
-                    ) : (
-                      <ListItem>
-                        {user?.notification.length > 0 ? (
-                          <ListItemText primary="See all notifications" />
-                        ) : (
-                          <ListItemText primary="No notifications" />
-                        )}
-                      </ListItem>
-                    )}
-                  </List>
-                </Popover>
-                <Box>
-                  {user?.profilePicture ? (
-                    <Avatar
-                      alt="Profile Picture"
-                      src={`http://localhost:8070/${user.profilePicture}`}
-                      sx={{ width: 50, height: 50 }}
-                    />
-                  ) : (
-                    <Avatar
-                      alt="Default Profile Picture"
-                      // src="/default-profile-picture.jpg" // Replace with the path to your default profile picture
-                      src={user?.profilePicture} // Replace with the path to your default profile picture
-                      sx={{ width: 50, height: 50 }}
-                    />
-                  )}
-                </Box>
-              </div>
-            </div>
+                  <Link
+                    to={menu.path}
+                    className={`text-base ${
+                      isActive ? "text-blue-500" : "text-gray-700"
+                    }`}
+                  >
+                    {menu.name}
+                  </Link>
+                  {/* {isActive && (
+                    <div className="absolute left-0 w-2 h-8 bg-blue-500 rounded-r-full"></div>
+                  )} */}
+                </li>
+              );
+            })}
+            <Link
+              to="/login"
+              className={`menu-items relative px-4 flex items-center gap-2 rounded-full transition-all py-2 mb-2 hover:text-gray-700`}
+              onClick={handleLogout}
+            >
+              Logout
+            </Link>
           </ul>
+          <div className="">
+            <div className="header flex items-center justify-center gap-7">
+              <Chip className="uppercase" label={user?.role} />
+              {/* <Link to="/profile" className="text-lg uppercase">
+                {user?.name}
+              </Link> */}
+              {/* <i className="fa-solid fa-bell text-xl"></i> */}
+              <Tooltip title="Notification" arrow>
+                <IconButton onClick={handleClick}>
+                  <Badge
+                    badgeContent={user?.notification?.length}
+                    className=""
+                    color="primary"
+                  >
+                    <AiFillBell
+                    // onClick={() => {
+                    //   navigate("/notification");
+                    // }}
+                    />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
+              <Popover
+                id={id}
+                open={open}
+                anchorEl={anchorEl}
+                onClose={handleClose}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "right",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+              >
+                <List>
+                  {/* {user?.notification && user.notification.length > 0 ? (
+                    user.notification.map((notification, index) => (
+                      <div key={index}>
+                        <ListItem>
+                          <ListItemText primary={notification.message} />
+                        </ListItem>
+                        <ListItem
+                          button
+                          onClick={() => navigate("/notification")}
+                        ></ListItem>
+                      </div>
+                    ))
+                  ) : (
+                    <ListItem>
+                      {user?.notification.length > 0 ? (
+                        <ListItemText primary="See all notifications" />
+                      ) : (
+                        <ListItemText primary="No notifications" />
+                      )}
+                    </ListItem>
+                  )} */}
+                  {user?.notification && user.notification.length > 0 ? (
+                    user.notification.map((notification, index) => (
+                      <ListItem key={index}>
+                        <ListItemText primary={notification.message} />
+                      </ListItem>
+                    ))
+                  ) : (
+                    <ListItem>
+                      <ListItemText primary="No notifications" />
+                    </ListItem>
+                  )}
+
+                  {user?.notification && user.notification.length > 0 && (
+                    <ListItem button onClick={() => navigate("/notification")}>
+                      <ListItemText primary="See all notifications" />
+                    </ListItem>
+                  )}
+                </List>
+              </Popover>
+              <Box>
+                <Avatar
+                  alt="Profile Picture"
+                  src={
+                    user?.profilePicture
+                      ? `http://localhost:8070/${user.profilePicture}`
+                      : "./../../img/default_avatar.jpg"
+                  }
+                  sx={{ width: 50, height: 50 }}
+                />
+              </Box>
+            </div>
+          </div>
         </nav>
-        <div className="body flex items-start justify-between mx-auto w-[80%]  mt-[55px]">
-          <div className="min-h-[100%] w-[300px] rounded-md shadow-lg shadow-[#989898]  px-2 py-4">
+        <div className="body flex items-center justify-center mx-auto w-[80%] mt-[55px]">
+          {/* <div className="min-h-[100%] w-[300px] rounded-md shadow-lg shadow-[#989898]  px-2 py-4">
             {sidebarMenu.map((menu, index) => {
               const isActive = location.pathname === menu.path;
               return (
@@ -290,7 +338,7 @@ const Layout = ({ children }) => {
                 </List>
               </Collapse>
             </List> */}
-          </div>
+          {/* </div>  */}
           <div className="children w-[80%] py-4">{children}</div>
           {/* <div className="">
             <div className="header flex items-center justify-center gap-7">

@@ -71,7 +71,12 @@ const Profile = () => {
             ) : (
               <Avatar
                 alt="Profile Picture"
-                src={`http://localhost:8070/${client?.profilePicture}`}
+                // src={`http://localhost:8070/${client?.profilePicture}`}
+                src={
+                  client?.profilePicture
+                    ? `http://localhost:8070/${client.profilePicture}`
+                    : "./../../img/default_avatar.jpg"
+                }
                 sx={{ width: 80, height: 80 }}
               />
             )}

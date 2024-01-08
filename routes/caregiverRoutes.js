@@ -1,6 +1,6 @@
 const express = require("express")
 const authMiddleware = require("../middlewares/authMiddleware")
-const { getCaregiverInfoController, updateCaregiverController } = require("../controllers/caregiverCtrl")
+const { getCaregiverInfoController, updateCaregiverController, getBookingsController, bookingStatusController } = require("../controllers/caregiverCtrl")
 const upload = require("../multerConfig")
 const router = express.Router()
 
@@ -13,6 +13,10 @@ const fieldsConfig = [
 ];
 //PATCH || SINGLE NURSE DETAILS
 router.patch('/updateCaregiver', authMiddleware, upload.any(), updateCaregiverController)
+
+router.get("/getBookings", authMiddleware, getBookingsController)
+
+router.post("/bookingStatus", authMiddleware, bookingStatusController)
 
 
 module.exports = router

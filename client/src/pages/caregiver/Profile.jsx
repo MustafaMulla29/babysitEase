@@ -63,7 +63,12 @@ const Profile = () => {
             {caregiver ? (
               <Avatar
                 alt="Profile Picture"
-                src={`http://localhost:8070/${caregiver?.profilePicture}`}
+                // src={`http://localhost:8070/${caregiver?.profilePicture}`}
+                src={
+                  caregiver?.profilePicture
+                    ? `http://localhost:8070/${caregiver?.profilePicture}`
+                    : "./../../img/default_avatar.jpg"
+                }
                 sx={{ width: 80, height: 80 }}
               />
             ) : (

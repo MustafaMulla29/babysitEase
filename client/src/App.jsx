@@ -19,7 +19,8 @@ import Caregivers from "./pages/admin/Caregivers";
 import Profile from "./pages/caregiver/Profile";
 import UserProfile from "./pages/client/Profile";
 import CaregiverDetails from "./pages/client/CaregiverDetails";
-import Bookings from "./pages/Bookings";
+import Bookings from "./pages/client/Bookings";
+import CaregiverBookings from "./pages/caregiver/Bookings";
 
 function App() {
   const dispatch = useDispatch();
@@ -144,10 +145,18 @@ function App() {
                 }
               />
               <Route
-                path={`/bookings`}
+                path={`/client/bookings`}
                 element={
                   <ProtectedRoutes>
                     <Bookings />
+                  </ProtectedRoutes>
+                }
+              />
+              <Route
+                path={`/caregiver/bookings`}
+                element={
+                  <ProtectedRoutes>
+                    <CaregiverBookings />
                   </ProtectedRoutes>
                 }
               />

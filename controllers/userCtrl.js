@@ -8,6 +8,7 @@ const nodemailer = require('nodemailer')
 const Mailgen = require('mailgen')
 const caregiverModel = require('../models/caregiverModel')
 const bookingModel = require('../models/bookingModel')
+const moment = require("moment")
 
 
 const registerController = async (req, res) => {
@@ -415,6 +416,8 @@ const getCaregiverDetails = async (req, res) => {
 const bookCaregiverController = async (req, res) => {
     try {
         const { clientId, caregiverId, date, } = req.body
+
+        const formattedDate = moment(date).format("YYYY-MM-DD");
         const user = await userModel.findOne({ _id: clientId })
         const caregiver = await caregiverModel.findOne({ userId: caregiverId })
         const bookedFor = caregiver?.role === "babysitter" ? "Child" : "Parent"
@@ -435,8 +438,9 @@ const bookCaregiverController = async (req, res) => {
 
         const existingBooking = await bookingModel.findOne({
             clientId: user?._id,
-            date: date,
+            date: formattedDate,
         });
+
 
         if (existingBooking) {
             return res.status(200).send({
@@ -448,7 +452,7 @@ const bookCaregiverController = async (req, res) => {
         // Check if the caregiver is already booked on the specified date
         const existingCaregiverBooking = await bookingModel.findOne({
             caregiverId: caregiverId,
-            date: date,
+            date: formattedDate,
         });
 
         if (existingCaregiverBooking) {
@@ -457,7 +461,24 @@ const bookCaregiverController = async (req, res) => {
                 message: "Caregiver is already booked on the specified date"
             });
         }
-        const booking = await bookingModel({ clientId, caregiverId, date, bookedFor })
+
+        // Check if the caregiver is booked for a date less than the current booking date
+        const previousBooking = await bookingModel.findOne({
+            caregiverId: caregiverId,
+            $or: [
+                { status: "Pending" },
+                { status: "Accepted" }
+            ],
+        });
+
+        if (previousBooking) {
+            return res.status(200).send({
+                success: false,
+                message: "You cannot book a caregiver for a new date until the previous booking is finished"
+            });
+        }
+
+        const booking = await bookingModel({ clientId, caregiverId, date: formattedDate, bookedFor })
 
         await booking.save()
         //FIXME: USER NOTIFICATIONS
@@ -487,29 +508,51 @@ const bookCaregiverController = async (req, res) => {
 const getBookingsController = async (req, res) => {
     try {
         const clientId = req.query.clientId;
-        const bookings = await bookingModel.find({ clientId: clientId })
+        const bookings = await bookingModel.find({ clientId: clientId });
 
-        if (!bookings) {
+        if (!bookings || bookings.length === 0) {
             return res.status(200).send({
                 success: false,
-                message: "You don't any bookings as of now"
-            })
+                message: "You don't have any bookings as of now"
+            });
         }
+
+        // Extract caregiverIds from the bookings
+        const caregiverIds = bookings.map(booking => booking.caregiverId);
+
+        // Fetch caregiver details using the caregiverIds
+        const caregivers = await userModel.find({ _id: { $in: caregiverIds } });
+
+        // Map caregiver details to corresponding bookings
+        const bookingsWithCaregiverDetails = bookings.map(booking => {
+            const caregiver = caregivers.find(c => c._id.toString() === booking.caregiverId.toString());
+            return {
+                _id: booking._id,
+                clientId: booking.clientId,
+                bookedFor: booking.bookedFor,
+                date: booking.date,
+                status: booking.status,
+                createdAt: booking.createdAt,
+                caregiverId: caregiver ? caregiver._id.toString() : null,
+                caregiverName: caregiver ? caregiver.name : null,
+                caregiverProfilePicture: caregiver ? caregiver.profilePicture : null
+            };
+        });
 
         res.status(200).send({
             success: true,
             message: "Successfully fetched your bookings",
-            data: bookings
-        })
+            data: bookingsWithCaregiverDetails
+        });
     } catch (error) {
         console.log(error);
         res.status(500).send({
             success: false,
-            message: "Error while booking caregiver",
+            message: "Error while fetching bookings",
             error,
         });
     }
-}
+};
 
 
 module.exports = { loginController, registerController, authController, applyCaregiverController, getNotificationsController, deleteNotificationsController, addDependentController, getAllCaregiversController, getCaregiverDetails, bookCaregiverController, getBookingsController }

@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { showLoading, hideLoading } from "./../../redux/features/alertSlice";
+import moment from "moment";
 
 const CaregiverDetails = () => {
   const [caregiver, setCaregiver] = useState(null);
@@ -49,22 +50,41 @@ const CaregiverDetails = () => {
   }, [params.userId]);
 
   //TODO: NEED TO FORMAT THE DATE USING MOMENT JS
-  const handleDateChange = (date) => {
-    console.log(date);
-    const currentDate = new Date();
+  // const handleDateChange = (date) => {
+  //   console.log(date);
+  //   const currentDate = moment();
 
-    if (date < currentDate) {
+  //   if (date < currentDate) {
+  //     setBookingError("Please select a valid date");
+  //     return;
+  //   }
+
+  //   if (date.date() === currentDate.date() && currentDate.hours() >= 9) {
+  //     setBookingError("You cannot book today! Select another date");
+  //     return;
+  //   }
+
+  //   setBookingDate(date);
+  //   setBookingError("");
+  // };
+
+  const handleDateChange = (date) => {
+    // console.log(date);
+    const currentDate = moment();
+
+    if (moment(date).isBefore(currentDate)) {
       setBookingError("Please select a valid date");
       return;
     }
 
     if (
-      date.getDate() === currentDate.getDate() &&
-      currentDate.getHours() >= 9
+      moment(date).date() === currentDate.date() &&
+      currentDate.hours() >= 9
     ) {
       setBookingError("You cannot book today! Select another date");
       return;
     }
+
     setBookingDate(date);
     setBookingError("");
   };
@@ -76,12 +96,13 @@ const CaregiverDetails = () => {
     }
     try {
       dispatch(showLoading());
+      const date = moment(bookingDate).format("YYYY-MM-DD");
       const res = await axios.post(
         "http://localhost:8070/api/v1/user/bookCaregiver",
         {
           clientId: user?._id,
           caregiverId: params.userId,
-          date: bookingDate,
+          date: date,
         },
         {
           headers: {
@@ -191,13 +212,13 @@ const CaregiverDetails = () => {
 
           {/* Description Section */}
           <div className="mb-8">
-            <Typography variant="h6">
+            {/* <Typography variant="h6">
               {caregiver ? (
                 "Description"
               ) : (
                 <Skeleton animation="wave" width={100} />
               )}
-            </Typography>
+            </Typography> */}
             <Typography>
               {caregiver ? (
                 caregiver.description
@@ -406,43 +427,47 @@ const CaregiverDetails = () => {
             </div>
           </div>
           <hr className="mb-8" />
-          <div className="mb-8">
-            <Typography variant="h6">
-              {caregiver ? (
-                "Certifications"
-              ) : (
-                <Skeleton animation="wave" width={150} />
-              )}
-            </Typography>
-            <div className="flex flex-wrap gap-4">
-              {caregiver ? (
-                caregiver.certifications?.map((certificate, index) => (
-                  <Avatar
-                    key={index}
-                    alt="certificate"
-                    src={`http://localhost:8070/${certificate}`}
-                    sx={{ width: 80, height: 80 }}
-                  />
-                ))
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  <Skeleton
-                    animation="wave"
-                    width={300}
-                    height={300}
-                    className="rounded"
-                  />
-                  <Skeleton
-                    animation="wave"
-                    width={300}
-                    height={300}
-                    className="rounded"
-                  />
+          {caregiver?.certifications.length > 0 && (
+            <div>
+              <div className="mb-8">
+                <Typography variant="h6">
+                  {caregiver?.certifications ? (
+                    "Certifications"
+                  ) : (
+                    <Skeleton animation="wave" width={150} />
+                  )}
+                </Typography>
+                <div className="flex flex-wrap gap-4">
+                  {caregiver ? (
+                    caregiver.certifications?.map((certificate, index) => (
+                      <Avatar
+                        key={index}
+                        alt="certificate"
+                        src={`http://localhost:8070/${certificate}`}
+                        sx={{ width: 80, height: 80 }}
+                      />
+                    ))
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      <Skeleton
+                        animation="wave"
+                        width={300}
+                        height={300}
+                        className="rounded"
+                      />
+                      <Skeleton
+                        animation="wave"
+                        width={300}
+                        height={300}
+                        className="rounded"
+                      />
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
+              <hr className="mb-8" />
             </div>
-          </div>
-          <hr className="mb-8" />
+          )}
 
           {/* Reviews Section */}
           {caregiver?.review?.length > 0 && (
@@ -478,6 +503,23 @@ const CaregiverDetails = () => {
                 <Typography>
                   Nothing much to do! Just select the date.
                 </Typography>
+                {/* <div>
+                  <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                      className={`${
+                        bookingError && "outline outline-1 outline-red-400"
+                      }`}
+                      value={bookingDate}
+                      onChange={handleDateChange}
+                      name="date"
+                    />
+                  </LocalizationProvider>
+                  <div className="h-4">
+                    <Typography className="text-red-500 text-sm mt-1">
+                      {bookingError}
+                    </Typography>
+                  </div>
+                </div> */}
                 <div>
                   <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <DatePicker
@@ -494,11 +536,18 @@ const CaregiverDetails = () => {
                       {bookingError}
                     </Typography>
                   </div>
+                  {bookingDate && (
+                    <Typography>
+                      Selected Date: {moment(bookingDate).format("YYYY-MM-DD")}
+                    </Typography>
+                  )}
                 </div>
+
                 <Button
                   onClick={handleBooking}
                   variant="outlined"
                   color="primary"
+                  // sx={{ color: "#4CAF50", border: "1px solid #4CAF50" }}
                 >
                   Book Now
                 </Button>

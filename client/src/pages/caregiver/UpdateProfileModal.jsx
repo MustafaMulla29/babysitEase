@@ -19,10 +19,10 @@ import { useParams } from "react-router-dom";
 // ... existing imports
 
 const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
-  const [editedData, setEditedData] = useState(null);
+  const [CaregiverData, setCaregiverData] = useState(null);
   const [ageRange, setAgeRange] = useState({
-    lowerLimit: caregiver?.ageRange?.lowerLimit,
-    upperLimit: caregiver?.ageRange?.upperLimit,
+    lowerLimit: null,
+    upperLimit: null,
   });
   const [profilePictureDisplay, setProfilePictureDisplay] = useState(null);
   const [deleteCertificates, setDeleteCertificates] = useState([]);
@@ -33,56 +33,38 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
   const params = useParams();
 
   useEffect(() => {
-    const getNurseInfo = async () => {
-      try {
-        const res = await axios.post(
-          "http://localhost:8070/api/v1/caregiver/getCaregiverInfo",
-          { userId: params.id },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        if (res.data.success) {
-          setEditedData(res.data.data);
-          setAgeRange(() => ({
-            lowerLimit: caregiver?.ageRange?.lowerLimit,
-            upperLimit: caregiver?.ageRange?.upperLimit,
-          }));
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getNurseInfo();
-  }, [params.id, caregiver]);
+    setCaregiverData(caregiver);
+    setAgeRange(() => ({
+      lowerLimit: caregiver?.ageRange?.lowerLimit,
+      upperLimit: caregiver?.ageRange?.upperLimit,
+    }));
+  }, [caregiver]);
 
   // useEffect(() => {
-  //   // Update editedData when caregiver prop changes
-  //   setEditedData({
-  //     name: caregiver?.name,
-  //     address: caregiver?.address,
-  //     ageRange: {
-  //       lowerLimit: caregiver?.ageRange?.lowerLimit,
-  //       upperLimit: caregiver?.ageRange?.upperLimit,
-  //     },
-  //     availability: caregiver?.availability,
-  //     certifications: caregiver?.certifications || [],
-  //     city: caregiver?.city,
-  //     dependents: caregiver?.dependents || [],
-  //     description: caregiver?.description,
-  //     feesPerDay: caregiver?.feesPerDay,
-  //     gender: caregiver?.gender,
-  //     preferredCities: caregiver?.preferredCities || [],
-  //     qualification: caregiver?.qualification || [],
-  //     rating: caregiver?.rating,
-  //     role: caregiver?.role,
-  //     specialisation: caregiver?.specialisation || [],
-  //     yearsExperience: caregiver?.yearsExperience,
-  //     profilePicture: caregiver?.profilePicture,
-  //   });
-  // }, [caregiver]);
+  //   const getNurseInfo = async () => {
+  //     try {
+  //       const res = await axios.post(
+  //         "http://localhost:8070/api/v1/CaregiverData/getCaregiverInfo",
+  //         { userId: params.id },
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //           },
+  //         }
+  //       );
+  //       if (res.data.success) {
+  //         setCaregiverData(res.data.data);
+  //         setAgeRange(() => ({
+  //           lowerLimit: CaregiverData?.ageRange?.lowerLimit,
+  //           upperLimit: CaregiverData?.ageRange?.upperLimit,
+  //         }));
+  //       }
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
+  //   getNurseInfo();
+  // }, [params.id, CaregiverData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -92,38 +74,29 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
       // Split the string based on commas and trim each city
       const citiesArray = value.split(",").map((city) => city.trim());
 
-      setEditedData((prevData) => ({
+      setCaregiverData((prevData) => ({
         ...prevData,
         preferredCities: citiesArray,
       }));
-      console.log(editedData?.preferredCities);
     } else if (name === "qualification") {
       const qualArray = value.split(",").map((qual) => qual.trim());
-      setEditedData((prevData) => ({
+      setCaregiverData((prevData) => ({
         ...prevData,
         [name]: qualArray,
       }));
     } else if (name === "specialisation") {
       const specArray = value.split(",").map((spec) => spec.trim());
-      setEditedData((prevData) => ({
+      setCaregiverData((prevData) => ({
         ...prevData,
         [name]: specArray,
       }));
     } else {
       // For other fields, directly update the state
-      setEditedData((prevData) => ({
+      setCaregiverData((prevData) => ({
         ...prevData,
         [name]: value,
       }));
     }
-  };
-
-  const handleSaveChanges = () => {
-    // Add logic to save the changes to the backend
-    // You can use axios or your preferred method for API calls
-    // After saving changes, close the modal
-    onClose();
-    // console.log(editedData);
   };
 
   const handleFileChange = (event) => {
@@ -133,7 +106,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
       setProfilePictureDisplay(URL.createObjectURL(file));
 
       // Update state with the selected file
-      setEditedData((prevData) => ({
+      setCaregiverData((prevData) => ({
         ...prevData,
         profilePicture: file,
       }));
@@ -144,14 +117,14 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
     const files = e.target.files;
     const fileList = Array.from(files);
     console.log("fileList:", fileList);
-    setEditedData((prevData) => ({
+    setCaregiverData((prevData) => ({
       ...prevData,
       certifications: [...prevData.certifications, ...fileList],
     }));
   };
 
   const removeCertificate = (certificate) => {
-    setEditedData((prevData) => ({
+    setCaregiverData((prevData) => ({
       ...prevData,
       certifications: prevData.certifications.filter(
         (cert) => cert !== certificate
@@ -160,98 +133,44 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
     setDeleteCertificates((prevData) => [...prevData, certificate]);
   };
 
-  // const handleSumbit = async (e) => {
-  //   e.preventDefault();
-  //   const formData = new FormData();
-
-  //   formData.append("user[profilePicture]", editedData.profilePicture);
-  //   formData.append("userId", user._id);
-
-  //   formData.append("caregiver[yearsExperience]", editedData.yearsExperience);
-  //   formData.append("caregiver[feesPerDay]", editedData.feesPerDay);
-  //   formData.append("caregiver[preferredCities]", editedData.preferredCities);
-  //   formData.append("caregiver[description]", editedData.description);
-  //   formData.append("caregiver[qualification]", editedData.qualification);
-  //   formData.append("caregiver[specialisation]", editedData.specialisation);
-  //   formData.append("caregiver[ageRange]", JSON.stringify(editedData.ageRange));
-  //   formData.append("caregiver[availability]", editedData.availability);
-
-  //   // Append certifications as an array
-  //   editedData.certifications.forEach((file, index) => {
-  //     formData.append(`caregiver[certifications][${index}]`, file);
-  //   });
-  //   console.log(Object.fromEntries(formData));
-  //   try {
-  //     console.log(formData);
-  //     dispatch(showLoading());
-  //     const res = await axios.patch(
-  //       "http://localhost:8070/api/v1/caregiver/updateCaregiver",
-  //       formData,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${localStorage.getItem("token")}`,
-  //           "Content-Type": "multipart/form-data", // Set content type to multipart/form-data
-  //         },
-  //       }
-  //     );
-  //     dispatch(hideLoading());
-  //     if (res.data.success) {
-  //       toast.success(res.data.message, {
-  //         position: toast.POSITION.TOP_CENTER,
-  //       });
-  //       onClose();
-  //     } else {
-  //       toast.error(res.data.message, {
-  //         position: toast.POSITION.TOP_CENTER,
-  //       });
-  //     }
-  //   } catch (error) {
-  //     dispatch(hideLoading());
-  //     console.log(error);
-  //     toast.error("Something went wrong", {
-  //       position: toast.POSITION.TOP_CENTER,
-  //     });
-  //   }
-  // };
-
   const handleSumbit = async (e) => {
     e.preventDefault();
 
     const formdata = new FormData();
     formdata.append("userId", user._id);
-    formdata.append("name", editedData.name);
-    formdata.append("address", editedData.address);
-    formdata.append("yearsExperience", editedData.yearsExperience);
-    formdata.append("feesPerDay", editedData.feesPerDay);
-    formdata.append("description", editedData.description);
-    formdata.append("availability", editedData.availability);
+    formdata.append("name", CaregiverData.name);
+    formdata.append("address", CaregiverData.address);
+    formdata.append("yearsExperience", CaregiverData.yearsExperience);
+    formdata.append("feesPerDay", CaregiverData.feesPerDay);
+    formdata.append("description", CaregiverData.description);
+    formdata.append("availability", CaregiverData.availability);
     formdata.append("ageRange", JSON.stringify(ageRange));
-    editedData.preferredCities.forEach((city, index) => {
+    CaregiverData.preferredCities.forEach((city, index) => {
       formdata.append(`preferredCities[]`, city);
     });
-    editedData.qualification.forEach((qual, index) => {
+    CaregiverData.qualification.forEach((qual, index) => {
       formdata.append("qualification[]", qual);
     });
-    editedData.specialisation.forEach((spec, index) => {
+    CaregiverData.specialisation.forEach((spec, index) => {
       formdata.append("specialisation[]", spec);
     });
     deleteCertificates.forEach((cert, index) => {
       formdata.append("deleteCertificates[]", cert);
     });
 
-    if (editedData.profilePicture instanceof File) {
-      formdata.append("profilePicture", editedData.profilePicture);
+    if (CaregiverData.profilePicture instanceof File) {
+      formdata.append("profilePicture", CaregiverData.profilePicture);
     }
-    // if (editedData.certifications instanceof File) {
-    //   editedData?.certifications?.forEach((certification, index) => {
+    // if (CaregiverData.certifications instanceof File) {
+    //   CaregiverData?.certifications?.forEach((certification, index) => {
     //     formdata.append(`certifications[]`, certification);
     //   });
-    //   console.log(editedData.certifications);
+    //   console.log(CaregiverData.certifications);
     // }
 
-    if (Array.isArray(editedData.certifications)) {
+    if (Array.isArray(CaregiverData.certifications)) {
       // Iterate and append files to FormData
-      editedData.certifications.forEach((certification, index) => {
+      CaregiverData.certifications.forEach((certification, index) => {
         formdata.append(`certifications[]`, certification);
       });
     }
@@ -341,7 +260,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         <Avatar
                           alt="Profile Picture"
                           name="profilePicture"
-                          src={`http://localhost:8070/${editedData?.profilePicture}`}
+                          src={`http://localhost:8070/${CaregiverData?.profilePicture}`}
                           sx={{ width: 100, height: 100 }}
                         />
                       </Box>
@@ -352,7 +271,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                       <TextField
                         label="Name"
                         name="name"
-                        value={editedData?.name}
+                        value={CaregiverData?.name}
                         onChange={handleInputChange}
                         fullWidth
                         className="mb-2"
@@ -362,7 +281,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                       <TextField
                         label="Address"
                         name="address"
-                        value={editedData?.address}
+                        value={CaregiverData?.address}
                         onChange={handleInputChange}
                         fullWidth
                         className="mb-2"
@@ -372,7 +291,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                     <TextField
                       label="Years of experience"
                       name="yearsExperience"
-                      value={editedData?.yearsExperience}
+                      value={CaregiverData?.yearsExperience}
                       onChange={handleInputChange}
                       fullWidth
                       className="mb-2"
@@ -413,7 +332,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                     <TextField
                       label="Availability"
                       name="availability"
-                      value={editedData?.availability}
+                      value={CaregiverData?.availability}
                       onChange={handleInputChange}
                       fullWidth
                       className="mb-2"
@@ -452,8 +371,8 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         <span className="text-red-500 text-sm mt-1"></span>
                       </div>
                       {/* <div className="flex items-center justify-start gap-2 w-full flex-wrap">
-                        {editedData?.certifications &&
-                          editedData?.certifications?.map((img, index) => {
+                        {CaregiverData?.certifications &&
+                          CaregiverData?.certifications?.map((img, index) => {
                             return (
                               <>
                                 <div>
@@ -478,7 +397,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                     {/* <TextField
                   label="Certifications"
                   name="certifications"
-                  value={editedData.certifications.join(", ")}
+                  value={CaregiverData.certifications.join(", ")}
                   onChange={handleInputChange}
                   fullWidth
                   className="mb-2"
@@ -489,7 +408,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                     <TextField
                       label="City"
                       name="city"
-                      value={editedData?.city}
+                      value={CaregiverData?.city}
                       onChange={handleInputChange}
                       fullWidth
                       className="mb-2"
@@ -500,7 +419,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                       <TextField
                         label="Preferred cities"
                         name="preferredCities"
-                        value={editedData?.preferredCities?.join(", ")}
+                        value={CaregiverData?.preferredCities?.join(", ")}
                         onChange={handleInputChange}
                         fullWidth
                         className="mb-2"
@@ -508,13 +427,13 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                       <TextField
                         label="Qualification"
                         name="qualification"
-                        value={editedData?.qualification?.join(", ")}
+                        value={CaregiverData?.qualification?.join(", ")}
                         onChange={handleInputChange}
                         fullWidth
                         className="mb-2"
                       />
                       {/* <div>
-                    {editedData.preferredCities.map((city, index) => (
+                    {CaregiverData.preferredCities.map((city, index) => (
                       <Chip key={index} label={city} className="mr-1 mb-1" />
                     ))}
                   </div> */}
@@ -523,7 +442,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                     <TextField
                       label="Specialisation"
                       name="specialisation"
-                      value={editedData?.specialisation?.join(", ")}
+                      value={CaregiverData?.specialisation?.join(", ")}
                       onChange={handleInputChange}
                       fullWidth
                       className="mb-2"

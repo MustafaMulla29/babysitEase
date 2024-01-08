@@ -92,7 +92,6 @@ const Notification = () => {
           >
             <Tab label="Unread" />
             <Tab label="Read" />
-            <Tab label="Item Three" />
           </Tabs>
         </Box>
         {selectedTab === 0 && (
