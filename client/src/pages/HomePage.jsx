@@ -88,7 +88,7 @@ const HomePage = () => {
             value={selectedTab}
             onChange={handleTabChange}
             aria-label="basic tabs example"
-            className="mt-5"
+            className="mt-8"
             indicatorColor="primary"
             textColor="primary"
           >
@@ -96,7 +96,7 @@ const HomePage = () => {
             <Tab label="Nurses" />
           </Tabs>
           {selectedTab === 0 && (
-            <div className="flex flex-wrap justify-center items-center gap-11 ml-5 mt-5">
+            <div className="flex flex-wrap justify-start items-center gap-11 mt-5">
               {caregivers && caregivers.length > 0 ? (
                 caregivers
                   .filter((caregiver) => caregiver.user.role === "babysitter")
@@ -118,7 +118,7 @@ const HomePage = () => {
             </div>
           )}
           {selectedTab === 1 && (
-            <div className="flex flex-wrap justify-center items-center gap-11 ml-5 mt-5">
+            <div className="flex flex-wrap justify-start items-center gap-11  mt-5">
               {caregivers && caregivers.length > 0 ? (
                 caregivers
                   .filter((caregiver) => caregiver.user.role === "nurse")

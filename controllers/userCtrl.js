@@ -173,11 +173,15 @@ const authController = async (req, res) => {
 
 const applyCaregiverController = async (req, res) => {
     try {
+        console.log("body", req.body)
         // Extract certificates from req.files
         const certifications = req.files ? req.files.map(file => file.path) : null;
 
         // Extract other form data from req.body
-        // const ageRange = JSON.parse(req.body.ageRange)
+        const ageRange = JSON.parse(req.body.ageRange)
+        // const preferredCities = JSON.parse(req.body.preferredCities)
+        // const qualification = JSON.parse(req.body.qualification)
+        // const specialisation = JSON.parse(req.body.specialisation)
         const {
             yearsExperience,
             feesPerDay,
@@ -186,8 +190,8 @@ const applyCaregiverController = async (req, res) => {
             qualification,
             specialisation,
             userId,
-            ageRange
         } = req.body;
+
         const existingCaregiver = await caregiverModel.findOne({ userId: userId })
 
         if (existingCaregiver) {
@@ -206,8 +210,8 @@ const applyCaregiverController = async (req, res) => {
             specialisation,
             ageRange,
             userId,
-            certifications, // Add certificates to the caregiver model
-            status: "Pending", // Fix the typo in 'status'
+            certifications,
+            status: "Pending",
         });
 
         await newCaregiver.save();

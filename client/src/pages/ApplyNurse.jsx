@@ -8,7 +8,7 @@ import { Button, Typography, TextField, Box, Chip } from "@mui/material";
 import axios from "axios";
 
 const ApplyNurse = () => {
-  const [experience, setExperience] = useState(null);
+  const [yearsExperience, setExperience] = useState(null);
   const [feesPerDay, setFeesPerDay] = useState("");
   const [ageRange, setAgeRange] = useState({
     lowerLimit: 1,
@@ -24,7 +24,7 @@ const ApplyNurse = () => {
   const [addBtnDisabled, setAddBtnDisabled] = useState(true);
   const [qualBtnDisabled, setQualBtnDisabled] = useState(true);
   const [specBtnDisabled, setSpecBtnDisabled] = useState(true);
-  const [certificatesArray, setCertificatesArray] = useState([]);
+  const [certifications, setCertificatesArray] = useState([]);
   const [specialisationError, setSpecialisationError] = useState("");
   const [experienceError, setExperienceError] = useState("");
   const [feesPerDayError, setFeesPerDayError] = useState("");
@@ -80,18 +80,18 @@ const ApplyNurse = () => {
 
   const handleDescriptionChange = (e) => {
     setDescription(e.target.value);
-    const descRegex = /^[a-zA-Z]+(\s[a-zA-Z]+)*$/;
-    if (e.target.value.length === 0) {
-      setDescriptionError("");
-    } else if (
-      !descRegex.test(e.target.value) ||
-      !/[aeiouAEIOU]/.test(e.target.value) ||
-      e.target.value.length < 30
-    ) {
-      setDescriptionError("Enter a proper description");
-    } else {
-      setDescriptionError("");
-    }
+    // const descRegex = /^[a-zA-Z]+(\s[a-zA-Z]+)*$/;
+    // if (e.target.value.length === 0) {
+    //   setDescriptionError("");
+    // } else if (
+    //   !descRegex.test(e.target.value) ||
+    //   !/[aeiouAEIOU]/.test(e.target.value) ||
+    //   e.target.value.length < 30
+    // ) {
+    //   setDescriptionError("Enter a proper description");
+    // } else {
+    //   setDescriptionError("");
+    // }
   };
 
   const handleQualificationChange = (e) => {
@@ -215,7 +215,7 @@ const ApplyNurse = () => {
         );
         setSpecialisation(updatedSpec);
       } else if (operation === "certificate") {
-        const updatedCertificates = certificatesArray.filter(
+        const updatedCertificates = certifications.filter(
           (cert) => cert.name !== itemToRemove
         );
         setCertificatesArray(updatedCertificates);
@@ -237,7 +237,7 @@ const ApplyNurse = () => {
   //     qualification,
   //     specialisation,
   //     ageRange,
-  //     certificatesArray,
+  //     certifications,
   //   };
   //   try {
   //     dispatch(showLoading());
@@ -274,18 +274,28 @@ const ApplyNurse = () => {
     e.preventDefault();
     const formData = new FormData();
 
-    formData.append("yearsExperience", experience);
+    formData.append("yearsExperience", yearsExperience);
     formData.append("feesPerDay", feesPerDay);
-    formData.append("preferredCities", preferredCities);
+    // formData.append("preferredCities", preferredCities);
     formData.append("description", description);
-    formData.append("qualification", qualification);
-    formData.append("specialisation", specialisation);
+    // formData.append("qualification", qualification);
+    // formData.append("specialisation", specialisation);
     formData.append("ageRange", JSON.stringify(ageRange));
     formData.append("userId", user._id);
 
+    preferredCities.forEach((city, index) => {
+      formData.append(`preferredCities[]`, city);
+    });
+    qualification.forEach((qual, index) => {
+      formData.append("qualification[]", qual);
+    });
+    specialisation.forEach((spec, index) => {
+      formData.append("specialisation[]", spec);
+    });
+
     // Append certificates to the form data
-    certificatesArray.forEach((file, index) => {
-      formData.append(`certifications[${index}]`, file);
+    certifications.forEach((file, index) => {
+      formData.append(`certifications`, file);
     });
 
     try {
@@ -296,7 +306,7 @@ const ApplyNurse = () => {
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "multipart/form-data", // Set content type to multipart/form-data
+            "Content-Type": "multipart/form-data",
           },
         }
       );
@@ -342,7 +352,7 @@ const ApplyNurse = () => {
                 autoComplete="off"
                 placeholder="Enter years of experience"
                 required
-                value={experience}
+                value={yearsExperience}
                 onChange={handleExperienceChange}
               />
               <div className="h-4">
@@ -603,8 +613,8 @@ const ApplyNurse = () => {
               <span className="text-red-500 text-sm mt-1"></span>
             </div>
             {/* <div className="flex items-center justify-start gap-2 w-full flex-wrap">
-              {certificatesArray &&
-                certificatesArray.map((img, index) => {
+              {certifications &&
+                certifications.map((img, index) => {
                   return (
                     <>
                       <Chip

@@ -134,13 +134,6 @@ const Profile = () => {
 
           {/* Description Section */}
           <div className="mb-8">
-            <Typography variant="h6">
-              {caregiver ? (
-                "Description"
-              ) : (
-                <Skeleton animation="wave" width={100} />
-              )}
-            </Typography>
             <Typography>
               {caregiver ? (
                 caregiver.description
@@ -357,16 +350,40 @@ const Profile = () => {
                 <Skeleton animation="wave" width={150} />
               )}
             </Typography>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 mt-4">
               {caregiver ? (
-                caregiver?.certifications?.map((certificate, index) => (
-                  <Avatar
-                    key={index}
-                    alt="certificate"
-                    src={`http://localhost:8070/${certificate}`}
-                    sx={{ width: 80, height: 80 }}
-                  />
-                ))
+                caregiver?.certifications?.length > 0 ? (
+                  caregiver?.certifications?.map((certificate, index) => (
+                    <div key={index} className="w-1/3 h-56 ">
+                      <a
+                        href={`http://localhost:8070/${certificate}`}
+                        rel="noreferrer"
+                        target="_blank"
+                        className="relative hover:after:content-['View'] after:absolute after:top-0 after:left-0 after:w-full after:h-full after:bg-black after:bg-opacity-0 after:hover:bg-opacity-50 after:flex after:items-center after:justify-center after:text-white after:transition-opacity after:duration-300"
+                      >
+                        <img
+                          alt="certificate"
+                          src={`http://localhost:8070/${certificate}`}
+                          className="w-full h-full object-cover rounded-md"
+                          // sx={{ width: 80, height: 80 }}
+                        />
+                      </a>
+                    </div>
+                  ))
+                ) : (
+                  <div className="w-full">
+                    <center>
+                      <img
+                        src="./../../../img/no_certificates.png"
+                        className="w-24"
+                        alt=""
+                      />
+                      <Typography className="mt-4" variant="h6">
+                        No certificates
+                      </Typography>
+                    </center>
+                  </div>
+                )
               ) : (
                 <div className="flex flex-wrap gap-2">
                   <Skeleton

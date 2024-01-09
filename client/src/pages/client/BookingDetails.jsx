@@ -1,5 +1,8 @@
 import { Typography, Paper, Avatar, Card, CardContent } from "@mui/material";
 import { FaCalendarAlt, FaClock, FaUser } from "react-icons/fa";
+import { MdOutlinePendingActions } from "react-icons/md";
+import { FaRegClock } from "react-icons/fa";
+import { BsCalendarDate } from "react-icons/bs";
 
 const BookingDetails = ({ booking }) => {
   return (
@@ -43,10 +46,20 @@ const BookingDetails = ({ booking }) => {
             />
             <Typography>{booking.caregiverName}</Typography>
             <Typography>
-              {new Date(booking.date).toLocaleDateString()}
+              <span className="flex items-center gap-3">
+                <BsCalendarDate className="text-lg" />
+                {new Date(booking.date).toLocaleDateString()}
+              </span>
             </Typography>
-            <Typography>{booking.bookedFor}</Typography>
-            <Typography>{booking.status}</Typography>
+            <Typography>For {booking.bookedFor}</Typography>
+            <Typography className="flex items-center gap-3">
+              <span>
+                {booking.status === "Pending" && (
+                  <FaRegClock className="text-lg" />
+                )}
+              </span>
+              <span>{booking.status}</span>
+            </Typography>
           </div>
         </div>
       </Paper>

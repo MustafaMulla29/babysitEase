@@ -23,7 +23,7 @@ const CaregiverCard = ({ caregiver }) => {
   const navigate = useNavigate();
   return (
     <>
-      {/* <Card className="max-w-xs bg-white rounded-md overflow-hidden shadow-md transition">
+      <Card className="max-w-xs bg-white rounded-md overflow-hidden shadow-md transition">
         <Avatar
           alt={name}
           src={`http://localhost:8070/${profilePicture}`}
@@ -34,7 +34,7 @@ const CaregiverCard = ({ caregiver }) => {
           <Typography
             variant="h6"
             component="div"
-            className="font-semibold text-xl mb-2 cursor-pointer"
+            className="font-semibold text-xl mb-2 cursor-pointer hover:underline hover:underline-offset-4"
             onClick={() => navigate(`/caregiver/${caregiver?.userId}`)}
           >
             {name}
@@ -54,9 +54,9 @@ const CaregiverCard = ({ caregiver }) => {
             Age Range: {ageRange.lowerLimit} - {ageRange.upperLimit} years
           </Typography>
         </CardContent>
-      </Card> */}
+      </Card>
 
-      <Card className="space-y-3 py-2 px-4 w-full">
+      {/* <Card className="space-y-3 py-2 px-4 w-full">
         <div className="flex items-center gap-2">
           <Avatar
             alt={name}
@@ -101,7 +101,7 @@ const CaregiverCard = ({ caregiver }) => {
         <div>
           <Typography>{description?.substring(0, 150)}...</Typography>
         </div>
-      </Card>
+      </Card> */}
     </>
   );
 };

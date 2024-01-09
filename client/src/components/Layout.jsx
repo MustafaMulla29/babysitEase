@@ -20,6 +20,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import { AiFillBell, AiFillNotification } from "react-icons/ai";
+import { IoMdLogOut } from "react-icons/io";
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -121,11 +122,11 @@ const Layout = ({ children }) => {
     <>
       <section className="main ">
         <nav className="flex w-[80%] m-auto items-center justify-between">
-          <div className="py-2 px-[2px] cursor-pointer">
+          <div className="py-2 px-[2px] w-20 cursor-pointer">
             <a href="/">
               <img
                 src="./../../img/babysitEase_logo.png"
-                className="w-20 max-w-full h-auto"
+                className=" w-full h-full"
                 alt="logo"
               />
             </a>
@@ -154,6 +155,35 @@ const Layout = ({ children }) => {
                 </li>
               );
             })}
+            {user?.role === "nurse" && user?.isCaregiver === false ? (
+              <div className="cursor-pointer px-4 flex items-center gap-2 rounded-full transition-all py-2 mb-2">
+                <Link
+                  to="/apply-nurse"
+                  className={`text-base ${
+                    location.pathname === "/apply-nurse"
+                      ? "text-blue-500"
+                      : "text-gray-700"
+                  }`}
+                >
+                  Apply for nurse
+                </Link>
+              </div>
+            ) : user?.role === "babysitter" && user?.isCaregiver === false ? (
+              <div className="cursor-pointer px-4 flex items-center gap-2 rounded-full transition-all py-2 mb-2">
+                <Link
+                  to="/apply-babysitter"
+                  className={`text-base ${
+                    location.pathname === "/apply-babysitter"
+                      ? "text-blue-500"
+                      : "text-gray-700"
+                  }`}
+                >
+                  Apply for babysitter
+                </Link>
+              </div>
+            ) : (
+              ""
+            )}
             <Link
               to="/login"
               className={`menu-items relative px-4 flex items-center gap-2 rounded-full transition-all py-2 mb-2 hover:text-gray-700`}
@@ -228,7 +258,11 @@ const Layout = ({ children }) => {
                     ))
                   ) : (
                     <ListItem>
-                      <ListItemText primary="No notifications" />
+                      <ListItemText
+                        onClick={() => navigate("/notification")}
+                        className="cursor-pointer"
+                        primary="See all"
+                      />
                     </ListItem>
                   )}
 
@@ -250,6 +284,14 @@ const Layout = ({ children }) => {
                   sx={{ width: 50, height: 50 }}
                 />
               </Box>
+
+              <Tooltip title="Log out" arrow>
+                <IconButton onClick={handleClick}>
+                  <Link to="/login" onClick={handleLogout} className="p-2">
+                    <IoMdLogOut className="text-xl text-black" />
+                  </Link>
+                </IconButton>
+              </Tooltip>
             </div>
           </div>
         </nav>

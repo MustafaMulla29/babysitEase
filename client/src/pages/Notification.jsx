@@ -82,7 +82,7 @@ const Notification = () => {
   };
   return (
     <Layout>
-      <p className="p-3 text-center text-xl">Notifications</p>
+      {/* <p className="p-3 text-center text-xl">Notifications</p> */}
       <Box sx={{ width: "100%" }}>
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <Tabs
@@ -94,53 +94,83 @@ const Notification = () => {
             <Tab label="Read" />
           </Tabs>
         </Box>
-        {selectedTab === 0 && (
-          <div>
-            <p>Unread notifications</p>
-            {user?.notification.map((notif, index) => {
-              return (
-                <div
-                  className="p-3 hover:bg-slate-100 transition-all cursor-pointer"
-                  key={index}
-                >
-                  <p
-                    onClick={() => navigate(notif.onClickPath)}
-                    className="cursor-pointer"
-                  >
-                    {notif.message}
-                  </p>
-                </div>
-              );
-            })}
-            <Button variant="outlined" onClick={handleMarkRead}>
-              Mark as read
-            </Button>
-          </div>
-        )}
-        {selectedTab === 1 && (
-          <div>
-            <p>Read notifications</p>
-            {user?.seenNotification.map((notif, index) => {
-              return (
-                <div
-                  className="p-3 hover:bg-slate-100 transition-all cursor-pointer"
-                  key={index}
-                >
-                  <p
-                    onClick={() => navigate(notif.onClickPath)}
-                    className="cursor-pointer"
-                  >
-                    {notif.message}
-                  </p>
-                </div>
-              );
-            })}
-            <Button variant="outlined" onClick={handleDeleteRead}>
-              Delete read
-            </Button>
-          </div>
-        )}
-        {selectedTab === 2 && <div>Content for Tab 3</div>}
+
+        <div className="">
+          {selectedTab === 0 && (
+            <>
+              <div className="min-h-[480px]">
+                {user?.notification.length > 0 ? (
+                  user?.notification.map((notif, index) => {
+                    return (
+                      <div
+                        className="p-3 hover:bg-slate-100 transition-all cursor-pointer"
+                        key={index}
+                      >
+                        <p
+                          onClick={() => navigate(notif.onClickPath)}
+                          className="cursor-pointer"
+                        >
+                          {notif.message}
+                        </p>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="flex items-center justify-center mt-4">
+                    <img
+                      src="./../../img/no_notifications.png"
+                      className="w-1/2"
+                      alt=""
+                    />
+                  </div>
+                )}
+              </div>
+              {user?.notification.length > 0 && (
+                <Button variant="outlined" onClick={handleMarkRead}>
+                  Mark as read
+                </Button>
+              )}
+            </>
+          )}
+        </div>
+        <div>
+          {selectedTab === 1 && (
+            <>
+              <div className="min-h-[480px]">
+                {user?.seenNotification.length > 0 ? (
+                  user?.seenNotification.map((notif, index) => {
+                    return (
+                      <div
+                        className="p-3 hover:bg-slate-100 transition-all cursor-pointer"
+                        key={index}
+                      >
+                        <p
+                          onClick={() => navigate(notif.onClickPath)}
+                          className="cursor-pointer"
+                        >
+                          {notif.message}
+                        </p>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="flex items-center justify-center mt-4">
+                    <img
+                      src="./../../img/no_notifications.png"
+                      className="w-1/2"
+                      alt=""
+                    />
+                  </div>
+                )}
+              </div>
+              {user?.notification.length > 0 && (
+                <Button variant="outlined" onClick={handleDeleteRead}>
+                  Delete read
+                </Button>
+              )}
+            </>
+          )}
+        </div>
       </Box>
     </Layout>
   );

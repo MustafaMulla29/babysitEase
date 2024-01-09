@@ -15,7 +15,7 @@ const BookingDetails = ({ booking }) => {
             <Typography>
               {new Date(booking.date).toLocaleDateString()}
             </Typography>
-            <Typography>{booking.bookedFor}</Typography>
+            <Typography>For {booking.bookedFor}</Typography>
             <Typography>{booking.status}</Typography>
             <Button
               variant="contained"
