@@ -95,10 +95,10 @@ const userSchema = mongoose.Schema({
         type: [userDependentSchema],
         default: []
     },
-    isAdmin: {
-        type: Boolean,
-        default: false
-    },
+    // isAdmin: {
+    //     type: Boolean,
+    //     default: false
+    // },
     isCaregiver: {
         type: Boolean,
         default: false

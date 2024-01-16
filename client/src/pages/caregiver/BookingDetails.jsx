@@ -1,6 +1,41 @@
 import { Typography, Paper, Avatar, Button } from "@mui/material";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { hideLoading, showLoading } from "../../redux/features/alertSlice";
+import axios from "axios";
 
 const BookingDetails = ({ booking }) => {
+  const dispatch = useDispatch();
+
+  const handleBookingStatus = async (status, bookingId) => {
+    try {
+      dispatch(showLoading());
+      const res = await axios.patch(
+        "http://localhost:8070/api/v1/caregiver/changeBookingStatus",
+        {
+          status,
+          bookingId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      dispatch(hideLoading());
+      if (res.data.success) {
+        toast.success(res.data.message, {
+          position: toast.POSITION.TOP_CENTER,
+        });
+      }
+    } catch (error) {
+      dispatch(hideLoading());
+      console.log(error);
+      toast.error("Something went wrong", {
+        position: toast.POSITION.TOP_CENTER,
+      });
+    }
+  };
   return (
     <>
       <Paper elevation={3} className="p-6 mb-8 bg-white rounded-md shadow-md">
@@ -17,16 +52,26 @@ const BookingDetails = ({ booking }) => {
             </Typography>
             <Typography>For {booking.bookedFor}</Typography>
             <Typography>{booking.status}</Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              className="bg-[#1976d2] hover:bg-[#1565c0]"
-            >
-              Accept
-            </Button>
-            <Button variant="outlined" color="secondary">
-              Reject
-            </Button>
+
+            {booking.status === "Pending" && (
+              <>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  className="bg-[#1976d2] hover:bg-[#1565c0]"
+                  onClick={() => handleBookingStatus("Approved", booking._id)}
+                >
+                  Accept
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={() => handleBookingStatus("Rejected", booking._id)}
+                >
+                  Reject
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </Paper>

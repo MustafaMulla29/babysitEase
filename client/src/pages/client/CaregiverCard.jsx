@@ -10,7 +10,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { CiLocationOn } from "react-icons/ci";
 
-const CaregiverCard = ({ caregiver }) => {
+const CaregiverCard = React.memo(({ caregiver, index }) => {
   const {
     user: { name, address, city, profilePicture },
     rating,
@@ -21,26 +21,48 @@ const CaregiverCard = ({ caregiver }) => {
     description,
   } = caregiver;
   const navigate = useNavigate();
+
+  const bgColors = [
+    "linear-gradient(180deg, #72ffd5 30%, #72ffd5 33%, white 33%)",
+    "linear-gradient(180deg, #9fc1ff 30%, #9fc1ff 33%, white 33%)",
+    "linear-gradient(180deg, #adc0ea 30%, #adc0ea 33%, white 33%)",
+    "linear-gradient(180deg, #99d9ff 30%, #99d9ff 33%, white 33%)",
+    "linear-gradient(180deg, #a5cfe7 30%, #a5cfe7 33%, white 33%)",
+    "linear-gradient(180deg, #fec6e3 30%, #fec6e3 33%, white 33%)",
+    "linear-gradient(180deg, #fed7ae 30%, #fed7ae 33%, white 33%)",
+    "linear-gradient(180deg, #ff97a2 30%, #ff97a2 33%, white 33%)",
+  ];
+
+  // Get the background color based on the index
+  const bgColor = bgColors[index % bgColors.length];
+
   return (
     <>
-      <Card className="max-w-xs bg-white rounded-md overflow-hidden shadow-md transition">
+      <Card
+        className="w-56 max-w-xs pt-8  rounded-md overflow-hidden shadow-md transition"
+        sx={{
+          background: `${bgColor}`,
+          // background: "-webkit-linear-gradient(180deg,#c446ee 30%,white 33%)",
+        }}
+      >
         <Avatar
+          className="border-4 border-white"
           alt={name}
           src={`http://localhost:8070/${profilePicture}`}
-          sx={{ width: 100, height: 100, margin: "auto" }}
+          sx={{ width: 90, height: 90, margin: "auto" }}
         />
 
         <CardContent>
           <Typography
             variant="h6"
             component="div"
-            className="font-semibold text-xl mb-2 cursor-pointer hover:underline hover:underline-offset-4"
+            className="font-semibold text-center text-xl mb-3 cursor-pointer hover:underline hover:underline-offset-4"
             onClick={() => navigate(`/caregiver/${caregiver?.userId}`)}
           >
             {name}
           </Typography>
           <Typography variant="body2" color="text.secondary" className="mb-2">
-            {address}, {city}
+            {address.substring(0, 20) + "..."}, {city}
           </Typography>
           <Typography
             variant="body2"
@@ -104,6 +126,6 @@ const CaregiverCard = ({ caregiver }) => {
       </Card> */}
     </>
   );
-};
+});
 
 export default CaregiverCard;

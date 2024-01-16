@@ -9,6 +9,7 @@ const Mailgen = require('mailgen')
 const caregiverModel = require('../models/caregiverModel')
 const bookingModel = require('../models/bookingModel')
 const moment = require("moment")
+const reviewModel = require('../models/reviewModel')
 
 
 const registerController = async (req, res) => {
@@ -424,7 +425,8 @@ const bookCaregiverController = async (req, res) => {
         const formattedDate = moment(date).format("YYYY-MM-DD");
         const user = await userModel.findOne({ _id: clientId })
         const caregiver = await caregiverModel.findOne({ userId: caregiverId })
-        const bookedFor = caregiver?.role === "babysitter" ? "Child" : "Parent"
+        const userCaregiver = await userModel.findOne({ _id: caregiverId })
+        const bookedFor = userCaregiver?.role === "babysitter" ? "Child" : "Parent"
 
         if (!user?.role === "client") {
             return res.status(200).send({
@@ -485,7 +487,6 @@ const bookCaregiverController = async (req, res) => {
         const booking = await bookingModel({ clientId, caregiverId, date: formattedDate, bookedFor })
 
         await booking.save()
-        //FIXME: USER NOTIFICATIONS
         const userNotif = await userModel.findOne({ _id: caregiverId })
         userNotif.notification.push({
             type: "New-booking-request",
@@ -558,5 +559,68 @@ const getBookingsController = async (req, res) => {
     }
 };
 
+const addReviewController = async (req, res) => {
+    try {
+        const { clientId, caregiverId, date, rating, comment, feedback } = req.body;
 
-module.exports = { loginController, registerController, authController, applyCaregiverController, getNotificationsController, deleteNotificationsController, addDependentController, getAllCaregiversController, getCaregiverDetails, bookCaregiverController, getBookingsController }
+        // Check if the user exists and is a client
+        const user = await userModel.findOne({ _id: clientId });
+        const existingReview = await reviewModel.findOne({ clientId, caregiverId })
+        if (!user || user.role !== "client") {
+            return res.status(403).send({
+                success: false,
+                message: "You cannot provide a review. Invalid user or not a client.",
+            });
+        }
+
+        if (existingReview) {
+            return res.status(200).send({
+                success: false,
+                message: "You already provided a reivew",
+            });
+        }
+
+
+        const caregiver = await caregiverModel.findOne({ userId: caregiverId });
+        if (!caregiver) {
+            return res.status(404).send({
+                success: false,
+                message: "Caregiver not found.",
+            });
+        }
+
+        const formattedDate = moment(date).format("YYYY-MM-DD");
+        const booking = await bookingModel.findOne({
+            clientId,
+            caregiverId,
+            date: { $lt: formattedDate },
+            status: "Completed",
+        });
+
+        if (!booking) {
+            return res.status(403).send({
+                success: false,
+                message: "You cannot provide a review. No completed booking found for the specified date.",
+            });
+        }
+
+        const newReview = await reviewModel({ clientId, caregiverId, date, rating, comment, feedback })
+        await newReview.save()
+
+        res.status(200).send({
+            success: true,
+            message: "Review added successfully.",
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({
+            success: false,
+            message: "Error while adding review.",
+            error,
+        });
+    }
+};
+
+
+
+module.exports = { loginController, registerController, authController, applyCaregiverController, getNotificationsController, deleteNotificationsController, addDependentController, getAllCaregiversController, getCaregiverDetails, bookCaregiverController, getBookingsController, addReviewController }

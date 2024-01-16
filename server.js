@@ -23,7 +23,6 @@ app.use(cors({
 app.use(morgan("dev"));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-
 // Handle file upload
 // app.use('/api/v1/upload', upload.single('image'), require("./routes/uploadRoutes"))
 // routes

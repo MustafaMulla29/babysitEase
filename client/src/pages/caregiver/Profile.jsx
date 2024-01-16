@@ -18,9 +18,12 @@ import { AiFillEdit, AiOutlineCloudUpload } from "react-icons/ai";
 import UpdateProfileModal from "./UpdateProfileModal";
 import { useSelector } from "react-redux";
 import { FaPen } from "react-icons/fa";
+import ReviewCard from "./ReviewCard";
+import { FaRegImage } from "react-icons/fa6";
 
 const Profile = () => {
   const [caregiver, setCaregiver] = useState(null);
+  const [caregiverReviews, setCaregiverReviews] = useState([]);
   const params = useParams();
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const { user } = useSelector((state) => state.user);
@@ -53,6 +56,27 @@ const Profile = () => {
       }
     };
     getNurseInfo();
+  }, [user?._id]);
+
+  useEffect(() => {
+    const getReviews = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:8070/api/v1/caregiver/getReviews/${user?._id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        if (res.data.success) {
+          setCaregiverReviews(res.data.data);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getReviews();
   }, [user?._id]);
   return (
     <>
@@ -359,7 +383,7 @@ const Profile = () => {
                         href={`http://localhost:8070/${certificate}`}
                         rel="noreferrer"
                         target="_blank"
-                        className="relative hover:after:content-['View'] after:absolute after:top-0 after:left-0 after:w-full after:h-full after:bg-black after:bg-opacity-0 after:hover:bg-opacity-50 after:flex after:items-center after:justify-center after:text-white after:transition-opacity after:duration-300"
+                        className="relative group hover:after:content-[''] after:absolute after:top-0 after:left-0 after:w-0 after:h-full after:rounded-md after:bg-black after:bg-opacity-70 after:hover:w-full after:flex after:items-center after:justify-center after:text-white after:transition-width after:duration-300 transition-all"
                       >
                         <img
                           alt="certificate"
@@ -367,6 +391,9 @@ const Profile = () => {
                           className="w-full h-full object-cover rounded-md"
                           // sx={{ width: 80, height: 80 }}
                         />
+                        <div className="absolute z-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-white">
+                          <FaRegImage size={32} />
+                        </div>
                       </a>
                     </div>
                   ))
@@ -405,20 +432,20 @@ const Profile = () => {
           <hr className="mb-8" />
 
           {/* Reviews Section */}
-          {caregiver?.review?.length > 0 && (
+          {caregiverReviews?.length > 0 && (
             <div>
               <Typography variant="h6">
-                {caregiver?.review ? (
+                {caregiverReviews ? (
                   "Reviews"
                 ) : (
                   <Skeleton animation="wave" width={100} />
                 )}
               </Typography>
               <div className="mt-4 space-y-2">
-                {caregiver?.review?.map((review, index) => {
+                {caregiverReviews?.map((review, index) => {
                   return (
                     <div key={index}>
-                      <Typography>{review}</Typography>
+                      <ReviewCard caregiverReviews={review} />
                     </div>
                   );
                 })}

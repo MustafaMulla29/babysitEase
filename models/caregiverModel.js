@@ -19,10 +19,10 @@ const caregiverSchema = new mongoose.Schema({
         required: [true, "Description is required"],
         trim: true
     },
-    review: {
-        type: [Object],
-        default: [],
-    },
+    // review: {
+    //     type: [Object],
+    //     default: [],
+    // },
     rating: {
         type: Number,
         default: 0,

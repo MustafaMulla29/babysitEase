@@ -143,11 +143,22 @@ const changeAccountStatusController = async (req, res) => {
         const caregiver = await caregiverModel.findByIdAndUpdate(caregiverId, { status })
         const user = await userModel.findOne({ _id: caregiver.userId })
         const notification = user.notification
-        notification.push({
-            type: "nurse-account-reques-updated",
-            message: `Your caregiver account request has been ${status}`,
-            onClickPath: "/notification"
-        })
+        if (status === "Approved") {
+            notification.push({
+                type: `${user?.role}-account-request-approved`,
+                message: `Your caregiver account request has been ${status}`,
+                onClickPath: "/notification"
+            })
+        }
+
+        if (status === "Rejected") {
+            notification.push({
+                type: `${user?.role}-account-request-rejected`,
+                message: `Your caregiver account request has been ${status}`,
+                onClickPath: "/notification"
+            })
+        }
+
         user.isCaregiver = status === "Approved" ? true : false
         await user.save()
         res.status(200).send({

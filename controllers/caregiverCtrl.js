@@ -4,6 +4,7 @@ const userModel = require("../models/userModels");
 const path = require('path');
 const fs = require("fs").promises
 const moment = require("moment");
+const reviewModel = require("../models/reviewModel");
 
 const getCaregiverInfoController = async (req, res) => {
     try {
@@ -291,4 +292,76 @@ const bookingStatusController = async (req, res) => {
     }
 };
 
-module.exports = { getCaregiverInfoController, updateCaregiverController, getBookingsController, bookingStatusController }
+const approveBookingController = async (req, res) => {
+    try {
+        const { status, bookingId } = req.body
+        const booking = await bookingModel.findOne({ _id: bookingId })
+        const user = await userModel.findOne({ _id: booking?.clientId })
+        const caregiver = await userModel.findOne({ _id: booking?.caregiverId })
+
+        if (!booking) {
+            return res.status(403).send({
+                success: false,
+                message: "No booking found"
+            })
+        }
+        await bookingModel.findOneAndUpdate({ _id: bookingId }, { status: status }, {
+            new: true, runValidators: true
+        })
+
+        const notification = user?.notification || null;
+        notification.push({
+            type: `booking-${status}`,
+            message: `You booking has been ${status} by ${caregiver?.name}`
+
+        })
+
+        await user.save()
+
+        res.status(200).send({
+            success: true,
+            message: "Successfully changed booking status"
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error while changing booking status.",
+            error,
+        });
+    }
+}
+
+const getReviewsController = async (req, res) => {
+    try {
+        const reviews = await reviewModel.find({ caregiverId: req.params.caregiverId })
+
+        const clientIds = reviews.map((review => review.clientId))
+
+        const clients = await userModel.find({ _id: { $in: clientIds } })
+
+        const reviewsWithClientDetails = reviews.map((review) => {
+            const client = clients.find((client) => client._id.equals(review.clientId))
+            return {
+                ...review._doc,
+                clientName: client?.name || null,
+                clientProfilePicture: client?.profilePicture || null
+            }
+        })
+
+        res.status(200).send({
+            success: true,
+            message: "Reviews fetched successfully",
+            data: reviewsWithClientDetails
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error while fetching reviews",
+            error,
+        });
+    }
+}
+
+module.exports = { getCaregiverInfoController, updateCaregiverController, getBookingsController, bookingStatusController, getReviewsController, approveBookingController }

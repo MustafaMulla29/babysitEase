@@ -19,11 +19,18 @@ import { toast } from "react-toastify";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { showLoading, hideLoading } from "./../../redux/features/alertSlice";
 import moment from "moment";
+import { FaPen } from "react-icons/fa";
+import ReviewDialog from "./ReviewDialog";
+import ReviewCard from "../caregiver/ReviewCard";
+import { FaRegImage } from "react-icons/fa6";
 
 const CaregiverDetails = () => {
   const [caregiver, setCaregiver] = useState(null);
   const [bookingDate, setBookingDate] = useState(null);
   const [bookingError, setBookingError] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [caregiverReviews, setCaregiverReviews] = useState(null);
+
   const params = useParams();
   const { user } = useSelector((state) => state.user);
   const dispatch = useDispatch();
@@ -49,24 +56,13 @@ const CaregiverDetails = () => {
     getUserInfo();
   }, [params.userId]);
 
-  //TODO: NEED TO FORMAT THE DATE USING MOMENT JS
-  // const handleDateChange = (date) => {
-  //   console.log(date);
-  //   const currentDate = moment();
+  const handleOpenDialog = () => {
+    setDialogOpen(true);
+  };
 
-  //   if (date < currentDate) {
-  //     setBookingError("Please select a valid date");
-  //     return;
-  //   }
-
-  //   if (date.date() === currentDate.date() && currentDate.hours() >= 9) {
-  //     setBookingError("You cannot book today! Select another date");
-  //     return;
-  //   }
-
-  //   setBookingDate(date);
-  //   setBookingError("");
-  // };
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+  };
 
   const handleDateChange = (date) => {
     // console.log(date);
@@ -129,6 +125,27 @@ const CaregiverDetails = () => {
       });
     }
   };
+
+  useEffect(() => {
+    const getReviews = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:8070/api/v1/caregiver/getReviews/${params.userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        if (res.data.success) {
+          setCaregiverReviews(res.data.data);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getReviews();
+  }, [params.userId]);
   return (
     <Layout>
       <div className="container mx-auto p-4">
@@ -440,12 +457,24 @@ const CaregiverDetails = () => {
                 <div className="flex flex-wrap gap-4">
                   {caregiver ? (
                     caregiver.certifications?.map((certificate, index) => (
-                      <Avatar
-                        key={index}
-                        alt="certificate"
-                        src={`http://localhost:8070/${certificate}`}
-                        sx={{ width: 80, height: 80 }}
-                      />
+                      <div key={index} className="w-1/3 h-56 ">
+                        <a
+                          href={`http://localhost:8070/${certificate}`}
+                          rel="noreferrer"
+                          target="_blank"
+                          className="relative group hover:after:content-[''] after:absolute after:top-0 after:left-0 after:w-0 after:h-full after:rounded-md after:bg-black after:bg-opacity-70 after:hover:w-full after:flex after:items-center after:justify-center after:text-white after:transition-width after:duration-300 transition-all"
+                        >
+                          <img
+                            alt="certificate"
+                            src={`http://localhost:8070/${certificate}`}
+                            className="w-full h-full object-cover rounded-md"
+                            // sx={{ width: 80, height: 80 }}
+                          />
+                          <div className="absolute z-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-white">
+                            <FaRegImage size={32} />
+                          </div>
+                        </a>
+                      </div>
                     ))
                   ) : (
                     <div className="flex flex-wrap gap-2">
@@ -469,29 +498,8 @@ const CaregiverDetails = () => {
             </div>
           )}
 
-          {/* Reviews Section */}
-          {caregiver?.review?.length > 0 && (
-            <div>
-              <Typography variant="h6">
-                {caregiver?.review ? (
-                  "Reviews"
-                ) : (
-                  <Skeleton animation="wave" width={100} />
-                )}
-              </Typography>
-              <div className="mt-4 space-y-2">
-                {caregiver?.review?.map((review, index) => {
-                  return (
-                    <div key={index}>
-                      <Typography>{review}</Typography>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
           {user?.role === "client" && (
-            <div id="booking">
+            <div id="booking" className="">
               <Typography variant="h6">
                 {caregiver ? (
                   "Booking"
@@ -552,10 +560,44 @@ const CaregiverDetails = () => {
                   Book Now
                 </Button>
               </div>
+              <hr className="mb-8" />
+            </div>
+          )}
+          <div className="flex items-center justify-between border-b-2 py-2">
+            <Typography variant="h6">
+              {caregiverReviews ? (
+                "Reviews"
+              ) : (
+                <Skeleton animation="wave" width={100} />
+              )}
+            </Typography>
+            {user?.role === "client" && (
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={handleOpenDialog}
+              >
+                <FaPen className="mr-2" /> Post a review
+              </Button>
+            )}
+          </div>
+          {/* Reviews Section */}
+          {caregiverReviews?.length > 0 && (
+            <div>
+              <div className="mt-4 space-y-2">
+                {caregiverReviews?.map((review, index) => {
+                  return (
+                    <div key={index}>
+                      <ReviewCard caregiverReviews={review} />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
       </div>
+      <ReviewDialog open={dialogOpen} onClose={handleCloseDialog} />
     </Layout>
   );
 };

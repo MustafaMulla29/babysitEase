@@ -6,6 +6,8 @@ import { toast } from "react-toastify";
 import { hideLoading, showLoading } from "../redux/features/alertSlice";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { GiPartyPopper } from "react-icons/gi";
+import { FcApproval } from "react-icons/fc";
 
 const Notification = () => {
   //   const handleChange = () => {};
@@ -103,12 +105,24 @@ const Notification = () => {
                   user?.notification.map((notif, index) => {
                     return (
                       <div
-                        className="p-3 hover:bg-slate-100 transition-all cursor-pointer"
+                        className="p-3 my-2 flex items-center gap-2 hover:bg-slate-100 transition-all cursor-pointer"
                         key={index}
                       >
+                        <span>
+                          {notif.type ===
+                            `${user?.role}-account-request-approved` && (
+                            <GiPartyPopper className="text-2xl" />
+                          )}
+                          {notif.type === "booking-Approved" && (
+                            <FcApproval className="text-2xl" />
+                          )}
+                          {notif.type === "booking-Rejected" && (
+                            <GiPartyPopper className="text-2xl" />
+                          )}
+                        </span>
                         <p
                           onClick={() => navigate(notif.onClickPath)}
-                          className="cursor-pointer"
+                          className="cursor-pointer text-lg"
                         >
                           {notif.message}
                         </p>
