@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { Typography } from "@mui/material";
+import BookingDetailsSkeleton from "../client/BookingDetailsSkeleton";
 
 const Bookings = () => {
   const [bookings, setBookings] = useState(null);
@@ -39,7 +40,7 @@ const Bookings = () => {
   useEffect(() => {
     const bookingStatus = async () => {
       try {
-        const res = await axios.post(
+        await axios.post(
           "http://localhost:8070/api/v1/caregiver/bookingStatus",
           {
             headers: {
@@ -64,8 +65,23 @@ const Bookings = () => {
         bookings.map((booking) => (
           <CaregiverBookingDetails key={booking._id} booking={booking} />
         ))
+      ) : !bookings ? (
+        <div>
+          <BookingDetailsSkeleton />
+          <BookingDetailsSkeleton />
+          <BookingDetailsSkeleton />
+        </div>
       ) : (
-        <Typography>You don't have any bookings as of now</Typography>
+        <figure className="w-1/3 m-auto">
+          <img
+            src="./../../../img/no_bookings.jpg"
+            className="w-full h-full"
+            alt="no bookings"
+          />
+          <Typography className="my-2 text-[19px] text-center">
+            You don&apos;t have any bookings as of now
+          </Typography>
+        </figure>
       )}
     </Layout>
   );

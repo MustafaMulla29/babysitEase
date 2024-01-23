@@ -109,7 +109,7 @@ const loginController = async (req, res) => {
             })
         }
         const isPasswordMatch = await bcrypt.compare(req.body.password, user.password)
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' })
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '90d' })
         if (!isPasswordMatch) {
             return res.status(200).send({
                 message: 'Invalid email or password',

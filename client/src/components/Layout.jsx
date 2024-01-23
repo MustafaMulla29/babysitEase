@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { adminMenu, babysitterMenu, nurseMenu, userMenu } from "../data/Menu";
+import { useState } from "react";
+import { adminMenu } from "../data/Menu";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -7,19 +7,14 @@ import {
   Avatar,
   Badge,
   Box,
-  Chip,
-  Collapse,
   IconButton,
   List,
   ListItem,
-  ListItemButton,
-  ListItemIcon,
   ListItemText,
-  ListSubheader,
   Popover,
   Tooltip,
 } from "@mui/material";
-import { AiFillBell, AiFillNotification } from "react-icons/ai";
+import { AiFillBell } from "react-icons/ai";
 import { IoMdLogOut } from "react-icons/io";
 import { GiPartyPopper } from "react-icons/gi";
 import { FaList } from "react-icons/fa";
@@ -31,8 +26,6 @@ const Layout = ({ children }) => {
   const navigate = useNavigate();
 
   //redering menu list
-
-  const role = user?.isAdmin ? "Admin" : user?.role;
 
   //logout function
   const handleLogout = () => {
@@ -152,9 +145,6 @@ const Layout = ({ children }) => {
                   >
                     {menu.name}
                   </Link>
-                  {/* {isActive && (
-                    <div className="absolute left-0 w-2 h-8 bg-blue-500 rounded-r-full"></div>
-                  )} */}
                 </li>
               );
             })}
@@ -187,21 +177,9 @@ const Layout = ({ children }) => {
             ) : (
               ""
             )}
-            <Link
-              to="/login"
-              className={`menu-items relative px-4 flex items-center gap-2 rounded-full transition-all py-2 mb-2 hover:text-gray-700`}
-              onClick={handleLogout}
-            >
-              Logout
-            </Link>
           </ul>
           <div className="">
             <div className="header flex items-center justify-center gap-7">
-              <Chip className="uppercase" label={user?.role} />
-              {/* <Link to="/profile" className="text-lg uppercase">
-                {user?.name}
-              </Link> */}
-              {/* <i className="fa-solid fa-bell text-xl"></i> */}
               <Tooltip title="Notification" arrow>
                 <IconButton
                   onClick={
@@ -215,11 +193,7 @@ const Layout = ({ children }) => {
                     className=""
                     color="primary"
                   >
-                    <AiFillBell
-                    // onClick={() => {
-                    //   navigate("/notification");
-                    // }}
-                    />
+                    <AiFillBell />
                   </Badge>
                 </IconButton>
               </Tooltip>
@@ -299,7 +273,13 @@ const Layout = ({ children }) => {
           </div>
         </nav>
         <div className="body flex items-center justify-center mx-auto w-[80%] mt-[55px]">
-          <div className="children w-[85%] py-4">{children}</div>
+          <div
+            className={`children ${
+              user?.role === "admin" ? "w-full" : "w-[85%]"
+            } py-4`}
+          >
+            {children}
+          </div>
         </div>
       </section>
     </>

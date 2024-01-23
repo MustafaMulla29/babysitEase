@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { hideLoading, showLoading } from "../../redux/features/alertSlice";
 import axios from "axios";
+import { PropTypes } from "prop-types";
 
 const BookingDetails = ({ booking }) => {
   const dispatch = useDispatch();
@@ -77,6 +78,17 @@ const BookingDetails = ({ booking }) => {
       </Paper>
     </>
   );
+};
+
+BookingDetails.propTypes = {
+  booking: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    clientProfilePicture: PropTypes.string.isRequired,
+    clientName: PropTypes.string.isRequired,
+    date: PropTypes.string.isRequired,
+    bookedFor: PropTypes.string.isRequired,
+    status: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 export default BookingDetails;

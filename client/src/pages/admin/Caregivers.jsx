@@ -16,6 +16,7 @@ import {
   Pagination,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import AdminProfile from "./AdminProfile";
 
 const Caregivers = () => {
   const [caregivers, setCaregivers] = useState([]);
@@ -79,200 +80,237 @@ const Caregivers = () => {
   }, [page]);
   return (
     <Layout>
-      <div>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>
-                  {caregivers && caregivers.length > 0 ? (
-                    "Name"
-                  ) : (
-                    <Skeleton animation="wave" width={100} />
-                  )}
-                </TableCell>
-                <TableCell>
-                  {caregivers && caregivers.length > 0 ? (
-                    "Email"
-                  ) : (
-                    <Skeleton animation="wave" width={100} />
-                  )}
-                </TableCell>
-                <TableCell>
-                  {caregivers && caregivers.length > 0 ? (
-                    "Created at"
-                  ) : (
-                    <Skeleton animation="wave" width={100} />
-                  )}
-                </TableCell>
-                <TableCell>
-                  {caregivers && caregivers.length > 0 ? (
-                    "Actions"
-                  ) : (
-                    <Skeleton animation="wave" width={100} />
-                  )}
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            {caregivers && caregivers.length > 0 ? (
-              <TableBody>
-                {caregivers.map((user) => (
-                  <TableRow
-                    key={user._id}
-                    className="cursor-pointer hover:bg-slate-100 transition-colors"
-                    onClick={() => navigate(`/caregiver/${user?.userId}`)}
-                  >
-                    <TableCell>{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.createdAt}</TableCell>
-                    <TableCell className="flex items-center justify-start">
-                      {user.status && user.status === "Pending" ? (
-                        <div>
-                          <Button
-                            variant="contained"
-                            className="bg-[#1976d2] hover:bg-[#1565c0] ml-3"
-                            onClick={() =>
-                              handleAccountStatus(user, "Approved")
-                            }
-                          >
-                            Approve
-                          </Button>
-                          <Button
-                            variant="contained"
-                            className="bg-[#f34c39] hover:bg-[#dd5f5f] ml-3"
-                          >
-                            Reject
-                          </Button>
-                        </div>
-                      ) : (
-                        //TODO: HAVE TO CREATE REJECT BUTTON AND SHOW
-                        user.status &&
-                        user.status === "Approved" && (
-                          <Button
-                            variant="contained"
-                            className="bg-[#f34c39] hover:bg-[#dd5f5f] ml-3"
-                          >
-                            Block
-                          </Button>
-                        )
-                      )}
+      <div className="flex items-start gap-4 justify-between">
+        <AdminProfile />
+        <div className="w-full">
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>
+                    {caregivers && caregivers.length > 0 ? (
+                      "Name"
+                    ) : (
+                      <Skeleton animation="wave" width={100} />
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {caregivers && caregivers.length > 0 ? (
+                      "Email"
+                    ) : (
+                      <Skeleton animation="wave" width={100} />
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {caregivers && caregivers.length > 0 ? (
+                      "Created at"
+                    ) : (
+                      <Skeleton animation="wave" width={100} />
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {caregivers && caregivers.length > 0 ? (
+                      "Status"
+                    ) : (
+                      <Skeleton animation="wave" width={100} />
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {caregivers && caregivers.length > 0 ? (
+                      "Actions"
+                    ) : (
+                      <Skeleton animation="wave" width={100} />
+                    )}
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              {caregivers && caregivers.length > 0 ? (
+                <TableBody>
+                  {caregivers.map((user) => (
+                    <TableRow key={user._id}>
+                      <TableCell
+                        className="cursor-pointer hover:underline hover:underline-offset-4 transition-colors"
+                        onClick={() => navigate(`/caregiver/${user?.userId}`)}
+                      >
+                        {user.name}
+                      </TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        {new Date(user.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        {!user.status ? "Not Applied" : user.status}
+                      </TableCell>
+                      <TableCell className="flex items-center justify-start">
+                        {user.status && user.status === "Pending" ? (
+                          <div>
+                            <Button
+                              variant="contained"
+                              className="bg-[#1976d2] hover:bg-[#1565c0] ml-3"
+                              onClick={() =>
+                                handleAccountStatus(user, "Approved")
+                              }
+                            >
+                              Approve
+                            </Button>
+                            <Button
+                              variant="contained"
+                              className="bg-[#f34c39] hover:bg-[#dd5f5f] ml-3"
+                            >
+                              Reject
+                            </Button>
+                          </div>
+                        ) : (
+                          //TODO: HAVE TO CREATE REJECT BUTTON AND SHOW
+                          user.status &&
+                          user.status === "Approved" && (
+                            <Button
+                              variant="contained"
+                              className="bg-[#f34c39] hover:bg-[#dd5f5f] ml-3"
+                            >
+                              Block
+                            </Button>
+                          )
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              ) : (
+                <TableBody>
+                  <TableRow>
+                    <TableCell>
+                      <Skeleton animation="wave" width={200} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={200} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            ) : (
-              <TableBody>
-                <TableRow>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton animation="wave" width={200} />
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            )}
-          </Table>
-        </TableContainer>
-        <Stack spacing={2}>
-          <Pagination
-            count={totalPages}
-            page={page}
-            onChange={handleChangePage}
-            variant="outlined"
-            color="primary"
-          />
-        </Stack>
+                  <TableRow>
+                    <TableCell>
+                      <Skeleton animation="wave" width={200} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={200} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>
+                      <Skeleton animation="wave" width={200} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={200} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>
+                      <Skeleton animation="wave" width={200} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={200} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>
+                      <Skeleton animation="wave" width={200} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={200} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>
+                      <Skeleton animation="wave" width={200} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={200} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>
+                      <Skeleton animation="wave" width={200} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={200} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton animation="wave" width={100} />
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              )}
+            </Table>
+          </TableContainer>
+          <Stack spacing={2}>
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={handleChangePage}
+              variant="outlined"
+              color="primary"
+            />
+          </Stack>
+        </div>
       </div>
     </Layout>
   );

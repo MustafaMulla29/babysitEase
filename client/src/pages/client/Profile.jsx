@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
-import { AiFillEdit } from "react-icons/ai";
 import { Avatar, Skeleton, Typography } from "@mui/material";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import DependentInputModal from "./DependentInputModal";
 import DependentCard from "./DependentCard";
-import { FaPen, FaS } from "react-icons/fa6";
+import { FaPen } from "react-icons/fa6";
 
 const Profile = () => {
   const [client, setClient] = useState(null);
@@ -17,10 +16,6 @@ const Profile = () => {
 
   const handleEditClick = () => {
     setEditModalOpen(true);
-  };
-
-  const handleEditModalClose = () => {
-    setEditModalOpen(false);
   };
 
   const handleOpenModal = () => {

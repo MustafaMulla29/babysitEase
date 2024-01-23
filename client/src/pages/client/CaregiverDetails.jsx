@@ -258,21 +258,21 @@ const CaregiverDetails = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <Typography>
                 {caregiver ? (
-                  `Lower limit of client: ${caregiver?.ageRange?.lowerLimit}`
+                  `Lower age limit of client: ${caregiver?.ageRange?.lowerLimit}`
                 ) : (
                   <Skeleton animation="wave" width={150} />
                 )}
               </Typography>
               <Typography>
                 {caregiver ? (
-                  `Upper limit of client: ${caregiver?.ageRange?.upperLimit}`
+                  `Upper age limit of client: ${caregiver?.ageRange?.upperLimit}`
                 ) : (
                   <Skeleton animation="wave" width={150} />
                 )}
               </Typography>
               <Typography>
                 {caregiver ? (
-                  `Fees per day: ${caregiver?.feesPerDay}`
+                  `Fees per day: ${caregiver?.feesPerDay}/rs`
                 ) : (
                   <Skeleton animation="wave" width={100} />
                 )}

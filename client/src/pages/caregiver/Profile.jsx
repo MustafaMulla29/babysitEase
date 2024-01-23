@@ -1,20 +1,6 @@
 import { useEffect, useState } from "react";
-import Layout from "../../components/Layout";
 import axios from "axios";
-import { useParams } from "react-router-dom";
-import {
-  Avatar,
-  Box,
-  Button,
-  Chip,
-  Modal,
-  Paper,
-  Rating,
-  Skeleton,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { AiFillEdit, AiOutlineCloudUpload } from "react-icons/ai";
+import { Avatar, Chip, Rating, Skeleton, Typography } from "@mui/material";
 import UpdateProfileModal from "./UpdateProfileModal";
 import { useSelector } from "react-redux";
 import { FaPen } from "react-icons/fa";
@@ -24,7 +10,6 @@ import { FaRegImage } from "react-icons/fa6";
 const Profile = () => {
   const [caregiver, setCaregiver] = useState(null);
   const [caregiverReviews, setCaregiverReviews] = useState([]);
-  const params = useParams();
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const { user } = useSelector((state) => state.user);
 
@@ -134,9 +119,9 @@ const Profile = () => {
               ) : (
                 <Skeleton
                   animation="wave"
-                  width={70}
-                  height={50}
-                  className="rounded-3xl"
+                  width={90}
+                  height={70}
+                  className="rounded-full"
                 />
               )}
               <Typography>
@@ -180,21 +165,21 @@ const Profile = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <Typography>
                 {caregiver ? (
-                  `Lower limit of client: ${caregiver?.ageRange?.lowerLimit}`
+                  `Lower age limit of client: ${caregiver?.ageRange?.lowerLimit}`
                 ) : (
                   <Skeleton animation="wave" width={150} />
                 )}
               </Typography>
               <Typography>
                 {caregiver ? (
-                  `Upper limit of client: ${caregiver?.ageRange?.upperLimit}`
+                  `Upper age limit of client: ${caregiver?.ageRange?.upperLimit}`
                 ) : (
                   <Skeleton animation="wave" width={150} />
                 )}
               </Typography>
               <Typography>
                 {caregiver ? (
-                  `Fees per day: ${caregiver?.feesPerDay}`
+                  `Fees per day: ${caregiver?.feesPerDay}/rs`
                 ) : (
                   <Skeleton animation="wave" width={100} />
                 )}

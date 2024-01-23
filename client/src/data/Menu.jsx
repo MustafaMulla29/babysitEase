@@ -18,11 +18,11 @@ export const userMenu = [
 
 //admin menu
 export const adminMenu = [
-  {
-    name: "Home",
-    path: "/",
-    icon: "fa-solid fa-house",
-  },
+  // {
+  //   name: "Home",
+  //   path: "/",
+  //   icon: "fa-solid fa-house",
+  // },
   {
     name: "Caregivers",
     path: "/admin/caregivers",
@@ -33,11 +33,11 @@ export const adminMenu = [
     path: "/admin/users",
     icon: "fa-solid fa-user",
   },
-  {
-    name: "Profile",
-    path: "/profile",
-    icon: "fa-solid fa-user",
-  },
+  // {
+  //   name: "Profile",
+  //   path: "/profile",
+  //   icon: "fa-solid fa-user",
+  // },
 ];
 
 //caregiver menu

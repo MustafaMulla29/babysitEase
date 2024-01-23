@@ -135,6 +135,25 @@ const getAllCaregiversController = async (req, res) => {
     }
 };
 
+const getAdminDetailsController = async (req, res) => {
+    try {
+        const admin = await userModel.findOne({ role: "admin" })
+
+        res.status(200).send({
+            success: true,
+            message: "Admin details fetched successfully",
+            data: admin
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({
+            success: false,
+            message: "Error while fetching admin details",
+            error
+        })
+    }
+}
+
 
 //CAREGIVER ACCOUNT STATUS
 const changeAccountStatusController = async (req, res) => {
@@ -176,4 +195,4 @@ const changeAccountStatusController = async (req, res) => {
     }
 }
 
-module.exports = { getAllUsersController, getAllCaregiversController, changeAccountStatusController }
+module.exports = { getAllUsersController, getAllCaregiversController, changeAccountStatusController, getAdminDetailsController }

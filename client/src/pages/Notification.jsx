@@ -177,7 +177,7 @@ const Notification = () => {
                   </div>
                 )}
               </div>
-              {user?.notification.length > 0 && (
+              {user?.seenNotification.length > 0 && (
                 <Button variant="outlined" onClick={handleDeleteRead}>
                   Delete read
                 </Button>

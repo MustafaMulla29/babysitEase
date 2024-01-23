@@ -1,8 +1,7 @@
-import { Typography, Paper, Avatar, Card, CardContent } from "@mui/material";
-import { FaCalendarAlt, FaClock, FaUser } from "react-icons/fa";
-import { MdOutlinePendingActions } from "react-icons/md";
+import { Typography, Paper, Avatar } from "@mui/material";
 import { FaRegClock } from "react-icons/fa";
 import { BsCalendarDate } from "react-icons/bs";
+import PropTypes from "prop-types";
 
 const BookingDetails = ({ booking }) => {
   return (
@@ -44,6 +43,7 @@ const BookingDetails = ({ booking }) => {
               src={`http://localhost:8070/${booking?.caregiverProfilePicture}`}
               sx={{ width: 80, height: 80 }}
             />
+
             <Typography>{booking.caregiverName}</Typography>
             <Typography>
               <span className="flex items-center gap-3">
@@ -63,6 +63,7 @@ const BookingDetails = ({ booking }) => {
           </div>
         </div>
       </Paper>
+
       {/* <Card className="max-w-md mx-auto mt-8 bg-white rounded-md shadow-md overflow-hidden">
         <div className="h-60 overflow-hidden">
           <img
@@ -88,6 +89,17 @@ const BookingDetails = ({ booking }) => {
       </Card> */}
     </>
   );
+};
+
+BookingDetails.propTypes = {
+  booking: PropTypes.shape({
+    caregiverProfilePicture: PropTypes.string,
+    caregiverName: PropTypes.string,
+    date: PropTypes.string,
+    bookedFor: PropTypes.string,
+    status: PropTypes.string,
+    createdAt: PropTypes.string,
+  }).isRequired,
 };
 
 export default BookingDetails;
