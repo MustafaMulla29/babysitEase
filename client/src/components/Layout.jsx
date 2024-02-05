@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { adminMenu } from "../data/Menu";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -19,8 +19,11 @@ import { IoMdLogOut } from "react-icons/io";
 import { GiPartyPopper } from "react-icons/gi";
 import { FaList } from "react-icons/fa";
 import { FcApproval, FcCancel } from "react-icons/fc";
+import { PropTypes } from "prop-types";
+import Zoom from "@mui/material/Zoom";
 
 const Layout = ({ children }) => {
+  const [navBg, setNavBg] = useState(false);
   const location = useLocation();
   const { user } = useSelector((state) => state.user);
   const navigate = useNavigate();
@@ -71,6 +74,7 @@ const Layout = ({ children }) => {
   // *********NURSE MENU******
 
   //*************BABYSITTER MENU */
+
   const babysitterMenu = [
     {
       name: "Home",
@@ -114,168 +118,204 @@ const Layout = ({ children }) => {
     ? adminMenu
     : (user?.role == "babysitter" && babysitterMenu) ||
       (user?.role == "nurse" ? newNurseMenu : userMenu);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        document.body.scrollTop > 30 ||
+        document.documentElement.scrollTop > 30
+      ) {
+        setNavBg(true);
+      } else {
+        setNavBg(false);
+      }
+    };
+
+    // Call handleScroll initially to set the initial state
+    handleScroll();
+
+    // Attach the event listener to the scroll event
+    window.addEventListener("scroll", handleScroll);
+
+    // Remove the event listener when the component is unmounted
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [setNavBg]);
+
   return (
     <>
       <section className="main ">
-        <nav className="flex w-[80%] m-auto items-center justify-between">
-          <div className="py-2 px-[2px] w-20 cursor-pointer">
-            <a href="/">
-              <img
-                src="./../../img/babysitEase_logo.png"
-                className=" w-full h-full"
-                alt="logo"
-              />
-            </a>
-          </div>
-          <ul className="flex flex-row gap-3 items-start p-4">
-            {sidebarMenu.map((menu, index) => {
-              const isActive = location.pathname === menu.path;
-              return (
-                <li
-                  className={`menu-items relative ${
-                    isActive ? "bg-gray-200" : "hover:bg-gray-100"
-                  } px-4 flex items-center gap-2 rounded-full transition-all py-2 mb-2`}
-                  key={index}
-                >
+        <header
+          className={` sticky top-0 left-0 z-10 transition-colors  ${
+            navBg ? "bg-[#adc0ea]" : "bg-transparent"
+          }`}
+        >
+          <nav className={`flex w-[80%] m-auto  items-center justify-between `}>
+            <div className="py-2 px-[2px] w-20 cursor-pointer">
+              <a href="/">
+                <img
+                  src="./../../img/babysitEase_logo.png"
+                  className=" w-full h-full"
+                  alt="logo"
+                />
+              </a>
+            </div>
+            <ul className="flex flex-row gap-3 items-start p-4">
+              {sidebarMenu.map((menu, index) => {
+                const isActive = location.pathname === menu.path;
+                return (
+                  <li
+                    className={`menu-items relative ${
+                      isActive ? "bg-gray-200" : "hover:bg-gray-100"
+                    } px-4 flex items-center gap-2 rounded-full transition-all py-2 mb-2`}
+                    key={index}
+                  >
+                    <Link
+                      to={menu.path}
+                      className={`text-base ${
+                        isActive ? "text-blue-500" : "text-gray-700"
+                      }`}
+                    >
+                      {menu.name}
+                    </Link>
+                  </li>
+                );
+              })}
+              {user?.role === "nurse" && user?.isCaregiver === false ? (
+                <div className="cursor-pointer px-4 flex items-center gap-2 rounded-full transition-all py-2 mb-2">
                   <Link
-                    to={menu.path}
+                    to="/apply-nurse"
                     className={`text-base ${
-                      isActive ? "text-blue-500" : "text-gray-700"
+                      location.pathname === "/apply-nurse"
+                        ? "text-blue-500"
+                        : "text-gray-700"
                     }`}
                   >
-                    {menu.name}
+                    Apply for nurse
                   </Link>
-                </li>
-              );
-            })}
-            {user?.role === "nurse" && user?.isCaregiver === false ? (
-              <div className="cursor-pointer px-4 flex items-center gap-2 rounded-full transition-all py-2 mb-2">
-                <Link
-                  to="/apply-nurse"
-                  className={`text-base ${
-                    location.pathname === "/apply-nurse"
-                      ? "text-blue-500"
-                      : "text-gray-700"
-                  }`}
-                >
-                  Apply for nurse
-                </Link>
-              </div>
-            ) : user?.role === "babysitter" && user?.isCaregiver === false ? (
-              <div className="cursor-pointer px-4 flex items-center gap-2 rounded-full transition-all py-2 mb-2">
-                <Link
-                  to="/apply-babysitter"
-                  className={`text-base ${
-                    location.pathname === "/apply-babysitter"
-                      ? "text-blue-500"
-                      : "text-gray-700"
-                  }`}
-                >
-                  Apply for babysitter
-                </Link>
-              </div>
-            ) : (
-              ""
-            )}
-          </ul>
-          <div className="">
-            <div className="header flex items-center justify-center gap-7">
-              <Tooltip title="Notification" arrow>
-                <IconButton
-                  onClick={
-                    user?.notification.length > 0
-                      ? handleClick
-                      : () => navigate("/notification")
-                  }
-                >
-                  <Badge
-                    badgeContent={user?.notification?.length}
-                    className=""
-                    color="primary"
+                </div>
+              ) : user?.role === "babysitter" && user?.isCaregiver === false ? (
+                <div className="cursor-pointer px-4 flex items-center gap-2 rounded-full transition-all py-2 mb-2">
+                  <Link
+                    to="/apply-babysitter"
+                    className={`text-base ${
+                      location.pathname === "/apply-babysitter"
+                        ? "text-blue-500"
+                        : "text-gray-700"
+                    }`}
                   >
-                    <AiFillBell />
-                  </Badge>
-                </IconButton>
-              </Tooltip>
-              <Popover
-                id={id}
-                open={open}
-                anchorEl={anchorEl}
-                onClose={handleClose}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "right",
-                }}
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-              >
-                <List>
-                  {user?.notification && user.notification.length > 0 ? (
-                    user.notification.slice(0, 2).map((notification, index) => (
-                      <ListItem key={index}>
-                        <span>
-                          {notification.type ===
-                            `${user?.role}-account-request-approved` && (
-                            <GiPartyPopper className="text-2xl mr-2" />
-                          )}
-                          {notification.type === "booking-Approved" && (
-                            <FcApproval className="text-2xl mr-2" />
-                          )}
-                          {notification.type === "booking-Rejected" && (
-                            <FcCancel className="text-2xl mr-2" />
-                          )}
-                        </span>
-                        <ListItemText primary={notification.message} />
-                      </ListItem>
-                    ))
-                  ) : (
-                    <ListItem>
-                      <ListItemText
-                        onClick={() => navigate("/notification")}
-                        className="cursor-pointer"
-                        primary="See all"
-                      />
-                    </ListItem>
-                  )}
-
-                  {user?.notification && user.notification.length > 0 && (
-                    <ListItem button onClick={() => navigate("/notification")}>
-                      <span>
-                        <FaList className="mr-2" />
-                      </span>
-                      <ListItemText primary="See all notifications" />
-                    </ListItem>
-                  )}
-                </List>
-              </Popover>
-              <Box>
-                <Avatar
-                  alt="Profile Picture"
-                  src={
-                    user?.profilePicture
-                      ? `http://localhost:8070/${user.profilePicture}`
-                      : "./../../img/default_avatar.jpg"
-                  }
-                  sx={{ width: 50, height: 50 }}
-                />
-              </Box>
-
-              <Tooltip title="Log out" arrow>
-                <IconButton onClick={handleClick}>
-                  <Link to="/login" onClick={handleLogout} className="p-2">
-                    <IoMdLogOut className="text-xl text-black" />
+                    Apply for babysitter
                   </Link>
-                </IconButton>
-              </Tooltip>
+                </div>
+              ) : (
+                ""
+              )}
+            </ul>
+            <div className="">
+              <div className="header flex items-center justify-center gap-7">
+                <Tooltip title="Notification" TransitionComponent={Zoom} arrow>
+                  <IconButton
+                    onClick={
+                      user?.notification.length > 0
+                        ? handleClick
+                        : () => navigate("/notification")
+                    }
+                  >
+                    <Badge
+                      badgeContent={user?.notification?.length}
+                      className=""
+                      color="primary"
+                    >
+                      <AiFillBell />
+                    </Badge>
+                  </IconButton>
+                </Tooltip>
+                <Popover
+                  id={id}
+                  open={open}
+                  anchorEl={anchorEl}
+                  onClose={handleClose}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "right",
+                  }}
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                >
+                  <List>
+                    {user?.notification && user.notification.length > 0 ? (
+                      user.notification
+                        .slice(0, 2)
+                        .map((notification, index) => (
+                          <ListItem key={index}>
+                            <span>
+                              {notification.type ===
+                                `${user?.role}-account-request-approved` && (
+                                <GiPartyPopper className="text-2xl mr-2" />
+                              )}
+                              {notification.type === "booking-Approved" && (
+                                <FcApproval className="text-2xl mr-2" />
+                              )}
+                              {notification.type === "booking-Rejected" && (
+                                <FcCancel className="text-2xl mr-2" />
+                              )}
+                            </span>
+                            <ListItemText primary={notification.message} />
+                          </ListItem>
+                        ))
+                    ) : (
+                      <ListItem>
+                        <ListItemText
+                          onClick={() => navigate("/notification")}
+                          className="cursor-pointer"
+                          primary="See all"
+                        />
+                      </ListItem>
+                    )}
+
+                    {user?.notification && user.notification.length > 0 && (
+                      <ListItem
+                        button
+                        onClick={() => navigate("/notification")}
+                      >
+                        <span>
+                          <FaList className="mr-2" />
+                        </span>
+                        <ListItemText primary="See all notifications" />
+                      </ListItem>
+                    )}
+                  </List>
+                </Popover>
+                <Box>
+                  <Avatar
+                    alt="Profile Picture"
+                    src={
+                      user?.profilePicture
+                        ? `http://localhost:8070/${user.profilePicture}`
+                        : "./../../img/default_avatar.jpg"
+                    }
+                    sx={{ width: 50, height: 50 }}
+                  />
+                </Box>
+
+                <Tooltip title="Log out" TransitionComponent={Zoom} arrow>
+                  <IconButton onClick={handleClick}>
+                    <Link to="/login" onClick={handleLogout} className="p-2">
+                      <IoMdLogOut className="text-xl text-black" />
+                    </Link>
+                  </IconButton>
+                </Tooltip>
+              </div>
             </div>
-          </div>
-        </nav>
-        <div className="body flex items-center justify-center mx-auto w-[80%] mt-[55px]">
+          </nav>
+        </header>
+        <div className="body flex items-center justify-center m-auto w-full mt-[55px]">
           <div
             className={`children ${
-              user?.role === "admin" ? "w-full" : "w-[85%]"
+              user?.role === "admin" ? "w-[95%]" : "w-[70%]"
             } py-4`}
           >
             {children}
@@ -284,6 +324,10 @@ const Layout = ({ children }) => {
       </section>
     </>
   );
+};
+
+Layout.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export default Layout;

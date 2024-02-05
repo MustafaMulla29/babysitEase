@@ -2,11 +2,13 @@ import {
   Avatar,
   Box,
   Button,
-  Chip,
+  FormControl,
+  InputLabel,
+  MenuItem,
   Modal,
   Paper,
+  Select,
   TextField,
-  Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { AiOutlineCloudUpload } from "react-icons/ai";
@@ -14,9 +16,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { hideLoading, showLoading } from "../../redux/features/alertSlice";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useParams } from "react-router-dom";
-
-// ... existing imports
+// import { useParams } from "react-router-dom";
+import { PropTypes } from "prop-types";
 
 const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
   const [CaregiverData, setCaregiverData] = useState(null);
@@ -24,13 +25,14 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
     lowerLimit: null,
     upperLimit: null,
   });
+  // eslint-disable-next-line no-unused-vars
   const [profilePictureDisplay, setProfilePictureDisplay] = useState(null);
   const [deleteCertificates, setDeleteCertificates] = useState([]);
-  const [deleteProfilePicture, setDeleteProfilePicture] = useState(null);
+  // const [deleteProfilePicture, setDeleteProfilePicture] = useState(null);
 
   const { user } = useSelector((state) => state.user);
   const dispatch = useDispatch();
-  const params = useParams();
+  // const params = useParams();
 
   useEffect(() => {
     setCaregiverData(caregiver);
@@ -123,6 +125,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
     }));
   };
 
+  // eslint-disable-next-line no-unused-vars
   const removeCertificate = (certificate) => {
     setCaregiverData((prevData) => ({
       ...prevData,
@@ -145,16 +148,16 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
     formdata.append("description", CaregiverData.description);
     formdata.append("availability", CaregiverData.availability);
     formdata.append("ageRange", JSON.stringify(ageRange));
-    CaregiverData.preferredCities.forEach((city, index) => {
+    CaregiverData.preferredCities.forEach((city) => {
       formdata.append(`preferredCities[]`, city);
     });
-    CaregiverData.qualification.forEach((qual, index) => {
+    CaregiverData.qualification.forEach((qual) => {
       formdata.append("qualification[]", qual);
     });
-    CaregiverData.specialisation.forEach((spec, index) => {
+    CaregiverData.specialisation.forEach((spec) => {
       formdata.append("specialisation[]", spec);
     });
-    deleteCertificates.forEach((cert, index) => {
+    deleteCertificates.forEach((cert) => {
       formdata.append("deleteCertificates[]", cert);
     });
 
@@ -170,7 +173,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
 
     if (Array.isArray(CaregiverData.certifications)) {
       // Iterate and append files to FormData
-      CaregiverData.certifications.forEach((certification, index) => {
+      CaregiverData.certifications.forEach((certification) => {
         formdata.append(`certifications[]`, certification);
       });
     }
@@ -266,7 +269,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                       </Box>
                     </div>
 
-                    <div className=" flex items-start justify-start gap-3">
+                    <div className=" flex items-start justify-start gap-3 my-3">
                       {/* Name */}
                       <TextField
                         label="Name"
@@ -275,6 +278,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         onChange={handleInputChange}
                         fullWidth
                         className="mb-2"
+                        required
                       />
 
                       {/* Address */}
@@ -285,18 +289,20 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         onChange={handleInputChange}
                         fullWidth
                         className="mb-2"
+                        required
+                      />
+                      <TextField
+                        label="Years of experience"
+                        name="yearsExperience"
+                        value={CaregiverData?.yearsExperience}
+                        onChange={handleInputChange}
+                        fullWidth
+                        className="mb-2"
+                        required
                       />
                     </div>
 
-                    <TextField
-                      label="Years of experience"
-                      name="yearsExperience"
-                      value={CaregiverData?.yearsExperience}
-                      onChange={handleInputChange}
-                      fullWidth
-                      className="mb-2"
-                    />
-                    <div className=" flex items-start justify-start gap-3">
+                    <div className=" flex items-start justify-start gap-3 my-3">
                       {/* Age Range */}
                       <TextField
                         label="Age Range Lower Limit"
@@ -311,6 +317,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         }
                         fullWidth
                         className="mb-2"
+                        required
                       />
                       <TextField
                         label="Age Range Upper Limit"
@@ -325,16 +332,52 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         }
                         fullWidth
                         className="mb-2"
+                        required
                       />
+                      <FormControl fullWidth required className="mb-3">
+                        <InputLabel id="demo-simple-select-label">
+                          Availability
+                        </InputLabel>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          label="Availability"
+                          name="availability"
+                          className="w-full rounded-md bg-[#f3f4f6] border transition-[outline] duration-200 outline-blue-600"
+                          value={CaregiverData?.availability}
+                          onChange={handleInputChange}
+                        >
+                          {/* <MenuItem value=""  className="">
+                    {" "}
+                    Select role
+                  </MenuItem> */}
+                          <MenuItem value="Available" className="px-3 py-2">
+                            Available
+                          </MenuItem>
+                          <MenuItem value="Unavailable" className="px-3 py-2">
+                            Unavailable
+                          </MenuItem>
+                        </Select>
+                      </FormControl>
                     </div>
 
                     {/* Availability */}
-                    <TextField
+                    {/* <TextField
                       label="Availability"
                       name="availability"
                       value={CaregiverData?.availability}
                       onChange={handleInputChange}
                       fullWidth
+                      className="mb-2"
+                    /> */}
+
+                    <TextField
+                      name="description"
+                      label="Description"
+                      fullWidth
+                      value={CaregiverData?.description}
+                      multiline
+                      rows={6}
                       className="mb-2"
                     />
 
@@ -405,17 +448,17 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
 
                     {/* <div className=" flex items-start justify-start gap-3"> */}
                     {/* City */}
-                    <TextField
-                      label="City"
-                      name="city"
-                      value={CaregiverData?.city}
-                      onChange={handleInputChange}
-                      fullWidth
-                      className="mb-2"
-                    />
 
                     {/* Preferred Cities */}
-                    <div className="mb-2">
+                    <div className="mb-2  flex items-start justify-start gap-3 my-3">
+                      <TextField
+                        label="City"
+                        name="city"
+                        value={CaregiverData?.city}
+                        onChange={handleInputChange}
+                        fullWidth
+                        className="mb-2"
+                      />
                       <TextField
                         label="Preferred cities"
                         name="preferredCities"
@@ -464,6 +507,12 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
       </div>
     </>
   );
+};
+
+UpdateProfileModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  caregiver: PropTypes.object.isRequired, // Adjust the type according to the actual structure
 };
 
 export default UpdateProfileModal;

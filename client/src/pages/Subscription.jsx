@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  selectIsSubscribed,
   setSubscribed,
   resetSubscription,
 } from "../redux/features/subscriptionSlice";
@@ -13,31 +12,27 @@ import {
   Card,
   CardContent,
   Container,
-  Dialog,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  FormControl,
   Grid,
   Paper,
-  Popover,
   Skeleton,
   TextField,
   Typography,
 } from "@mui/material";
 import { AiOutlineArrowLeft, AiOutlineCheck } from "react-icons/ai";
-import { FcApproval } from "react-icons/fc";
 import { IoIosPricetags } from "react-icons/io";
 import { GiDuration } from "react-icons/gi";
 import { MdDateRange } from "react-icons/md";
 import { GrPlan } from "react-icons/gr";
+import axios from "axios";
+import { hideLoading, showLoading } from "../redux/features/alertSlice";
+import moment from "moment";
 
 const Subscription = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const isSubscribed = useSelector(selectIsSubscribed);
+  // const isSubscribed = useSelector(selectIsSubscribed);
   const [step, setStep] = useState(1);
-  const [popoverOpen, setPopoverOpen] = useState(false);
+  // const [popoverOpen, setPopoverOpen] = useState(false);
   const [purchaseDate, setPurchaseDate] = useState(null);
   const [expiryDate, setExpiryDate] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState([]);
@@ -45,19 +40,67 @@ const Subscription = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const handlePayment = (e) => {
-    e.preventDefault();
-    if (!isSubscribed) {
-      dispatch(setSubscribed());
+  const { user } = useSelector((state) => state.user);
 
-      localStorage.setItem("subscriptionStatus", "subscribed");
-      toast.success("Subscribed successfully", {
-        position: toast.POSITION.TOP_CENTER,
-      });
-      setPopoverOpen(true);
-      navigate("/"); // Consider navigating after closing the popover
-    } else {
-      toast.info("You are already subscribed", {
+  const plans = [
+    {
+      title: "1 Month",
+      price: "599",
+      duration: "Monthly",
+      features: ["Access to all content", "Cancel anytime"],
+    },
+    {
+      title: "3 Months",
+      price: "1,440",
+      duration: "Quarterly",
+      features: ["Save 20% compared to monthly", "Exclusive perks"],
+    },
+    {
+      title: "1 Year",
+      price: "6,188",
+      duration: "Annually",
+      features: ["Best value", "Priority support"],
+    },
+  ];
+
+  const handleSubscription = async (e) => {
+    e.preventDefault();
+    try {
+      dispatch(showLoading());
+      const data = {
+        user_id: user?._id,
+        expiryDate,
+        plan: selectedPlan[0].duration,
+        price: selectedPlan[0].price,
+        status: "Active",
+      };
+      const res = await axios.post(
+        "http://localhost:8070/api/v1/caregiver/subscribe",
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      dispatch(hideLoading());
+      if (res.data.success) {
+        dispatch(setSubscribed());
+        localStorage.setItem("subscriptionStatus", "Active");
+        toast.success(res.data.message, {
+          position: toast.POSITION.TOP_CENTER,
+        });
+        navigate("/");
+      } else {
+        dispatch(hideLoading());
+        toast.error("Something went wrong", {
+          position: toast.POSITION.TOP_CENTER,
+        });
+      }
+    } catch (error) {
+      dispatch(hideLoading());
+      console.log(error);
+      toast.error("Something went wrong", {
         position: toast.POSITION.TOP_CENTER,
       });
     }
@@ -81,27 +124,6 @@ const Subscription = () => {
     setLoading(true);
   };
 
-  const plans = [
-    {
-      title: "1 Month",
-      price: "599",
-      duration: "Monthly",
-      features: ["Access to all content", "Cancel anytime"],
-    },
-    {
-      title: "3 Months",
-      price: "1,440",
-      duration: "Quarterly",
-      features: ["Save 20% compared to monthly", "Exclusive perks"],
-    },
-    {
-      title: "1 Year",
-      price: "6,188",
-      duration: "Annually",
-      features: ["Best value", "Priority support"],
-    },
-  ];
-
   useEffect(() => {
     if (step === 2 && selectedPlan) {
       const currentDate = new Date();
@@ -123,15 +145,15 @@ const Subscription = () => {
         default:
           break;
       }
-
-      setExpiryDate(expDate.toDateString());
+      const date = moment(expDate).format("YYYY-MM-DD");
+      setExpiryDate(date);
     }
   }, [step, selectedPlan, expiryDate]);
 
   useEffect(() => {
     const storedStatus = localStorage.getItem("subscriptionStatus");
 
-    if (storedStatus === "subscribed") {
+    if (storedStatus === "Active") {
       dispatch(setSubscribed());
     } else {
       dispatch(resetSubscription());
@@ -449,7 +471,7 @@ const Subscription = () => {
                         "Subscribe Now"
                       )}
                     </Typography>
-                    <form action="" method="post" onSubmit={handlePayment}>
+                    <form action="" method="post" onSubmit={handleSubscription}>
                       {loading ? (
                         <Skeleton animation="wave" height={80} />
                       ) : (

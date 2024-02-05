@@ -1,5 +1,5 @@
 const express = require('express')
-const { loginController, registerController, authController, getNotificationsController, deleteNotificationsController, applyCaregiverController, addDependentController, getAllCaregiversController, getCaregiverDetails, bookCaregiverController, getBookingsController, addReviewController } = require('../controllers/userCtrl')
+const { loginController, registerController, authController, getNotificationsController, deleteNotificationsController, applyCaregiverController, addDependentController, getAllCaregiversController, getCaregiverDetails, bookCaregiverController, getBookingsController, addReviewController, cancelBookingController, searchCaregiversController, deleteDependentController } = require('../controllers/userCtrl')
 const authMiddleware = require('../middlewares/authMiddleware')
 const upload = require('../multerConfig')
 
@@ -29,6 +29,9 @@ router.post("/delete-notifications", authMiddleware, deleteNotificationsControll
 //ADD DEPENDENT ROUTE || POST
 router.post("/addDependent", authMiddleware, addDependentController)
 
+//Delete DEPENDENT ROUTE || POST
+router.delete("/deleteDependent/:userId/:dependentId", authMiddleware, deleteDependentController)
+
 //GET ALL CAREGIVERS || GET
 router.get("/getAllCaregivers", authMiddleware, getAllCaregiversController)
 
@@ -43,5 +46,11 @@ router.get("/getBookings", authMiddleware, getBookingsController)
 
 //POST REVIEWS 
 router.post("/addReview", authMiddleware, addReviewController)
+
+//POST CANCEL BOOKING
+router.post("/cancelBooking", authMiddleware, cancelBookingController)
+
+//GET SEARCH CAREGIVERS
+router.get("/searchCaregivers", authMiddleware, searchCaregiversController)
 
 module.exports = router

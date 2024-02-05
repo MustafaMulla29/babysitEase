@@ -54,15 +54,21 @@ const userSchema = mongoose.Schema({
         trim: true,
         unique: true
     },
+    phoneNumber: {
+        type: Number,
+        required: [true, "Phone number is required"],
+        unique: true,
+        select: false
+    },
     password: {
         type: String,
         required: [true, 'Password is required'],
         trim: true,
     },
-    aadharNumber: {
-        type: Number,
-        required: [true, 'Aadhar number is required']
-    },
+    // aadharNumber: {
+    //     type: Number,
+    //     required: [true, 'Aadhar number is required']
+    // },
     role: {
         type: String,
         required: [true, 'Role is required'],
@@ -95,10 +101,10 @@ const userSchema = mongoose.Schema({
         type: [userDependentSchema],
         default: []
     },
-    // isAdmin: {
-    //     type: Boolean,
-    //     default: false
-    // },
+    isBlocked: {
+        type: Boolean,
+        default: false
+    },
     isCaregiver: {
         type: Boolean,
         default: false

@@ -1,11 +1,24 @@
-import React from "react";
 import { Card, CardContent, Typography, Avatar, Skeleton } from "@mui/material";
-import { FaUser, FaAllergies, FaHospitalUser } from "react-icons/fa";
+import { FaUser, FaAllergies, FaHospitalUser, FaPen } from "react-icons/fa";
+import { PropTypes } from "prop-types";
+import { useState } from "react";
+import DependentInputModal from "./DependentInputModal";
+import DeleteDependent from "./DeleteDependent";
 
 const DependentCard = ({ dependent, loading }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
-    <Card className="max-w-md mx-auto my-4 shadow-lg rounded-md">
-      <CardContent className="text-center">
+    <Card className="max-w-md relative my-4 shadow-lg rounded-md">
+      <CardContent className="text-center mt-6">
         {loading ? (
           <Skeleton
             variant="circular"
@@ -14,7 +27,7 @@ const DependentCard = ({ dependent, loading }) => {
             className="mx-auto my-4"
           />
         ) : (
-          <Avatar className="mx-auto bg-blue-500 p-2 mb-4">
+          <Avatar className="m-auto bg-blue-500 p-2 mb-4">
             <FaUser size={24} color="#fff" />
           </Avatar>
         )}
@@ -30,7 +43,7 @@ const DependentCard = ({ dependent, loading }) => {
             <Typography
               variant="subtitle1"
               gutterBottom
-              className="text-blue-500"
+              className="text-blue-500 text-left"
             >
               <FaAllergies className="inline mr-2" />
               Allergies
@@ -65,9 +78,34 @@ const DependentCard = ({ dependent, loading }) => {
               </ul>
             </div>
           )}
+        <div
+          className="absolute top-2 right-12 p-2 rounded-full hover:bg-slate-100 transition-all cursor-pointer"
+          onClick={handleOpenModal}
+        >
+          <FaPen className="text-lg " />
+        </div>
+        <DeleteDependent dependentId={dependent?._id} />
+        <DependentInputModal
+          open={isModalOpen}
+          onClose={handleCloseModal}
+          dependent={dependent}
+        />
       </CardContent>
     </Card>
   );
+};
+
+DependentCard.propTypes = {
+  dependent: PropTypes.shape({
+    name: PropTypes.string,
+    type: PropTypes.string,
+    gender: PropTypes.string,
+    age: PropTypes.number,
+    allergies: PropTypes.arrayOf(PropTypes.string),
+    medicalConditions: PropTypes.arrayOf(PropTypes.string),
+    _id: PropTypes.string,
+  }),
+  loading: PropTypes.bool.isRequired,
 };
 
 export default DependentCard;

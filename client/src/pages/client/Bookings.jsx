@@ -8,7 +8,8 @@ import BookingDetailsSkeleton from "./BookingDetailsSkeleton";
 import { Typography } from "@mui/material";
 
 const Bookings = () => {
-  const [bookings, setBookings] = useState(null);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const { user } = useSelector((state) => state.user);
 
@@ -32,41 +33,43 @@ const Bookings = () => {
         toast.error("Something went wrong", {
           position: toast.POSITION.TOP_CENTER,
         });
+      } finally {
+        setLoading(false);
       }
     };
     getBookings();
   }, [user]);
 
-  useEffect(() => {
-    const bookingStatus = async () => {
-      try {
-        await axios.post(
-          "http://localhost:8070/api/v1/caregiver/bookingStatus",
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-      } catch (error) {
-        return;
-      }
-    };
-    bookingStatus();
-  }, []);
+  // useEffect(() => {
+  //   const bookingStatus = async () => {
+  //     try {
+  //       await axios.post(
+  //         "http://localhost:8070/api/v1/caregiver/bookingStatus",
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //           },
+  //         }
+  //       );
+  //     } catch (error) {
+  //       return;
+  //     }
+  //   };
+  //   bookingStatus();
+  // }, []);
   return (
     <Layout>
       <h1 className="text-3xl font-bold mb-4">Bookings page</h1>
-      {bookings && bookings?.length > 0 ? (
-        bookings.map((booking) => (
-          <BookingDetails key={booking._id} booking={booking} />
-        ))
-      ) : !bookings ? (
+      {loading ? (
         <div>
           <BookingDetailsSkeleton />
           <BookingDetailsSkeleton />
           <BookingDetailsSkeleton />
         </div>
+      ) : bookings.length > 0 ? (
+        bookings.map((booking) => (
+          <BookingDetails key={booking._id} booking={booking} />
+        ))
       ) : (
         <figure className="w-1/3 m-auto">
           <img

@@ -27,7 +27,7 @@ const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [aadharNumber, setAadharNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [role, setRole] = useState("");
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
@@ -39,7 +39,7 @@ const Register = () => {
   const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [aadharError, setAadharError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
   const [cityError, setCityError] = useState("");
   const [addressError, setAddressError] = useState("");
 
@@ -108,14 +108,14 @@ const Register = () => {
     }
   };
 
-  const handleAadharChange = (e) => {
-    setAadharNumber(e.target.value);
+  const handlePhoneChange = (e) => {
+    setPhoneNumber(e.target.value);
     if (e.target.value.length == 0) {
-      setAadharError("");
-    } else if (isNaN(e.target.value) || e.target.value.length < 6) {
-      setAadharError("Enter a valid aadhar number");
+      setPhoneError("");
+    } else if (isNaN(e.target.value) || e.target.value.length < 10) {
+      setPhoneError("Enter a valid phone number");
     } else {
-      setAadharError("");
+      setPhoneError("");
     }
   };
 
@@ -148,11 +148,11 @@ const Register = () => {
   //   handleNameChange({ target: { value: name } });
   //   handleEmailChange({ target: { value: email } });
   //   handlePasswordChange({ target: { value: password } });
-  //   handleAadharChange({ target: { value: aadharNumber } });
+  //   handlePhoneChange({ target: { value: phoneNumber } });
   //   handleCityChange({ target: { value: city } });
 
   //   // Check if there are any errors
-  //   if (nameError || emailError || passwordError || aadharError || cityError) {
+  //   if (nameError || emailError || passwordError || phoneError || cityError) {
   //     toast.error("Please fill in the form correctly", {
   //       position: toast.POSITION.TOP_CENTER,
   //     });
@@ -163,7 +163,7 @@ const Register = () => {
   //       name,
   //       email,
   //       password,
-  //       aadharNumber,
+  //       phoneNumber,
   //       role,
   //       address,
   //       city,
@@ -212,11 +212,11 @@ const Register = () => {
     handleNameChange({ target: { value: name } });
     handleEmailChange({ target: { value: email } });
     handlePasswordChange({ target: { value: password } });
-    handleAadharChange({ target: { value: aadharNumber } });
+    handlePhoneChange({ target: { value: phoneNumber } });
     handleCityChange({ target: { value: city } });
 
     // Check if there are any errors
-    if (nameError || emailError || passwordError || aadharError || cityError) {
+    if (nameError || emailError || passwordError || phoneError || cityError) {
       toast.error("Please fill in the form correctly", {
         position: toast.POSITION.TOP_CENTER,
       });
@@ -228,7 +228,7 @@ const Register = () => {
       formData.append("name", name);
       formData.append("email", email);
       formData.append("password", password);
-      formData.append("aadharNumber", aadharNumber);
+      formData.append("phoneNumber", phoneNumber);
       formData.append("role", role);
       formData.append("address", address);
       formData.append("city", city);
@@ -366,16 +366,16 @@ const Register = () => {
                 <div>
                   <TextField
                     id="outlined-textarea"
-                    label="Aadhar Number"
+                    label="Phone Number"
                     multiline
                     type="text"
-                    name="aadharNumber"
-                    placeholder="Enter your aadhar number"
+                    name="phoneNumber"
+                    placeholder="Enter your phone number"
                     autoComplete="off"
                     className={`w-full bg-[#f3f4f6] rounded-md transition-[outline] duration-200 outline-blue-600 border `}
-                    error={aadharError ? true : false}
-                    value={aadharNumber}
-                    onChange={handleAadharChange}
+                    error={phoneError ? true : false}
+                    value={phoneNumber}
+                    onChange={handlePhoneChange}
                     // minLength={6}
                     // maxLength={10}
                     inputProps={{ minLength: 6, maxLength: 10 }}
@@ -383,7 +383,7 @@ const Register = () => {
                   />
                   <div className="h-4 m-1">
                     <Typography className="text-red-500 text-sm mt-1">
-                      {aadharError}
+                      {phoneError}
                     </Typography>
                   </div>
                 </div>

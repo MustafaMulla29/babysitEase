@@ -5,6 +5,9 @@ const path = require('path');
 const fs = require("fs").promises
 const moment = require("moment");
 const reviewModel = require("../models/reviewModel");
+const subscriptionModel = require("../models/subscriptionModel");
+const nodemailer = require('nodemailer')
+const Mailgen = require('mailgen')
 
 const getCaregiverInfoController = async (req, res) => {
     try {
@@ -206,7 +209,7 @@ const updateCaregiverController = async (req, res) => {
 const getBookingsController = async (req, res) => {
     try {
         const caregiverId = req.query.caregiverId;
-        const bookings = await bookingModel.find({ caregiverId: caregiverId });
+        const bookings = await bookingModel.find({ caregiverId: caregiverId }).sort({ bookedAt: -1 });
 
         if (!bookings || bookings.length === 0) {
             return res.status(200).send({
@@ -227,6 +230,7 @@ const getBookingsController = async (req, res) => {
             return {
                 _id: booking._id,
                 clientId: booking.clientId,
+                bookedOn: booking.bookedAt,
                 bookedFor: booking.bookedFor,
                 date: booking.date,
                 status: booking.status,
@@ -253,26 +257,75 @@ const getBookingsController = async (req, res) => {
 };
 
 //mark booking status complete if booking is complete
+// const bookingStatusController = async (req, res) => {
+//     try {
+//         const currentDate = moment().format("YYYY-MM-DD");
+
+//         // Find bookings that are Approved and have an end date less than the current date
+//         const bookingsToComplete = await bookingModel.find({
+//             status: "Approved",
+//             date: { $lt: currentDate },
+//         });
+
+//         if (bookingsToComplete.length === 0) {
+//             return res.status(200).send({
+//                 success: true,
+//                 message: "No bookings to complete.",
+//             });
+//         }
+
+//         // Update the status of each booking to "completed"
+//         const updatePromises = bookingsToComplete.map(async (booking) => {
+//             booking.status = "Completed";
+//             await booking.save();
+//         });
+
+//         await Promise.all(updatePromises);
+
+//         return res.status(200).send({
+//             success: true,
+//             message: "Bookings marked as completed.",
+//         });
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).send({
+//             success: false,
+//             message: "Error while completing bookings.",
+//             error,
+//         });
+//     }
+// };
+
+//TODO: HAVE TO ADD STATUS:COMPLETED CODE 
 const bookingStatusController = async (req, res) => {
     try {
         const currentDate = moment().format("YYYY-MM-DD");
 
-        // Find bookings that are Approved and have an end date less than the current date
-        const bookingsToComplete = await bookingModel.find({
-            status: "Approved",
-            date: { $lt: currentDate },
+        const bookingsToUpdate = await bookingModel.find({
+            $or: [
+                { status: "Pending", bookedAt: { $lte: moment(currentDate).endOf('day').toDate() } },
+                { status: "Approved", date: { $lt: currentDate } },
+            ],
         });
 
-        if (bookingsToComplete.length === 0) {
+        if (bookingsToUpdate.length === 0) {
             return res.status(200).send({
                 success: true,
-                message: "No bookings to complete.",
+                message: "No bookings to update.",
             });
         }
 
-        // Update the status of each booking to "completed"
-        const updatePromises = bookingsToComplete.map(async (booking) => {
-            booking.status = "Completed";
+        const updatePromises = bookingsToUpdate.map(async (booking) => {
+            if (booking.status === "Pending") {
+                const timeDifference = moment().diff(booking.bookedAt, 'hours');
+                // If more than 5 hours have passed, nullify the status
+                if (timeDifference >= 5) {
+                    booking.status = "Nullified";
+                }
+            } else if (booking.status === "Approved") {
+                booking.status = "Completed";
+            }
+
             await booking.save();
         });
 
@@ -280,17 +333,18 @@ const bookingStatusController = async (req, res) => {
 
         return res.status(200).send({
             success: true,
-            message: "Bookings marked as completed.",
+            message: "Bookings status updated.",
         });
     } catch (error) {
         console.log(error);
         res.status(500).send({
             success: false,
-            message: "Error while completing bookings.",
+            message: "Error while updating bookings status.",
             error,
         });
     }
 };
+
 
 const approveBookingController = async (req, res) => {
     try {
@@ -364,4 +418,206 @@ const getReviewsController = async (req, res) => {
     }
 }
 
-module.exports = { getCaregiverInfoController, updateCaregiverController, getBookingsController, bookingStatusController, getReviewsController, approveBookingController }
+// EMAIL SENDING FUNCTION
+const sendSubscriptionEmail = (user, type) => {
+    let config = {
+        service: 'gmail',
+        auth: {
+            user: process.env.BABYSITEASE_EMAIL,
+            pass: process.env.BABYSITEASE_APP_PASSWORD,
+        }
+    }
+
+    let transporter = nodemailer.createTransport(config)
+
+    let mailGenerator = new Mailgen({
+        theme: 'default',
+        product: {
+            name: 'Mailgen',
+            link: 'https://mailgen.js/'
+        }
+    })
+
+    // Subscription mail content
+    const subscriptionEmailContent = {
+        body: {
+            name: user?.name,
+            intro: `Dear ${user?.name},\n\nThank you for ${type === 'new' ? 'subscribing to' : 'updating'} our caregiver service. You are now ${type === 'new' ? 'part of' : 'updated in'} our caregiving community.`,
+            action: {
+                instructions: `You can ${type === 'new' ? 'explore' : 'manage'} our platform for available caregivers and ${type === 'new' ? 'manage your subscriptions.' : 'update your subscription details.'}`,
+                button: {
+                    color: '#22BC66',
+                    text: `${type === 'new' ? 'Explore Caregivers' : 'Manage Subscriptions'}`,
+                    link: `http://localhost:5173/client/${type === 'new' ? 'caregivers' : 'subscriptions'}`
+                }
+            },
+            outro: 'Thank you for choosing our service!'
+        }
+    };
+
+    let mail = mailGenerator.generate(subscriptionEmailContent)
+
+    let message = {
+        from: process.env.BABYSITEASE_EMAIL,
+        to: user?.email,
+        subject: `${type === 'new' ? 'Subscription Successful!' : 'Subscription Update Successful!'}`,
+        html: mail
+    }
+
+    transporter.sendMail(message, (error, info) => {
+        if (error) {
+            console.log(error);
+        }
+    });
+};
+
+const subscriptionController = async (req, res) => {
+    try {
+        const { user_id } = req.body;
+
+        const user = await userModel.findOne({ _id: req.body.user_id });
+
+        if (!user || (user.role !== "babysitter" && user.role !== "nurse")) {
+            return res.status(401).send({
+                success: false,
+                message: "You cannot subscribe as you are not a caregiver"
+            });
+        }
+
+        // Check if there is an existing document with the user_id and status: Expired
+        let existingSubscription = await subscriptionModel.findOne({
+            user_id: req.body.user_id,
+            status: "Expired",
+        });
+
+        if (existingSubscription) {
+            // If exists, update the existing document with new data
+            await existingSubscription.updateOne(req.body);
+
+            sendSubscriptionEmail(user, 'update');
+            res.status(200).send({
+                success: true,
+                message: "Subscription updated successfully",
+            });
+        } else {
+            // If not exists, create a new document
+            const newSubscription = new subscriptionModel(req.body);
+
+            await newSubscription.save();
+            sendSubscriptionEmail(user, 'new');
+            res.status(201).send({
+                success: true,
+                message: "Subscribed successfully"
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error while processing subscription",
+            error,
+        });
+    }
+};
+
+const checkSubscriptionController = async (req, res) => {
+    try {
+        const user = await userModel.findOne({ _id: req.params.id });
+
+        if (!user) {
+            return res.status(401).send({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        const currentDate = moment(new Date()).format("YYYY-MM-DD")
+
+        let subscription = await subscriptionModel.findOne({
+            user_id: req.params.id,
+            status: "Active",
+            expiryDate: { $lt: moment(currentDate).toDate() },
+        });
+
+        // console.log("Current Date:", moment(currentDate).toDate());
+        // console.log("Subscription Expiry Date:", subscription?.expiryDate);
+        if (subscription) {
+            res.status(200).send({
+                success: true,
+                message: "Subscription is active",
+                data: {
+                    subscriptionStatus: "Expired"
+                },
+            });
+        } else {
+            // Subscription not found or has expired, update status if expired
+            // subscription = await subscriptionModel.findOneAndUpdate(
+            //     { user_id: req.params.id, status: "Active", expiryDate: { $lt: moment(currentDate).toDate() } },
+            //     { $set: { status: "Expired" } },
+            //     { new: true, runValidators: true }
+            // );
+
+            // if (subscription) {
+            //     res.status(200).send({
+            //         success: true,
+            //         message: "Subscription has expired",
+            //         data: {
+            //             subscriptionStatus: subscription?.status
+            //         },
+            //     });
+            // } else {
+            res.status(401).send({
+                success: false,
+                message: "Subscription not found",
+            });
+            // }
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error while checking subscription",
+            error,
+        });
+    }
+};
+
+
+const changeSubscriptionStatusController = async (req, res) => {
+    try {
+        const currentDate = moment(new Date()).format("YYYY-MM-DD")
+
+        const subscription = await subscriptionModel.findOne({
+            user_id: req.params?.id,
+            status: "Active",
+            expiryDate: { $lt: moment(currentDate).toDate() },
+        });
+
+
+        if (subscription) {
+            subscription.status = "Expired"
+            await subscription.save()
+            return res.status(200).send({
+                success: true,
+                message: "Changed subscription status to expired",
+                data: {
+                    subscriptionStatus: "Expired"
+                }
+            })
+        }
+        res.status(200).send({
+            message: "No subscription expired"
+        })
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error while changing subscription status",
+            error,
+        });
+    }
+}
+
+
+module.exports = { getCaregiverInfoController, updateCaregiverController, getBookingsController, bookingStatusController, getReviewsController, approveBookingController, subscriptionController, checkSubscriptionController, changeSubscriptionStatusController }

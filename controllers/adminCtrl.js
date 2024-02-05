@@ -1,23 +1,7 @@
 const caregiverModel = require("../models/caregiverModel")
 const userModel = require("../models/userModels")
-
-// const getAllUsersController = async (req, res) => {
-//     try {
-//         const users = await userModel.find({ role: "client" })
-//         res.status(200).send({
-//             success: true,
-//             message: "Successfully fetched users",
-//             data: users
-//         })
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).send({
-//             success: false,
-//             message: "Error while fetching users",
-//             error
-//         })
-//     }
-// }
+const nodemailer = require("nodemailer")
+const Mailgen = require('mailgen')
 
 const getAllUsersController = async (req, res) => {
     const perPage = 10;
@@ -47,42 +31,6 @@ const getAllUsersController = async (req, res) => {
         });
     }
 };
-
-
-// const getAllCaregiversController = async (req, res) => {
-//     try {
-//         const users = await userModel.find({ role: { $in: ["nurse", "babysitter"] } })
-//         const nurses = await caregiverModel.find({})
-
-//         const nurseDetailsMap = {};
-//         nurses.forEach(nurse => {
-//             nurseDetailsMap[nurse.userId] = nurse;
-//         });
-
-//         // Combine user details with caregiver-specific details
-//         const caregivers = users.map(user => {
-//             const nurseDetails = nurseDetailsMap[user._id];
-//             // Combine common details from user and nurse-specific details
-//             return {
-//                 ...user._doc,
-//                 ...(nurseDetails ? { ...nurseDetails._doc } : {})
-//             };
-//         });
-//         //TODO: CREATING BABYSITTER APPLY ROUTES AND FETCHING THEM
-//         res.status(200).send({
-//             success: true,
-//             message: "Successfully fetched caregivers",
-//             data: caregivers
-//         })
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).send({
-//             success: false,
-//             message: "Error while fetching caregivers",
-//             error
-//         })
-//     }
-// }
 
 
 const getAllCaregiversController = async (req, res) => {
@@ -154,7 +102,6 @@ const getAdminDetailsController = async (req, res) => {
     }
 }
 
-
 //CAREGIVER ACCOUNT STATUS
 const changeAccountStatusController = async (req, res) => {
     try {
@@ -180,6 +127,57 @@ const changeAccountStatusController = async (req, res) => {
 
         user.isCaregiver = status === "Approved" ? true : false
         await user.save()
+
+        let config = {
+            service: 'gmail',
+            auth: {
+                user: process.env.BABYSITEASE_EMAIL,
+                pass: process.env.BABYSITEASE_APP_PASSWORD,
+            }
+        }
+
+        let transporter = nodemailer.createTransport(config)
+
+        let mailGenerator = new Mailgen({
+            theme: 'default',
+            product: {
+                name: 'Mailgen',
+                link: 'https://mailgen.js/'
+            }
+        })
+
+        //client mail
+        const response = {
+            body: {
+                name: user?.name,
+                intro: `Dear ${user?.name},\n\nYour ${user?.role} account has been ${status} by the admin.`,
+                action: {
+                    instructions: 'Visit our platform to see more.',
+                    button: {
+                        color: '#22BC66',
+                        text: 'Visit',
+                        link: 'http://localhost:5173/'
+                    }
+                },
+                outro: 'Thank you for choosing our service!'
+            }
+        };
+
+        let mail = mailGenerator.generate(response)
+
+        let message = {
+            from: 'babysitease@gmail.com',
+            to: user?.email,
+            subject: `Your account has been ${status}`,
+            html: mail
+        }
+
+        transporter.sendMail(message, (error, info) => {
+            if (error) {
+                console.log(error)
+            }
+        })
+
         res.status(200).send({
             success: true,
             message: "Account status updated",
@@ -195,4 +193,95 @@ const changeAccountStatusController = async (req, res) => {
     }
 }
 
-module.exports = { getAllUsersController, getAllCaregiversController, changeAccountStatusController, getAdminDetailsController }
+const blockUserController = async (req, res) => {
+    try {
+        const { userId } = req.params; // Assuming you have userId in the request parameters
+        // const isAdmin = req.user.isAdmin;
+
+        // if (!isAdmin) {
+        //     return res.status(403).send({
+        //         success: false,
+        //         message: "Permission denied. Only admins can block users.",
+        //     });
+        // }
+
+        const user = await userModel.findById(userId);
+
+        if (!user) {
+            return res.status(404).send({
+                success: false,
+                message: "User not found.",
+            });
+        }
+
+        user.isBlocked = true;
+
+        await user.save();
+
+        let config = {
+            service: 'gmail',
+            auth: {
+                user: process.env.BABYSITEASE_EMAIL,
+                pass: process.env.BABYSITEASE_APP_PASSWORD,
+            }
+        }
+
+        let transporter = nodemailer.createTransport(config)
+
+        let mailGenerator = new Mailgen({
+            theme: 'default',
+            product: {
+                name: 'Mailgen',
+                link: 'https://mailgen.js/'
+            }
+        })
+
+        //client mail
+        const response = {
+            body: {
+                name: user?.name,
+                intro: `Dear ${user?.name},\n\nYour account has been blocked by the admin.`,
+                action: {
+                    instructions: 'Visit our platform to see more.',
+                    button: {
+                        color: '#22BC66',
+                        text: 'Visit',
+                        link: 'http://localhost:5173/'
+                    }
+                },
+                outro: 'Thank you for choosing our service!'
+            }
+        };
+
+        let mail = mailGenerator.generate(response)
+
+        let message = {
+            from: 'babysitease@gmail.com',
+            to: user?.email,
+            subject: `Your account has been Blocked`,
+            html: mail
+        }
+
+        transporter.sendMail(message, (error, info) => {
+            if (error) {
+                console.log(error)
+            }
+        })
+
+        res.status(200).send({
+            success: true,
+            message: "User blocked successfully",
+            user,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error while blocking the user",
+            error,
+        });
+    }
+};
+
+
+module.exports = { getAllUsersController, getAllCaregiversController, changeAccountStatusController, getAdminDetailsController, blockUserController }

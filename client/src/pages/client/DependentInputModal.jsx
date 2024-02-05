@@ -18,23 +18,28 @@ import {
   Chip,
 } from "@mui/material";
 import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
+import { hideLoading, showLoading } from "../../redux/features/alertSlice";
+import { PropTypes } from "prop-types";
 
-const DependentInputModal = ({ open, onClose, onSave }) => {
+const DependentInputModal = ({ open, onClose, dependent }) => {
   const [dependentData, setDependentData] = useState({
-    type: "",
-    gender: "",
-    name: "",
-    age: "",
-    allergies: [],
-    medicalConditions: [],
+    type: dependent?.type ? dependent.type : "",
+    gender: dependent?.gender ? dependent.gender : "",
+    name: dependent?.name ? dependent.name : "",
+    age: dependent?.age ? dependent.age : "",
+    allergies: dependent?.allergies ? dependent.allergies : [],
+    medicalConditions: dependent?.medicalConditions
+      ? dependent.medicalConditions
+      : [],
   });
   const [allergyInput, setAllergyInput] = useState("");
   const [medicalInput, setMedicalInput] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
 
   const { user } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
 
   const handleKeyEnter = (e) => {
     if (e.target.name === "allergies" && e.key === "Enter") {
@@ -186,11 +191,6 @@ const DependentInputModal = ({ open, onClose, onSave }) => {
     }
   };
 
-  const handleSave = () => {
-    // onSave(dependentData);
-    onClose();
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -207,7 +207,9 @@ const DependentInputModal = ({ open, onClose, onSave }) => {
     if (dependentData.age < 0 || dependentData.age > 100) {
       return;
     }
+
     try {
+      dispatch(showLoading());
       const data = {
         type: dependentData.type,
         gender: dependentData.gender,
@@ -216,6 +218,8 @@ const DependentInputModal = ({ open, onClose, onSave }) => {
         allergies: dependentData.allergies,
         medicalConditions: dependentData.medicalConditions,
         _id: user?._id,
+        edit: dependent ? true : false,
+        dependentId: dependent?._id ? dependent._id : "",
       };
 
       const res = await axios.post(
@@ -233,13 +237,14 @@ const DependentInputModal = ({ open, onClose, onSave }) => {
           position: toast.POSITION.TOP_CENTER,
         });
         onClose();
-        window.location.reload();
       }
     } catch (error) {
       console.log(error);
       toast.error("Something went wrong", {
         position: toast.POSITION.TOP_CENTER,
       });
+    } finally {
+      dispatch(hideLoading());
     }
   };
 
@@ -349,7 +354,7 @@ const DependentInputModal = ({ open, onClose, onSave }) => {
                   <Chip
                     key={index}
                     label={allergy}
-                    onDelete={(e) => handleDelete(index, "allergy")}
+                    onDelete={() => handleDelete(index, "allergy")}
                   />
                 );
               })}
@@ -373,7 +378,7 @@ const DependentInputModal = ({ open, onClose, onSave }) => {
                   <Chip
                     key={index}
                     label={medical}
-                    onDelete={(e) => handleDelete(index, "medical")}
+                    onDelete={() => handleDelete(index, "medical")}
                   />
                 );
               })}
@@ -390,6 +395,20 @@ const DependentInputModal = ({ open, onClose, onSave }) => {
       </DialogContent>
     </Dialog>
   );
+};
+
+DependentInputModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  dependent: PropTypes.shape({
+    type: PropTypes.string,
+    gender: PropTypes.string,
+    name: PropTypes.string,
+    age: PropTypes.number,
+    allergies: PropTypes.arrayOf(PropTypes.string),
+    medicalConditions: PropTypes.arrayOf(PropTypes.string),
+    _id: PropTypes.string,
+  }),
 };
 
 export default DependentInputModal;

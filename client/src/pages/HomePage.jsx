@@ -1,6 +1,6 @@
 import Layout from "../components/Layout";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import CaregiverCard from "./client/CaregiverCard";
 import CaregiverCardSkeleton from "./client/CaregiverCardSkeleton";
@@ -9,6 +9,7 @@ import Profile from "./caregiver/Profile";
 import { MenuItem, Select, Tab, Tabs, Typography } from "@mui/material";
 import { CiSearch } from "react-icons/ci";
 import { Navigate } from "react-router-dom";
+import SearchBar from "../components/SearchBar";
 
 const HomePage = () => {
   const [caregivers, setCaregivers] = useState([]);
@@ -16,13 +17,41 @@ const HomePage = () => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [searchCaregiver, setSearchCaregiver] = useState("");
   const [searchBy, setSearchBy] = useState("-1");
-  const [searchedCaregivers, setSearchedCaregivers] = useState(null);
+  const [searchedCaregivers, setSearchedCaregivers] = useState([]);
   const [searchError, setSearchError] = useState("");
   const [sortBy, setSortBy] = useState("default");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const getAllCaregivers = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:8070/api/v1/user/getAllCaregivers",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        if (res.data.success) {
+          setCaregivers(res.data.data);
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error("Something went wrong", {
+          position: toast.POSITION.TOP_CENTER,
+        });
+      }
+    };
+    getAllCaregivers();
+  }, []);
 
   // Handler function for tab change
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
+    setSortBy("default");
+    if (sortBy !== "default") setSearchedCaregivers([]);
   };
   //login user data
   const getUserData = async () => {
@@ -41,11 +70,11 @@ const HomePage = () => {
     }
   };
 
-  const babysitters = caregivers.filter(
-    (caregiver) => caregiver.user.role === "babysitter"
+  const babysitters = caregivers?.filter(
+    (caregiver) => caregiver.user?.role === "babysitter"
   );
-  const nurses = caregivers.filter(
-    (caregiver) => caregiver.user.role === "nurse"
+  const nurses = caregivers?.filter(
+    (caregiver) => caregiver.user?.role === "nurse"
   );
 
   const handleCaregiverSearch = (e) => {
@@ -128,65 +157,58 @@ const HomePage = () => {
     }
   };
 
-  const handleSortByChange = (e) => {
-    const value = e.target.value;
-    setSortBy(value);
+  const sort = (e) => {
+    try {
+      const value = e.target.value;
+      setSortBy(value);
 
-    const applySorting = (caregiversList) => {
-      switch (value) {
-        case "age-asc":
-          return [...caregiversList].sort(
-            (a, b) => a.ageRange.lowerLimit - b.ageRange.upperLimit
-          );
-        case "age-desc":
-          return [...caregiversList].sort(
-            (a, b) => b.ageRange.upperLimit - a.ageRange.lowerLimit
-          );
-        case "rating-desc":
-          return [...caregiversList].sort((a, b) => b.rating - a.rating);
-        case "rating-asc":
-          return [...caregiversList].sort((a, b) => a.rating - b.rating);
-        // Add more cases for other sorting options as needed
-        default:
-          return caregiversList; // No sorting
+      const applySorting = (caregiversList) => {
+        switch (value) {
+          case "age-asc":
+            return [...caregiversList].sort(
+              (a, b) => a.ageRange.lowerLimit - b.ageRange.upperLimit
+            );
+          case "age-desc":
+            return [...caregiversList].sort(
+              (a, b) => b.ageRange.upperLimit - a.ageRange.lowerLimit
+            );
+          case "rating-desc":
+            return [...caregiversList].sort((a, b) => b.rating - a.rating);
+          case "rating-asc":
+            return [...caregiversList].sort((a, b) => a.rating - b.rating);
+          default:
+            return caregiversList;
+        }
+      };
+
+      if (searchedCaregivers?.length > 0) {
+        setSearchedCaregivers((prevSearchedCaregivers) =>
+          applySorting(prevSearchedCaregivers)
+        );
+      } else if (selectedTab === 0) {
+        console.log("Selected tab 0 and babysitters");
+        setSearchedCaregivers(() => applySorting(babysitters));
+      } else if (selectedTab === 1) {
+        console.log("Selected tab 1 and nurses");
+        setSearchedCaregivers(() => applySorting(nurses));
+      } else {
+        return;
       }
-    };
-
-    if (searchedCaregivers?.length > 0) {
-      setSearchedCaregivers((prevSearchedCaregivers) =>
-        applySorting(prevSearchedCaregivers)
-      );
-    } else if (selectedTab === 0) {
-      setSearchedCaregivers(() => applySorting(babysitters));
-    } else {
-      setSearchedCaregivers(() => applySorting(nurses));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
     }
   };
 
-  useEffect(() => {
-    const getAllCaregivers = async () => {
-      try {
-        const res = await axios.get(
-          "http://localhost:8070/api/v1/user/getAllCaregivers",
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+  const handleSortByChange = (e) => {
+    setLoading(true);
+    sort(e);
+  };
 
-        if (res.data.success) {
-          setCaregivers(res.data.data);
-        }
-      } catch (error) {
-        console.log(error);
-        toast.error("Something went wrong", {
-          position: toast.POSITION.TOP_CENTER,
-        });
-      }
-    };
-    getAllCaregivers();
-  }, []);
+  //TODO: HAVE TO CREATE PAGINATION FOR CAREGIVERS AND CREATE SEARCH FOR ALL CAREGIVERS(FETCH ALL CAREGIVERS AND APPLY SEARCH)
 
   return (
     <Layout>
@@ -313,38 +335,47 @@ const HomePage = () => {
             {/* Other content */}
           </div>
           {selectedTab === 0 &&
-            ((searchCaregiver && searchError) ||
-              (!searchError && !searchCaregiver)) &&
-            sortBy === "default" && (
-              <div className="flex flex-wrap justify-start items-center gap-11 mt-5">
-                {caregivers && caregivers.length > 0 ? (
-                  caregivers
-                    .filter((caregiver) => caregiver.user.role === "babysitter")
-                    .map((caregiver, index) => (
+            (loading ? (
+              <div className="flex flex-wrap justify-start items-center gap-6">
+                <CaregiverCardSkeleton />
+                <CaregiverCardSkeleton />
+                <CaregiverCardSkeleton />
+                <CaregiverCardSkeleton />
+              </div>
+            ) : (
+              ((searchCaregiver && searchError) ||
+                (!searchError && !searchCaregiver)) &&
+              sortBy === "default" &&
+              !loading && (
+                <div className="flex flex-wrap justify-start items-center gap-11 mt-5">
+                  {caregivers && caregivers.length > 0 ? (
+                    babysitters.map((caregiver, index) => (
                       <CaregiverCard
                         key={caregiver._id}
                         caregiver={caregiver}
                         index={index}
                       />
                     ))
-                ) : (
-                  <div className="flex flex-wrap justify-start items-center gap-6">
-                    <CaregiverCardSkeleton />
-                    <CaregiverCardSkeleton />
-                    <CaregiverCardSkeleton />
-                    <CaregiverCardSkeleton />
-                    <CaregiverCardSkeleton />
-                    <CaregiverCardSkeleton />
-                    <CaregiverCardSkeleton />
-                    <CaregiverCardSkeleton />
-                  </div>
-                )}
-              </div>
-            )}
+                  ) : (
+                    <div className="flex flex-wrap justify-start items-center gap-6">
+                      <CaregiverCardSkeleton />
+                      <CaregiverCardSkeleton />
+                      <CaregiverCardSkeleton />
+                      <CaregiverCardSkeleton />
+                      <CaregiverCardSkeleton />
+                      <CaregiverCardSkeleton />
+                      <CaregiverCardSkeleton />
+                      <CaregiverCardSkeleton />
+                    </div>
+                  )}
+                </div>
+              )
+            ))}
 
           {selectedTab === 0 &&
             (searchCaregiver || sortBy !== "default") &&
-            searchError === "" && (
+            searchError === "" &&
+            !loading && (
               <div className="flex flex-wrap justify-start items-center gap-11 mt-5">
                 {searchedCaregivers && searchedCaregivers.length > 0 ? (
                   searchedCaregivers.map((caregiver, index) => (
@@ -378,38 +409,46 @@ const HomePage = () => {
             )}
 
           {selectedTab === 1 &&
-            ((searchCaregiver && searchError) ||
-              (!searchError && !searchCaregiver)) &&
-            sortBy === "default" && (
-              <div className="flex flex-wrap justify-start items-center gap-11  mt-5">
-                {caregivers && caregivers.length > 0 ? (
-                  caregivers
-                    .filter((caregiver) => caregiver.user.role === "nurse")
-                    .map((caregiver, index) => (
+            (loading ? (
+              <div className="flex flex-wrap justify-start items-center gap-6">
+                <CaregiverCardSkeleton />
+                <CaregiverCardSkeleton />
+                <CaregiverCardSkeleton />
+                <CaregiverCardSkeleton />
+              </div>
+            ) : (
+              ((searchCaregiver && searchError) ||
+                (!searchError && !searchCaregiver)) &&
+              sortBy === "default" && (
+                <div className="flex flex-wrap justify-start items-center gap-11  mt-5">
+                  {caregivers && caregivers.length > 0 ? (
+                    nurses.map((caregiver, index) => (
                       <CaregiverCard
                         key={caregiver._id}
                         caregiver={caregiver}
                         index={index}
                       />
                     ))
-                ) : (
-                  <div className="flex flex-wrap justify-start items-center gap-6">
-                    <CaregiverCardSkeleton />
-                    <CaregiverCardSkeleton />
-                    <CaregiverCardSkeleton />
-                    <CaregiverCardSkeleton />
-                    <CaregiverCardSkeleton />
-                    <CaregiverCardSkeleton />
-                    <CaregiverCardSkeleton />
-                    <CaregiverCardSkeleton />
-                  </div>
-                )}
-              </div>
-            )}
+                  ) : (
+                    <div className="flex flex-wrap justify-start items-center gap-6">
+                      <CaregiverCardSkeleton />
+                      <CaregiverCardSkeleton />
+                      <CaregiverCardSkeleton />
+                      <CaregiverCardSkeleton />
+                      <CaregiverCardSkeleton />
+                      <CaregiverCardSkeleton />
+                      <CaregiverCardSkeleton />
+                      <CaregiverCardSkeleton />
+                    </div>
+                  )}
+                </div>
+              )
+            ))}
 
           {selectedTab === 1 &&
             (searchCaregiver || sortBy !== "default") &&
-            searchError === "" && (
+            searchError === "" &&
+            !loading && (
               <div className="flex flex-wrap justify-start items-center gap-11 mt-5">
                 {searchedCaregivers && searchedCaregivers.length > 0 ? (
                   searchedCaregivers.map((caregiver, index) => (
@@ -422,7 +461,15 @@ const HomePage = () => {
                 ) : (
                   <div className="">
                     {searchCaregiver.length > 0 ? (
-                      <p className="text-center">No results found</p>
+                      <figure className="w-1/3 m-auto">
+                        <img
+                          src="./../../img/404.jpg"
+                          className="w-full h-full"
+                        />
+                        <Typography variant="h6" className="my-2">
+                          No results found
+                        </Typography>
+                      </figure>
                     ) : (
                       <div className="flex flex-wrap justify-start items-center gap-6">
                         <CaregiverCardSkeleton />

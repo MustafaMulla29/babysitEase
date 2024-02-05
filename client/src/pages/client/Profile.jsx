@@ -6,10 +6,12 @@ import axios from "axios";
 import DependentInputModal from "./DependentInputModal";
 import DependentCard from "./DependentCard";
 import { FaPen } from "react-icons/fa6";
+import { MdOutlineAddCircleOutline } from "react-icons/md";
 
 const Profile = () => {
   const [client, setClient] = useState(null);
   const params = useParams();
+  // eslint-disable-next-line no-unused-vars
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -52,9 +54,29 @@ const Profile = () => {
   }, [params.id]);
   return (
     <Layout>
+      {client?.isBlocked && (
+        <div className="py-5 px-8 rounded-lg bg-[#FCE8E6]">
+          <div className="h-full w-ful flex items-start gap-10">
+            <img
+              src="./../../../img/blocked.png"
+              alt="account_blocked"
+              className="w-24"
+            />
+            <div className="max-w-lg">
+              <Typography className="text-lg font-semibold">
+                Your account has been blocked by the admin. Reasons could be:{" "}
+              </Typography>
+              <ol className="list-disc pl-5">
+                <li>Violation of Community Guidelines</li>
+                <li>Inappropriate Behavior</li>
+                <li>Spam or Misuse</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="container mx-auto p-4">
         <div className="bg-white p-6 rounded-md shadow-md">
-          {/* Header Section */}
           <div className="flex items-center gap-4 mb-8">
             {loading ? (
               <Skeleton
@@ -66,7 +88,6 @@ const Profile = () => {
             ) : (
               <Avatar
                 alt="Profile Picture"
-                // src={`http://localhost:8070/${client?.profilePicture}`}
                 src={
                   client?.profilePicture
                     ? `http://localhost:8070/${client.profilePicture}`
@@ -124,12 +145,11 @@ const Profile = () => {
               )}
             </div>
           </div>
-          {/* Divider */}
           <hr className="mb-8" />
 
           {/* Other Details Section */}
           <div className="mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="">
               <Typography>
                 {loading ? (
                   <Skeleton
@@ -161,25 +181,39 @@ const Profile = () => {
               </span>
               {client?.dependents.length < 2 && (
                 <span>
-                  <FaPen
-                    className="text-base cursor-pointer"
+                  <MdOutlineAddCircleOutline
+                    className="text-lg cursor-pointer"
                     onClick={handleOpenModal}
                   />
                 </span>
               )}
             </Typography>
 
-            <div className="flex flex-wrap gap-7">
-              {client?.dependents?.map((dependent, index) => (
-                <DependentCard
-                  dependent={dependent}
-                  key={index}
-                  loading={loading}
+            {client?.dependents?.length === 0 ? (
+              <div className="flex items-center justify-center flex-col w-1/2 m-auto">
+                <img
+                  src="./../../../img/no_dependents.png"
+                  className="w-full h-full"
+                  alt=""
                 />
-              ))}
-            </div>
+                <Typography>
+                  No dependents. Add by clicking + icon above
+                </Typography>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-11">
+                {client?.dependents?.map((dependent, index) => (
+                  <DependentCard
+                    dependent={dependent}
+                    key={index}
+                    loading={loading}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
+
         <DependentInputModal open={isModalOpen} onClose={handleCloseModal} />
       </div>
     </Layout>

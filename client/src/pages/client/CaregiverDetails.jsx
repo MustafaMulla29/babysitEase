@@ -8,7 +8,6 @@ import {
   Chip,
   Rating,
   Skeleton,
-  TextField,
   Typography,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -23,6 +22,8 @@ import { FaPen } from "react-icons/fa";
 import ReviewDialog from "./ReviewDialog";
 import ReviewCard from "../caregiver/ReviewCard";
 import { FaRegImage } from "react-icons/fa6";
+import { IoFlashOutline } from "react-icons/io5";
+import { FaExclamationCircle } from "react-icons/fa";
 
 const CaregiverDetails = () => {
   const [caregiver, setCaregiver] = useState(null);
@@ -89,6 +90,10 @@ const CaregiverDetails = () => {
     e.preventDefault();
     if (bookingError) {
       return;
+    } else if (user?.isBlocked) {
+      return toast.error("Your account is blocked!", {
+        position: toast.POSITION.TOP_CENTER,
+      });
     }
     try {
       dispatch(showLoading());
@@ -120,9 +125,15 @@ const CaregiverDetails = () => {
     } catch (error) {
       dispatch(hideLoading());
       console.log(error);
-      toast.error("Something went wrong", {
-        position: toast.POSITION.TOP_CENTER,
-      });
+      if (error.response.status === 401) {
+        toast.error(error.response.data.message, {
+          position: toast.POSITION.TOP_CENTER,
+        });
+      } else {
+        toast.error("Something went wrong", {
+          position: toast.POSITION.TOP_CENTER,
+        });
+      }
     }
   };
 
@@ -182,14 +193,31 @@ const CaregiverDetails = () => {
                 )}
               </Typography>
               {caregiver ? (
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 mb-2">
+                  {/* <IoFlashOutline />
                   <Chip
                     className="mb-2"
-                    label={
-                      caregiver?.availability ? "Available" : "Unavailable"
+                    label={caregiver?.availability}
+                    color={
+                      caregiver?.availability === "Available"
+                        ? "success"
+                        : "error"
                     }
-                    color={caregiver?.availability ? "success" : "error"}
-                  />
+                  /> */}
+                  <div
+                    className={`${
+                      caregiver?.availability === "Available"
+                        ? "bg-green-800"
+                        : "bg-red-800"
+                    } flex gap-1 items-center py-2 px-3 rounded-full text-white text-[12px]`}
+                  >
+                    {caregiver?.availability === "Available" ? (
+                      <IoFlashOutline />
+                    ) : (
+                      <FaExclamationCircle className="" />
+                    )}
+                    {caregiver?.availability}
+                  </div>
                   {user?.role === "client" && (
                     <a href="#booking">
                       <Button

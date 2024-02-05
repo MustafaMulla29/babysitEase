@@ -1,24 +1,14 @@
 import React from "react";
-import {
-  Card,
-  CardContent,
-  Typography,
-  Avatar,
-  Rating,
-  Chip,
-} from "@mui/material";
+import { Card, CardContent, Typography, Avatar, Rating } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { CiLocationOn } from "react-icons/ci";
+import { PropTypes } from "prop-types";
 
 const CaregiverCard = React.memo(({ caregiver, index }) => {
   const {
     user: { name, address, city, profilePicture },
     rating,
     ageRange,
-    feesPerDay,
-    qualification,
-    preferredCities,
-    description,
+    userId,
   } = caregiver;
   const navigate = useNavigate();
 
@@ -57,7 +47,7 @@ const CaregiverCard = React.memo(({ caregiver, index }) => {
             variant="h6"
             component="div"
             className="font-semibold text-center text-xl mb-3 cursor-pointer hover:underline hover:underline-offset-4"
-            onClick={() => navigate(`/caregiver/${caregiver?.userId}`)}
+            onClick={() => navigate(`/caregiver/${userId}`)}
           >
             {name}
           </Typography>
@@ -128,4 +118,24 @@ const CaregiverCard = React.memo(({ caregiver, index }) => {
   );
 });
 
+CaregiverCard.displayName = "CaregiverCard";
+
+CaregiverCard.propTypes = {
+  caregiver: PropTypes.shape({
+    user: PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      address: PropTypes.string.isRequired,
+      city: PropTypes.string.isRequired,
+      profilePicture: PropTypes.string.isRequired,
+      // ... other properties
+    }).isRequired,
+    userId: PropTypes.string.isRequired,
+    rating: PropTypes.number.isRequired,
+    ageRange: PropTypes.shape({
+      lowerLimit: PropTypes.number.isRequired,
+      upperLimit: PropTypes.number.isRequired,
+    }).isRequired,
+  }).isRequired,
+  index: PropTypes.number.isRequired,
+};
 export default CaregiverCard;

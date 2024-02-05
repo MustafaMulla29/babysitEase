@@ -1,6 +1,6 @@
 const express = require('express')
 const authMiddleware = require('../middlewares/authMiddleware')
-const { getAllUsersController, getAllCaregiversController, changeAccountStatusController, getAdminDetailsController } = require('../controllers/adminCtrl')
+const { getAllUsersController, getAllCaregiversController, changeAccountStatusController, getAdminDetailsController, blockUserController } = require('../controllers/adminCtrl')
 
 const router = express.Router()
 
@@ -14,5 +14,7 @@ router.get('/getAdminDetails', authMiddleware, getAdminDetailsController)
 
 //POST || ACCOUNT STATUS
 router.post('/changeAccountStatus', authMiddleware, changeAccountStatusController)
+
+router.patch("/blockUser/:userId", authMiddleware, blockUserController)
 
 module.exports = router

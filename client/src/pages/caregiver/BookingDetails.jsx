@@ -1,9 +1,14 @@
-import { Typography, Paper, Avatar, Button } from "@mui/material";
+import { Typography, Paper, Avatar, Tooltip, IconButton } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { hideLoading, showLoading } from "../../redux/features/alertSlice";
 import axios from "axios";
 import { PropTypes } from "prop-types";
+import { BsCalendarDate } from "react-icons/bs";
+import { FaRegClock } from "react-icons/fa";
+import { AiFillCheckCircle, AiFillCloseCircle } from "react-icons/ai";
+import moment from "moment";
+import Zoom from "@mui/material/Zoom";
 
 const BookingDetails = ({ booking }) => {
   const dispatch = useDispatch();
@@ -37,9 +42,15 @@ const BookingDetails = ({ booking }) => {
       });
     }
   };
+
+  const bookedOnDate = moment(booking.bookedOn).format("DD/MM/YYYY");
+  const jobDate = moment(booking.date).format("DD/MM/YYYY");
   return (
     <>
-      <Paper elevation={3} className="p-6 mb-8 bg-white rounded-md shadow-md">
+      <Paper
+        elevation={3}
+        className="p-6 mb-8 relative bg-white rounded-md shadow-md"
+      >
         <div>
           <div className="flex items-center justify-between">
             <Avatar
@@ -48,32 +59,66 @@ const BookingDetails = ({ booking }) => {
               sx={{ width: 80, height: 80 }}
             />
             <Typography>{booking.clientName}</Typography>
+
+            <Typography>Booked on: {bookedOnDate}</Typography>
             <Typography>
-              {new Date(booking.date).toLocaleDateString()}
+              <span className="flex items-center gap-3">
+                Job Date:
+                <BsCalendarDate className="text-lg" />
+                {jobDate}
+              </span>
             </Typography>
             <Typography>For {booking.bookedFor}</Typography>
-            <Typography>{booking.status}</Typography>
-
-            {booking.status === "Pending" && (
-              <>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  className="bg-[#1976d2] hover:bg-[#1565c0]"
+            <Typography
+              className={`flex items-center gap-1 ${
+                booking.status === "Pending"
+                  ? "bg-orange-400"
+                  : booking.status === "Approved"
+                  ? "bg-blue-500"
+                  : booking.status === "Completed"
+                  ? "bg-green-500"
+                  : "bg-red-500"
+              } text-[12px] px-2 py-1 rounded-full text-white flex items-center`}
+            >
+              {booking.status === "Pending" ? (
+                <FaRegClock className="text-sm" />
+              ) : booking.status === "Approved" ? (
+                <AiFillCheckCircle className="text-sm" />
+              ) : booking.status === "Completed" ? (
+                <AiFillCheckCircle className="text-sm" />
+              ) : (
+                <AiFillCloseCircle className="text-sm" />
+              )}
+              {booking.status === "Nullified" ? (
+                <Tooltip
+                  TransitionComponent={Zoom}
+                  title="Accepted nor rejected by caregiver"
+                >
+                  {booking.status}
+                </Tooltip>
+              ) : (
+                booking.status
+              )}
+            </Typography>
+          </div>
+          {booking.status === "Pending" && (
+            <div className="flex w-full items-center justify-center gap-10">
+              <Tooltip title="Accept Booking" TransitionComponent={Zoom} arrow>
+                <IconButton
                   onClick={() => handleBookingStatus("Approved", booking._id)}
                 >
-                  Accept
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="secondary"
+                  <AiFillCheckCircle className="text-3xl text-green-500 cursor-pointer" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Reject Booking" TransitionComponent={Zoom} arrow>
+                <IconButton
                   onClick={() => handleBookingStatus("Rejected", booking._id)}
                 >
-                  Reject
-                </Button>
-              </>
-            )}
-          </div>
+                  <AiFillCloseCircle className="text-3xl text-red-500 cursor-pointer" />{" "}
+                </IconButton>
+              </Tooltip>
+            </div>
+          )}
         </div>
       </Paper>
     </>
@@ -86,6 +131,7 @@ BookingDetails.propTypes = {
     clientProfilePicture: PropTypes.string.isRequired,
     clientName: PropTypes.string.isRequired,
     date: PropTypes.string.isRequired,
+    bookedOn: PropTypes.string.isRequired,
     bookedFor: PropTypes.string.isRequired,
     status: PropTypes.string.isRequired,
   }).isRequired,

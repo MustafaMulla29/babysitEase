@@ -1,13 +1,4 @@
-import React from "react";
-import {
-  Card,
-  CardContent,
-  Typography,
-  Avatar,
-  Rating,
-  Skeleton,
-} from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { Card, CardContent, Typography, Skeleton } from "@mui/material";
 
 const CaregiverCardSkeleton = () => {
   return (

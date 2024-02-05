@@ -3,9 +3,10 @@ import axios from "axios";
 import { Avatar, Chip, Rating, Skeleton, Typography } from "@mui/material";
 import UpdateProfileModal from "./UpdateProfileModal";
 import { useSelector } from "react-redux";
-import { FaPen } from "react-icons/fa";
+import { FaExclamationCircle, FaPen } from "react-icons/fa";
 import ReviewCard from "./ReviewCard";
 import { FaRegImage } from "react-icons/fa6";
+import { IoFlashOutline } from "react-icons/io5";
 
 const Profile = () => {
   const [caregiver, setCaregiver] = useState(null);
@@ -66,6 +67,28 @@ const Profile = () => {
   return (
     <>
       <div className="container mx-auto p-4">
+        {caregiver?.isBlocked && (
+          <div className="py-5 px-8 rounded-lg bg-[#FCE8E6]">
+            <div className="h-full w-ful flex items-start gap-10">
+              <img
+                src="./../../../img/blocked.png"
+                alt="account_blocked"
+                className="w-24"
+              />
+              <div className="max-w-lg">
+                <Typography className="text-lg font-semibold">
+                  Your caregiver account has been blocked by the admin. Reasons
+                  could be:{" "}
+                </Typography>
+                <ol className="list-disc pl-5">
+                  <li>Violation of Community Guidelines</li>
+                  <li>Inappropriate Behavior</li>
+                  <li>Spam or Misuse</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="bg-white p-6 rounded-md shadow-md">
           {/* Header Section */}
           <div className="flex items-center gap-4 mb-8">
@@ -111,11 +134,20 @@ const Profile = () => {
                 )}
               </Typography>
               {caregiver ? (
-                <Chip
-                  className="mb-2"
-                  label={caregiver?.availability ? "Available" : "Unavailable"}
-                  color={caregiver?.availability ? "success" : "error"}
-                />
+                <div
+                  className={`${
+                    caregiver?.availability === "Available"
+                      ? "bg-green-800"
+                      : "bg-red-800"
+                  } flex gap-1 items-center py-2 px-3 rounded-full text-white text-[12px] w-fit`}
+                >
+                  {caregiver?.availability === "Available" ? (
+                    <IoFlashOutline />
+                  ) : (
+                    <FaExclamationCircle className="" />
+                  )}
+                  {caregiver?.availability}
+                </div>
               ) : (
                 <Skeleton
                   animation="wave"

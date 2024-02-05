@@ -6,6 +6,11 @@ const caregiverSchema = new mongoose.Schema({
         ref: "user",
         required: [true, "User id is required"]
     },
+    role: {
+        type: String,
+        ref: "user",
+        required: [true, "role is required"]
+    },
     createdAt: {
         type: Date,
         default: Date.now()
@@ -19,10 +24,6 @@ const caregiverSchema = new mongoose.Schema({
         required: [true, "Description is required"],
         trim: true
     },
-    // review: {
-    //     type: [Object],
-    //     default: [],
-    // },
     rating: {
         type: Number,
         default: 0,
@@ -32,8 +33,12 @@ const caregiverSchema = new mongoose.Schema({
         required: [true, 'Fees per day is required']
     },
     availability: {
-        type: Boolean,
-        default: true
+        type: String,
+        default: "Available",
+        enum: {
+            values: ["Available", "Unavailable"],
+            message: "Availability can be either Available or Unavailable"
+        }
     },
 
     preferredCities: {

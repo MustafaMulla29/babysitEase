@@ -6,7 +6,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { showLoading, hideLoading } from "../redux/features/alertSlice";
 import { Button, TextField, Typography } from "@mui/material";
 import { setUser } from "../redux/features/userSlice";
-import { message } from "antd";
 
 const Login = () => {
   //input values state

@@ -42,7 +42,7 @@ const registerController = async (req, res) => {
         let config = {
             service: 'gmail',
             auth: {
-                // user: 'babysitease@gmail.com',
+                // user: process.env.BABYSITEASE_EMAIL,
                 // pass: 'nazm oaib xcsz hxow',
                 user: process.env.BABYSITEASE_EMAIL,
                 pass: process.env.BABYSITEASE_APP_PASSWORD,
@@ -70,7 +70,7 @@ const registerController = async (req, res) => {
         let mail = mailGenerator.generate(response)
 
         let message = {
-            from: 'babysitease@gmail.com',
+            from: process.env.BABYSITEASE_EMAIL,
             to: req.body.email,
             subject: 'Registered successully!',
             html: mail
@@ -79,8 +79,6 @@ const registerController = async (req, res) => {
         transporter.sendMail(message, (error, info) => {
             if (error) {
                 console.log(error)
-            } else {
-                console.log(info)
             }
         })
         // }
@@ -174,7 +172,6 @@ const authController = async (req, res) => {
 
 const applyCaregiverController = async (req, res) => {
     try {
-        console.log("body", req.body)
         // Extract certificates from req.files
         const certifications = req.files ? req.files.map(file => file.path) : null;
 
@@ -193,6 +190,7 @@ const applyCaregiverController = async (req, res) => {
             userId,
         } = req.body;
 
+
         const existingCaregiver = await caregiverModel.findOne({ userId: userId })
 
         if (existingCaregiver) {
@@ -201,6 +199,7 @@ const applyCaregiverController = async (req, res) => {
                 message: "You have already applied"
             })
         }
+        const user = await userModel.findOne({ _id: userId })
 
         const newCaregiver = await caregiverModel({
             yearsExperience,
@@ -212,6 +211,7 @@ const applyCaregiverController = async (req, res) => {
             ageRange,
             userId,
             certifications,
+            role: user?.role,
             status: "Pending",
         });
 
@@ -233,9 +233,51 @@ const applyCaregiverController = async (req, res) => {
 
         await userModel.findByIdAndUpdate(adminUser._id, { notification });
 
+        let config = {
+            service: 'gmail',
+            auth: {
+                user: process.env.BABYSITEASE_EMAIL,
+                pass: process.env.BABYSITEASE_APP_PASSWORD,
+            }
+        }
+
+        let transporter = nodemailer.createTransport(config)
+
+        let mailGenerator = new Mailgen({
+            theme: 'default',
+            product: {
+                name: 'Mailgen',
+                link: 'https://mailgen.js/'
+            }
+        })
+
+
+        let response = {
+            body: {
+                name: user?.name,
+                intro: 'You have successfully applied for a caregiver account',
+                outro: 'Wait for the approval from admin'
+            }
+        }
+        // if (!existingUser) {
+        let mail = mailGenerator.generate(response)
+
+        let message = {
+            from: process.env.BABYSITEASE_EMAIL,
+            to: user?.email,
+            subject: 'caregiver account applied successully!',
+            html: mail
+        }
+
+        transporter.sendMail(message, (error, info) => {
+            if (error) {
+                console.log(error)
+            }
+        })
+
         res.status(201).send({
             success: true,
-            message: "Applied for nurse successfully",
+            message: "Applied for caregiver successfully",
         });
     } catch (error) {
         console.log(error);
@@ -299,7 +341,7 @@ const deleteNotificationsController = async (req, res) => {
 //ADD DEPENDENT CONTROLLER
 const addDependentController = async (req, res) => {
     try {
-        const { _id, type, gender, name, age, allergies, medicalConditions } = req.body;
+        const { _id, type, gender, name, age, allergies, medicalConditions, edit, dependentId } = req.body;
         // Find the user by _id
         const existingUser = await userModel.findOne({ _id });
 
@@ -313,33 +355,52 @@ const addDependentController = async (req, res) => {
         );
 
         // If trying to add a parent dependent and already has one, or trying to add a child dependent and already has one, return an error
-        if (
-            (type === "Parent" && hasParentDependent) ||
-            (type === "Child" && hasChildDependent)
-        ) {
-            return res.status(400).send({
-                success: false,
-                message: `User already has a ${dependentType} dependent`,
-            });
+        if (!edit) {
+            if (
+                (type === "Parent" && hasParentDependent) ||
+                (type === "Child" && hasChildDependent)
+            ) {
+                return res.status(400).send({
+                    success: false,
+                    message: `Already has a ${type} dependent`,
+                });
+            }
         }
 
         // If the user doesn't have a dependent of the same type, proceed to add the new dependent
-        const updatedUser = await userModel.findByIdAndUpdate(
-            { _id },
-            {
-                $push: {
-                    dependents: {
-                        type, gender, name, age, allergies, medicalConditions
+        let updatedUser
+        if (edit) {
+            updatedUser = await userModel.findOneAndUpdate(
+                { _id, "dependents._id": dependentId }, // Find user by _id and match dependent by _id
+                {
+                    $set: {
+                        "dependents.$.type": type,
+                        "dependents.$.gender": gender,
+                        "dependents.$.name": name,
+                        "dependents.$.age": age,
+                        "dependents.$.allergies": allergies,
+                        "dependents.$.medicalConditions": medicalConditions,
                     },
                 },
-            },
-            { new: true, runValidators: true }
-        );
+                { new: true, runValidators: true }
+            );
+        } else {
+            updatedUser = await userModel.findByIdAndUpdate(
+                { _id },
+                {
+                    $push: {
+                        dependents: {
+                            type, gender, name, age, allergies, medicalConditions
+                        },
+                    },
+                },
+                { new: true, runValidators: true }
+            );
+        }
 
         return res.status(200).send({
             success: true,
-            message: "Dependent added successfully",
-            data: updatedUser,
+            message: edit ? "Dependent updated successfully" : "Dependent added successfully",
         });
     } catch (error) {
         console.log(error);
@@ -351,44 +412,200 @@ const addDependentController = async (req, res) => {
     }
 };
 
+const deleteDependentController = async (req, res) => {
+    try {
+        const { userId, dependentId } = req.params;
+
+        const updatedUser = await userModel.findByIdAndUpdate(
+            { _id: userId },
+            {
+                $pull: { // Use $pull to remove the specified dependent
+                    dependents: { _id: dependentId }
+                }
+            },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Dependent deleted successfully",
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Error while deleting dependent",
+            error,
+        });
+    }
+};
+
+
+
+
+// const getAllCaregiversController = async (req, res) => {
+//     try {
+//         // Find caregivers with status "Approved"
+//         const caregivers = await caregiverModel.find({ status: "Approved" });
+
+//         // Extract userIds from the caregivers
+//         const userIds = caregivers.map(caregiver => caregiver.userId);
+
+//         // Find users with isCaregiver set to true and matching userIds
+//         const caregiverUsers = await userModel.find({
+//             isCaregiver: true,
+//             isBlocked: false,
+//             _id: { $in: userIds },
+//         });
+
+//         // Create a mapping of userId to user information
+//         const userMap = {};
+//         caregiverUsers.forEach(user => {
+//             userMap[user._id] = user;
+//         });
+
+//         // Combine user and caregiver information into one object
+//         const caregiversCombined = caregivers.map(caregiver => ({
+//             ...caregiver.toObject(),  // Convert Mongoose document to plain JavaScript object
+//             user: userMap[caregiver.userId], // Add user information
+//         }));
+
+
+//         // Send the combined data in the response
+//         res.status(200).send({
+//             success: true,
+//             message: "Caregivers and users retrieved successfully",
+//             data: caregiversCombined,
+//         });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).send({
+//             success: false,
+//             message: "Error while getting caregivers and users",
+//             error,
+//         });
+//     }
+// };
+
 const getAllCaregiversController = async (req, res) => {
     try {
-        // Find caregivers with status "Approved"
-        const caregivers = await caregiverModel.find({ status: "Approved" });
+        const { page, pageSize, tab } = req.query;
+        const skip = (page - 1) * pageSize;
+        const tabValue = parseInt(tab);
 
-        // Extract userIds from the caregivers
+        const role = tabValue === 0 ? "babysitter" : "nurse"
+        const totalCaregivers = await caregiverModel.countDocuments({ status: "Approved", role });
+
+        const caregivers = await caregiverModel
+            .find({ status: "Approved", role })
+            .sort({ rating: -1 })
+            .skip(skip)
+            .limit(Number(pageSize));
+
+
         const userIds = caregivers.map(caregiver => caregiver.userId);
 
-        // Find users with isCaregiver set to true and matching userIds
+
         const caregiverUsers = await userModel.find({
             isCaregiver: true,
+            isBlocked: false,
             _id: { $in: userIds },
+            role: role,
         });
 
-        // Create a mapping of userId to user information
+
         const userMap = {};
         caregiverUsers.forEach(user => {
             userMap[user._id] = user;
         });
 
-        // Combine user and caregiver information into one object
         const caregiversCombined = caregivers.map(caregiver => ({
-            ...caregiver.toObject(),  // Convert Mongoose document to plain JavaScript object
-            user: userMap[caregiver.userId], // Add user information
+            ...caregiver.toObject(),
+            user: userMap[caregiver.userId],
         }));
 
 
-        // Send the combined data in the response
+
+
         res.status(200).send({
             success: true,
             message: "Caregivers and users retrieved successfully",
-            data: caregiversCombined,
+            data: {
+                caregivers: caregiversCombined,
+                totalCaregivers: totalCaregivers,
+            },
         });
     } catch (error) {
         console.error(error);
         res.status(500).send({
             success: false,
             message: "Error while getting caregivers and users",
+            error,
+        });
+    }
+};
+
+const searchCaregiversController = async (req, res) => {
+    try {
+        const { term, searchBy, tab } = req.query;
+
+        let query = {};
+
+        if (searchBy === 'preferredCities') {
+            query = { 'preferredCities': { $in: [new RegExp(term, 'i')] } };
+        } else if (searchBy === 'specialisation') {
+            query = { 'specialisation': { $in: [new RegExp(term, 'i')] } };
+        } else if (searchBy === 'ageRange') {
+            // Assuming 'term' is in the format 'minAge-maxAge'
+            const [minAge, maxAge] = term.split('-');
+            query = {
+                'ageRange.lowerLimit': { $lte: parseInt(term) },
+                'ageRange.upperLimit': { $gte: parseInt(term) }
+            };
+        }
+        const role = tab === "babysitter" ? "babysitter" : "nurse"
+
+        const caregivers = await caregiverModel
+            .find({
+                status: 'Approved',
+                role,
+                ...query,
+            })
+
+        const caregiverIds = caregivers?.map((caregiver) => caregiver.userId)
+
+        const users = await userModel.find({
+            isCaregiver: true,
+            isBlocked: false, _id: { $in: caregiverIds }
+        })
+
+        const userMap = {};
+        users.forEach(user => {
+            userMap[user._id] = user;
+        });
+        const combinedCaregivers = caregivers.map((caregiver) => ({
+            ...caregiver.toObject(),
+            user: userMap[caregiver.userId]
+        }))
+
+
+        res.status(200).send({
+            success: true,
+            message: 'Caregivers retrieved successfully',
+            combinedCaregivers,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({
+            success: false,
+            message: 'Error while searching caregivers',
             error,
         });
     }
@@ -442,9 +659,17 @@ const bookCaregiverController = async (req, res) => {
             })
         }
 
+        if (user?.isBlocked) {
+            return res.status(401).send({
+                success: false,
+                message: "Your account is blocked!"
+            })
+        }
+
         const existingBooking = await bookingModel.findOne({
             clientId: user?._id,
             date: formattedDate,
+            status: { $ne: "Nullified" }
         });
 
 
@@ -459,6 +684,7 @@ const bookCaregiverController = async (req, res) => {
         const existingCaregiverBooking = await bookingModel.findOne({
             caregiverId: caregiverId,
             date: formattedDate,
+            status: { $ne: "Nullified" }
         });
 
         if (existingCaregiverBooking) {
@@ -495,6 +721,92 @@ const bookCaregiverController = async (req, res) => {
         });
 
         await userNotif.save();
+
+
+        let config = {
+            service: 'gmail',
+            auth: {
+                user: process.env.BABYSITEASE_EMAIL,
+                pass: process.env.BABYSITEASE_APP_PASSWORD,
+            }
+        }
+
+        let transporter = nodemailer.createTransport(config)
+
+        let mailGenerator = new Mailgen({
+            theme: 'default',
+            product: {
+                name: 'Mailgen',
+                link: 'https://mailgen.js/'
+            }
+        })
+
+        //client mail
+        const response = {
+            body: {
+                name: user?.name,
+                intro: `Dear ${user?.name},\n\nYou have successfully booked a caregiver for ${bookedFor.toLowerCase()} care.`,
+                action: {
+                    instructions: 'You can check the details of your booking on our platform.',
+                    button: {
+                        color: '#22BC66',
+                        text: 'View Booking',
+                        link: 'http://localhost:5173/client/bookings'
+                    }
+                },
+                outro: 'Thank you for choosing our service!'
+            }
+        };
+
+        let mail = mailGenerator.generate(response)
+
+        let message = {
+            from: process.env.BABYSITEASE_EMAIL,
+            to: user?.email,
+            subject: 'caregiver booked successully!',
+            html: mail
+        }
+
+        transporter.sendMail(message, (error, info) => {
+            if (error) {
+                console.log(error)
+            }
+        })
+
+        //caregiver mail
+        const caregiverResponse = {
+            body: {
+                name: userCaregiver?.name,
+                intro: `Dear ${userCaregiver?.name},\n\nYou have a new booking request from ${user?.name}.`,
+                action: {
+                    instructions: 'You can review and respond to the booking request on our platform.',
+                    button: {
+                        color: '#22BC66',
+                        text: 'Review Booking',
+                        link: 'http://localhost:5173/caregiver/bookings' // Replace with your actual booking requests link
+                    }
+                },
+                outro: 'Thank you for being a caregiver on our platform!'
+            }
+        };
+
+        let caregiverMail = mailGenerator.generate(caregiverResponse);
+
+        let caregiverMessage = {
+            from: process.env.BABYSITEASE_EMAIL,
+            to: userCaregiver?.email,
+            subject: 'New Booking Request!',
+            html: caregiverMail
+        };
+
+        transporter.sendMail(caregiverMessage, (error, caregiverInfo) => {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log(caregiverInfo);
+            }
+        });
+
         res.status(200).send({
             success: true,
             message: "You have successfully booked a caregiver"
@@ -513,7 +825,7 @@ const bookCaregiverController = async (req, res) => {
 const getBookingsController = async (req, res) => {
     try {
         const clientId = req.query.clientId;
-        const bookings = await bookingModel.find({ clientId: clientId });
+        const bookings = await bookingModel.find({ clientId: clientId }).sort({ bookedAt: -1 });
 
         if (!bookings || bookings.length === 0) {
             return res.status(200).send({
@@ -534,6 +846,7 @@ const getBookingsController = async (req, res) => {
             return {
                 _id: booking._id,
                 clientId: booking.clientId,
+                bookedOn: booking.bookedAt,
                 bookedFor: booking.bookedFor,
                 date: booking.date,
                 status: booking.status,
@@ -621,6 +934,25 @@ const addReviewController = async (req, res) => {
     }
 };
 
+const cancelBookingController = async (req, res) => {
+    try {
+        const { bookingId } = req.body;
+        await bookingModel.findByIdAndDelete(bookingId);
+
+        res.status(200).send({
+            success: true,
+            message: "Booking cancelled successfully.",
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({
+            success: false,
+            message: "Error while adding review.",
+            error,
+        });
+    }
+}
 
 
-module.exports = { loginController, registerController, authController, applyCaregiverController, getNotificationsController, deleteNotificationsController, addDependentController, getAllCaregiversController, getCaregiverDetails, bookCaregiverController, getBookingsController, addReviewController }
+
+module.exports = { loginController, registerController, authController, applyCaregiverController, getNotificationsController, deleteNotificationsController, addDependentController, getAllCaregiversController, getCaregiverDetails, bookCaregiverController, getBookingsController, addReviewController, cancelBookingController, searchCaregiversController, deleteDependentController }
