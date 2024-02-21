@@ -240,9 +240,7 @@ const DependentInputModal = ({ open, onClose, dependent }) => {
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something went wrong", {
-        position: toast.POSITION.TOP_CENTER,
-      });
+      toast.error("Something went wrong");
     } finally {
       dispatch(hideLoading());
     }

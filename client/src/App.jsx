@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import HomePage from "./pages/HomePage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import "react-toastify/dist/ReactToastify.css";
@@ -7,7 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import Spinner from "./components/Spinner";
 import ProtectedRoutes from "./components/ProtectedRoutes";
 import PublicRoutes from "./components/PublicRoutes";
-import { ToastContainer } from "react-toastify";
+import { Slide, ToastContainer } from "react-toastify";
 import Subscription from "./pages/Subscription";
 import { StyledEngineProvider } from "@mui/material";
 import Notification from "./pages/Notification";
@@ -19,22 +18,18 @@ import {
 import ApplyNurse from "./pages/ApplyNurse";
 import Users from "./pages/admin/Users";
 import Caregivers from "./pages/admin/Caregivers";
-// import Profile from "./pages/caregiver/Profile";
 import UserProfile from "./pages/client/Profile";
 import CaregiverDetails from "./pages/client/CaregiverDetails";
 import Bookings from "./pages/client/Bookings";
 import CaregiverBookings from "./pages/caregiver/Bookings";
 import axios from "axios";
-import HomePageNew from "./pages/HomePageNew";
 import SearchPage from "./pages/client/SearchPage";
+import Homepage from "./pages/Homepage";
+import ScrollTop from "./components/ScrollTop";
 
 function App() {
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.alerts);
-
-  // changes made here 04-08-2023
-  //from useSubscription custom hook
-  // const isSubscribed = useSelector((state) => state.subscription.isSubscribed);
 
   const { user } = useSelector((state) => state.user);
 
@@ -42,17 +37,6 @@ function App() {
     // Reset subscription status when the component mounts
     dispatch(resetSubscription());
   }, [dispatch]);
-
-  // useEffect(() => {
-  //   const thirtyDaysInMillis = 30 * 24 * 60 * 60 * 100;
-
-  //   const timeoutId = setTimeout(() => {
-  //     dispatch(resetSubscription());
-  //     localStorage.removeItem("subscriptionStatus"); // Remove from local storage
-  //   }, thirtyDaysInMillis);
-
-  //   return () => clearTimeout(timeoutId);
-  // }, [dispatch, isSubscribed]);
 
   useEffect(() => {
     const bookingStatus = async () => {
@@ -137,7 +121,11 @@ function App() {
     <>
       <StyledEngineProvider injectFirst>
         <BrowserRouter>
-          <ToastContainer />
+          <ToastContainer
+            position="top-center"
+            transition={Slide}
+            autoClose={2000}
+          />
           {loading ? (
             <Spinner />
           ) : (
@@ -147,13 +135,12 @@ function App() {
                 element={
                   <ProtectedRoutes>
                     {localStorage.getItem("subscriptionStatus") === "Active" ? (
-                      <HomePageNew />
+                      <Homepage />
                     ) : user?.role === "babysitter" ||
                       user?.role === "nurse" ? (
                       <Navigate to="/subscribe" replace={true} />
                     ) : (
-                      // <HomePage />
-                      <HomePageNew />
+                      <Homepage />
                     )}
                   </ProtectedRoutes>
                 }
@@ -270,6 +257,7 @@ function App() {
               {/* to here */}
             </Routes>
           )}
+          <ScrollTop />
         </BrowserRouter>
       </StyledEngineProvider>
     </>

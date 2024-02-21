@@ -10,31 +10,33 @@ import {
   Skeleton,
   Typography,
 } from "@mui/material";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-// import { DateFnsUtils } from "@date-io/date-fns";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { useDispatch, useSelector } from "react-redux";
-import { toast } from "react-toastify";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { showLoading, hideLoading } from "./../../redux/features/alertSlice";
-import moment from "moment";
 import { FaPen } from "react-icons/fa";
 import ReviewDialog from "./ReviewDialog";
 import ReviewCard from "../caregiver/ReviewCard";
 import { FaRegImage } from "react-icons/fa6";
 import { IoFlashOutline } from "react-icons/io5";
 import { FaExclamationCircle } from "react-icons/fa";
+import { CiLocationOn } from "react-icons/ci";
+import BookingModal from "./BookingModal";
+import { useSelector } from "react-redux";
 
 const CaregiverDetails = () => {
   const [caregiver, setCaregiver] = useState(null);
-  const [bookingDate, setBookingDate] = useState(null);
-  const [bookingError, setBookingError] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [caregiverReviews, setCaregiverReviews] = useState(null);
+  const [caregiverReviews, setCaregiverReviews] = useState([]);
+
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const handleOpenModal = () => {
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+  };
 
   const params = useParams();
   const { user } = useSelector((state) => state.user);
-  const dispatch = useDispatch();
 
   useEffect(() => {
     const getUserInfo = async () => {
@@ -63,78 +65,6 @@ const CaregiverDetails = () => {
 
   const handleCloseDialog = () => {
     setDialogOpen(false);
-  };
-
-  const handleDateChange = (date) => {
-    // console.log(date);
-    const currentDate = moment();
-
-    if (moment(date).isBefore(currentDate)) {
-      setBookingError("Please select a valid date");
-      return;
-    }
-
-    if (
-      moment(date).date() === currentDate.date() &&
-      currentDate.hours() >= 9
-    ) {
-      setBookingError("You cannot book today! Select another date");
-      return;
-    }
-
-    setBookingDate(date);
-    setBookingError("");
-  };
-
-  const handleBooking = async (e) => {
-    e.preventDefault();
-    if (bookingError) {
-      return;
-    } else if (user?.isBlocked) {
-      return toast.error("Your account is blocked!", {
-        position: toast.POSITION.TOP_CENTER,
-      });
-    }
-    try {
-      dispatch(showLoading());
-      const date = moment(bookingDate).format("YYYY-MM-DD");
-      const res = await axios.post(
-        "http://localhost:8070/api/v1/user/bookCaregiver",
-        {
-          clientId: user?._id,
-          caregiverId: params.userId,
-          date: date,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-
-      dispatch(hideLoading());
-      if (res.data.success) {
-        toast.success(res.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
-      } else {
-        toast.info(res.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
-      }
-    } catch (error) {
-      dispatch(hideLoading());
-      console.log(error);
-      if (error.response.status === 401) {
-        toast.error(error.response.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
-      } else {
-        toast.error("Something went wrong", {
-          position: toast.POSITION.TOP_CENTER,
-        });
-      }
-    }
   };
 
   useEffect(() => {
@@ -180,30 +110,24 @@ const CaregiverDetails = () => {
             <div className="">
               <Typography variant="h4" className="mb-2 font-bold">
                 {caregiver ? (
-                  caregiver.name
+                  caregiver.name?.charAt(0).toUpperCase() +
+                  caregiver.name.slice(1, caregiver.name.length)
                 ) : (
                   <Skeleton width={200} animation="wave" />
                 )}
               </Typography>
               <Typography className="mb-2">
                 {caregiver ? (
-                  caregiver.address
+                  <span className="flex items-center gap-1">
+                    <CiLocationOn className="text-lg" />
+                    {caregiver.address}
+                  </span>
                 ) : (
                   <Skeleton animation="wave" width={150} />
                 )}
               </Typography>
               {caregiver ? (
                 <div className="flex items-start gap-3 mb-2">
-                  {/* <IoFlashOutline />
-                  <Chip
-                    className="mb-2"
-                    label={caregiver?.availability}
-                    color={
-                      caregiver?.availability === "Available"
-                        ? "success"
-                        : "error"
-                    }
-                  /> */}
                   <div
                     className={`${
                       caregiver?.availability === "Available"
@@ -219,15 +143,16 @@ const CaregiverDetails = () => {
                     {caregiver?.availability}
                   </div>
                   {user?.role === "client" && (
-                    <a href="#booking">
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        className="rounded-3xl text-sm"
-                      >
-                        Book Me
-                      </Button>
-                    </a>
+                    // <a href="#booking">
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      className="rounded-3xl text-sm"
+                      onClick={handleOpenModal}
+                    >
+                      Book Me
+                    </Button>
+                    // </a>
                   )}
                 </div>
               ) : (
@@ -257,13 +182,6 @@ const CaregiverDetails = () => {
 
           {/* Description Section */}
           <div className="mb-8">
-            {/* <Typography variant="h6">
-              {caregiver ? (
-                "Description"
-              ) : (
-                <Skeleton animation="wave" width={100} />
-              )}
-            </Typography> */}
             <Typography>
               {caregiver ? (
                 caregiver.description
@@ -526,71 +444,6 @@ const CaregiverDetails = () => {
             </div>
           )}
 
-          {user?.role === "client" && (
-            <div id="booking" className="">
-              <Typography variant="h6">
-                {caregiver ? (
-                  "Booking"
-                ) : (
-                  <Skeleton animation="wave" width={150} />
-                )}
-              </Typography>
-              <div className="p-2 flex items-start gap-5 flex-col ">
-                <Typography>
-                  Nothing much to do! Just select the date.
-                </Typography>
-                {/* <div>
-                  <LocalizationProvider dateAdapter={AdapterDateFns}>
-                    <DatePicker
-                      className={`${
-                        bookingError && "outline outline-1 outline-red-400"
-                      }`}
-                      value={bookingDate}
-                      onChange={handleDateChange}
-                      name="date"
-                    />
-                  </LocalizationProvider>
-                  <div className="h-4">
-                    <Typography className="text-red-500 text-sm mt-1">
-                      {bookingError}
-                    </Typography>
-                  </div>
-                </div> */}
-                <div>
-                  <LocalizationProvider dateAdapter={AdapterDateFns}>
-                    <DatePicker
-                      className={`${
-                        bookingError && "outline outline-1 outline-red-400"
-                      }`}
-                      value={bookingDate}
-                      onChange={handleDateChange}
-                      name="date"
-                    />
-                  </LocalizationProvider>
-                  <div className="h-4">
-                    <Typography className="text-red-500 text-sm mt-1">
-                      {bookingError}
-                    </Typography>
-                  </div>
-                  {bookingDate && (
-                    <Typography>
-                      Selected Date: {moment(bookingDate).format("YYYY-MM-DD")}
-                    </Typography>
-                  )}
-                </div>
-
-                <Button
-                  onClick={handleBooking}
-                  variant="outlined"
-                  color="primary"
-                  // sx={{ color: "#4CAF50", border: "1px solid #4CAF50" }}
-                >
-                  Book Now
-                </Button>
-              </div>
-              <hr className="mb-8" />
-            </div>
-          )}
           <div className="flex items-center justify-between border-b-2 py-2">
             <Typography variant="h6">
               {caregiverReviews ? (
@@ -626,6 +479,15 @@ const CaregiverDetails = () => {
         </div>
       </div>
       <ReviewDialog open={dialogOpen} onClose={handleCloseDialog} />
+      {user?.role === "client" && (
+        <BookingModal
+          open={modalOpen}
+          onClose={handleCloseModal}
+          userBlocked={user?.isBlocked}
+          clientId={user?._id}
+          params={params}
+        />
+      )}
     </Layout>
   );
 };

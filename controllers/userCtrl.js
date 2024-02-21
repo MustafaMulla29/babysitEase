@@ -577,7 +577,7 @@ const searchCaregiversController = async (req, res) => {
                 status: 'Approved',
                 role,
                 ...query,
-            })
+            }).sort({ rating: -1 })
 
         const caregiverIds = caregivers?.map((caregiver) => caregiver.userId)
 
@@ -637,9 +637,10 @@ const getCaregiverDetails = async (req, res) => {
 
 const bookCaregiverController = async (req, res) => {
     try {
-        const { clientId, caregiverId, date, } = req.body
+        const { clientId, caregiverId, date, endDate } = req.body
 
         const formattedDate = moment(date).format("YYYY-MM-DD");
+        const formattedEndDate = moment(endDate).format("YYYY-MM-DD");
         const user = await userModel.findOne({ _id: clientId })
         const caregiver = await caregiverModel.findOne({ userId: caregiverId })
         const userCaregiver = await userModel.findOne({ _id: caregiverId })
@@ -668,29 +669,37 @@ const bookCaregiverController = async (req, res) => {
 
         const existingBooking = await bookingModel.findOne({
             clientId: user?._id,
-            date: formattedDate,
+            $or: [
+                { date: { $gte: formattedDate, $lte: formattedEndDate }, bookedFor },
+                { endDate: { $gte: formattedDate, $lte: formattedEndDate }, bookedFor },
+            ],
             status: { $ne: "Nullified" }
         });
+
 
 
         if (existingBooking) {
             return res.status(200).send({
                 success: false,
-                message: "You already have a booking for the same day"
+                message: "Already have a booking for the slot"
             });
         }
 
         // Check if the caregiver is already booked on the specified date
         const existingCaregiverBooking = await bookingModel.findOne({
             caregiverId: caregiverId,
-            date: formattedDate,
+            $or: [
+                { date: { $gte: formattedDate, $lte: formattedEndDate }, bookedFor },
+                { endDate: { $gte: formattedDate, $lte: formattedEndDate }, bookedFor },
+            ],
             status: { $ne: "Nullified" }
         });
+
 
         if (existingCaregiverBooking) {
             return res.status(200).send({
                 success: false,
-                message: "Caregiver is already booked on the specified date"
+                message: "Caregiver is already booked on the specified slot"
             });
         }
 
@@ -703,14 +712,16 @@ const bookCaregiverController = async (req, res) => {
             ],
         });
 
+        console.log(previousBooking)
+
         if (previousBooking) {
             return res.status(200).send({
                 success: false,
-                message: "You cannot book a caregiver for a new date until the previous booking is finished"
+                message: "Cannot book caregiver until previous booking is finished"
             });
         }
 
-        const booking = await bookingModel({ clientId, caregiverId, date: formattedDate, bookedFor })
+        const booking = await bookingModel({ clientId, caregiverId, date: formattedDate, endDate: formattedEndDate, bookedFor })
 
         await booking.save()
         const userNotif = await userModel.findOne({ _id: caregiverId })
@@ -745,7 +756,7 @@ const bookCaregiverController = async (req, res) => {
         const response = {
             body: {
                 name: user?.name,
-                intro: `Dear ${user?.name},\n\nYou have successfully booked a caregiver for ${bookedFor.toLowerCase()} care.`,
+                intro: `Dear ${user?.name},\n\nYou have successfully booked a caregiver for ${bookedFor.toLowerCase()} care, from ${formattedDate} to ${formattedEndDate}`,
                 action: {
                     instructions: 'You can check the details of your booking on our platform.',
                     button: {
@@ -777,7 +788,7 @@ const bookCaregiverController = async (req, res) => {
         const caregiverResponse = {
             body: {
                 name: userCaregiver?.name,
-                intro: `Dear ${userCaregiver?.name},\n\nYou have a new booking request from ${user?.name}.`,
+                intro: `Dear ${userCaregiver?.name},\n\nYou have a new booking request from ${user?.name} on ${formattedDate} to ${formattedEndDate}.`,
                 action: {
                     instructions: 'You can review and respond to the booking request on our platform.',
                     button: {
@@ -809,7 +820,7 @@ const bookCaregiverController = async (req, res) => {
 
         res.status(200).send({
             success: true,
-            message: "You have successfully booked a caregiver"
+            message: "Successfully booked a caregiver"
         })
 
     } catch (error) {
@@ -849,11 +860,13 @@ const getBookingsController = async (req, res) => {
                 bookedOn: booking.bookedAt,
                 bookedFor: booking.bookedFor,
                 date: booking.date,
+                endDate: booking.endDate,
                 status: booking.status,
                 createdAt: booking.createdAt,
                 caregiverId: caregiver ? caregiver._id.toString() : null,
                 caregiverName: caregiver ? caregiver.name : null,
-                caregiverProfilePicture: caregiver ? caregiver.profilePicture : null
+                caregiverProfilePicture: caregiver ? caregiver.profilePicture : null,
+                caregiverRole: caregiver ? caregiver.role : null
             };
         });
 
@@ -906,14 +919,14 @@ const addReviewController = async (req, res) => {
         const booking = await bookingModel.findOne({
             clientId,
             caregiverId,
-            date: { $lt: formattedDate },
+            endDate: { $lt: formattedDate },
             status: "Completed",
         });
 
         if (!booking) {
             return res.status(403).send({
                 success: false,
-                message: "You cannot provide a review. No completed booking found for the specified date.",
+                message: "Cannot provide a review if you haven't worked with him",
             });
         }
 

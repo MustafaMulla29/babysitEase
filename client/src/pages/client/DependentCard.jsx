@@ -1,9 +1,10 @@
 import { Card, CardContent, Typography, Avatar, Skeleton } from "@mui/material";
-import { FaUser, FaAllergies, FaHospitalUser, FaPen } from "react-icons/fa";
+import { FaUser, FaAllergies, FaHospitalUser } from "react-icons/fa";
 import { PropTypes } from "prop-types";
 import { useState } from "react";
 import DependentInputModal from "./DependentInputModal";
 import DeleteDependent from "./DeleteDependent";
+import { FaRegEdit } from "react-icons/fa";
 
 const DependentCard = ({ dependent, loading }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -82,7 +83,7 @@ const DependentCard = ({ dependent, loading }) => {
           className="absolute top-2 right-12 p-2 rounded-full hover:bg-slate-100 transition-all cursor-pointer"
           onClick={handleOpenModal}
         >
-          <FaPen className="text-lg " />
+          <FaRegEdit className="text-lg " />
         </div>
         <DeleteDependent dependentId={dependent?._id} />
         <DependentInputModal

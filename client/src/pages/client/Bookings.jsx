@@ -60,28 +60,30 @@ const Bookings = () => {
   return (
     <Layout>
       <h1 className="text-3xl font-bold mb-4">Bookings page</h1>
-      {loading ? (
-        <div>
-          <BookingDetailsSkeleton />
-          <BookingDetailsSkeleton />
-          <BookingDetailsSkeleton />
-        </div>
-      ) : bookings.length > 0 ? (
-        bookings.map((booking) => (
-          <BookingDetails key={booking._id} booking={booking} />
-        ))
-      ) : (
-        <figure className="w-1/3 m-auto">
-          <img
-            src="./../../../img/no_bookings.jpg"
-            className="w-full h-full"
-            alt="no bookings"
-          />
-          <Typography className="my-2 text-[19px] text-center">
-            You don&apos;t have any bookings as of now
-          </Typography>
-        </figure>
-      )}
+      <div className="flex items-start flex-row flex-wrap w-full">
+        {loading ? (
+          <>
+            <BookingDetailsSkeleton />
+            <BookingDetailsSkeleton />
+            <BookingDetailsSkeleton />
+          </>
+        ) : bookings.length > 0 ? (
+          bookings.map((booking) => (
+            <BookingDetails key={booking._id} booking={booking} />
+          ))
+        ) : (
+          <figure className="w-1/3 m-auto">
+            <img
+              src="./../../../img/no_bookings.jpg"
+              className="w-full h-full"
+              alt="no bookings"
+            />
+            <Typography className="my-2 text-[19px] text-center">
+              You don&apos;t have any bookings as of now
+            </Typography>
+          </figure>
+        )}
+      </div>
     </Layout>
   );
 };

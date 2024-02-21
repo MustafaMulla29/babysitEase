@@ -3,10 +3,12 @@ import axios from "axios";
 import { Avatar, Chip, Rating, Skeleton, Typography } from "@mui/material";
 import UpdateProfileModal from "./UpdateProfileModal";
 import { useSelector } from "react-redux";
-import { FaExclamationCircle, FaPen } from "react-icons/fa";
+import { FaExclamationCircle } from "react-icons/fa";
+import { FaRegEdit } from "react-icons/fa";
 import ReviewCard from "./ReviewCard";
 import { FaRegImage } from "react-icons/fa6";
 import { IoFlashOutline } from "react-icons/io5";
+import { CiLocationOn } from "react-icons/ci";
 
 const Profile = () => {
   const [caregiver, setCaregiver] = useState(null);
@@ -117,7 +119,7 @@ const Profile = () => {
                 {caregiver ? (
                   <span className="flex items-center gap-4">
                     {caregiver.name}
-                    <FaPen
+                    <FaRegEdit
                       className="text-base cursor-pointer"
                       onClick={handleEditClick}
                     />
@@ -128,7 +130,10 @@ const Profile = () => {
               </Typography>
               <Typography className="mb-2">
                 {caregiver ? (
-                  caregiver.address
+                  <span className="flex items-center gap-1 text-gray-500">
+                    <CiLocationOn className="text-lg" />
+                    {caregiver.address}
+                  </span>
                 ) : (
                   <Skeleton animation="wave" width={150} />
                 )}

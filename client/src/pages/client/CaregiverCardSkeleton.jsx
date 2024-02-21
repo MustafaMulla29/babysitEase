@@ -2,7 +2,7 @@ import { Card, CardContent, Typography, Skeleton } from "@mui/material";
 
 const CaregiverCardSkeleton = () => {
   return (
-    <Card className="max-w-xs bg-white rounded-md overflow-hidden shadow-md transition">
+    <Card className="max-w-xs w-[16rem] bg-white rounded-md overflow-hidden shadow-md transition">
       <center>
         <Skeleton
           variant="circular"

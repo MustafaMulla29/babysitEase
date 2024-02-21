@@ -2,6 +2,7 @@ import React from "react";
 import { Card, CardContent, Typography, Avatar, Rating } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { PropTypes } from "prop-types";
+import { CiLocationOn } from "react-icons/ci";
 
 const CaregiverCard = React.memo(({ caregiver, index }) => {
   const {
@@ -29,7 +30,7 @@ const CaregiverCard = React.memo(({ caregiver, index }) => {
   return (
     <>
       <Card
-        className="w-56 max-w-xs pt-8  rounded-md overflow-hidden shadow-md transition"
+        className="w-[16rem] max-w-xs pt-8  rounded-md overflow-hidden shadow-md transition"
         sx={{
           background: `${bgColor}`,
           // background: "-webkit-linear-gradient(180deg,#c446ee 30%,white 33%)",
@@ -49,21 +50,27 @@ const CaregiverCard = React.memo(({ caregiver, index }) => {
             className="font-semibold text-center text-xl mb-3 cursor-pointer hover:underline hover:underline-offset-4"
             onClick={() => navigate(`/caregiver/${userId}`)}
           >
-            {name}
+            {name?.charAt(0).toUpperCase()}
+            {name?.slice(1, name.length)}
           </Typography>
-          <Typography variant="body2" color="text.secondary" className="mb-2">
-            {address.substring(0, 20) + "..."}, {city}
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            className="mb-2 text-gray-500 flex items-center"
+          >
+            <CiLocationOn className="mr-1 text-lg" /> {city},{" "}
+            {address.substring(0, 15) + "..."}
           </Typography>
           <Typography
             variant="body2"
             color="text.secondary"
             className="mb-2 flex items-center gap-2"
           >
-            Rating:{" "}
             <Rating name="read-only" value={rating} readOnly precision={0.5} />
           </Typography>
           <Typography variant="body2" color="text.secondary" className="mb-2">
-            Age Range: {ageRange.lowerLimit} - {ageRange.upperLimit} years
+            Age range - &#40; {ageRange.lowerLimit} - {ageRange.upperLimit}{" "}
+            years&#41;
           </Typography>
         </CardContent>
       </Card>

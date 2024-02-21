@@ -1,14 +1,12 @@
 import {
   FormControl,
   FormControlLabel,
-  InputLabel,
-  MenuItem,
   Radio,
   RadioGroup,
-  Select,
+  Skeleton,
   Typography,
 } from "@mui/material";
-import CaregiverCard from "./CaregiverCard";
+// import CaregiverCard from "./CaregiverCard";
 import SearchBar from "../../components/SearchBar";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -16,7 +14,8 @@ import { toast } from "react-toastify";
 import Layout from "../../components/Layout";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
-import CaregiverCardSkeleton from "./CaregiverCardSkeleton";
+// import CaregiverCardSkeleton from "./CaregiverCardSkeleton";
+import SearchedCaregiverCard from "./SearchedCaregiverCard";
 
 const SearchPage = () => {
   const [searchResults, setSearchResults] = useState([]);
@@ -29,51 +28,13 @@ const SearchPage = () => {
   const [searchString, setSearchString] = useState(searchParams.get("q"));
   const [searchBy, setSearchBy] = useState(searchParams.get("searchby"));
 
-  //   useEffect(() => {
-  //     const fetchSearchResults = async () => {
-  //       try {
-  //         if (searchString.length === 0 || searchBy === "-1") {
-  //           // Reset search results and exit
-  //           setSearchResults([]);
-  //           return;
-  //         }
-  //         const res = await axios.get(
-  //           `http://localhost:8070/api/v1/user/searchCaregivers?term=${searchString}&searchBy=${searchBy}&tab=${0}`,
-  //           {
-  //             headers: {
-  //               Authorization: `Bearer ${localStorage.getItem("token")}`,
-  //             },
-  //           }
-  //         );
-  //         if (res.data.success) {
-  //           setSearchResults(res.data.combinedCaregivers);
-  //         }
-  //       } catch (error) {
-  //         console.log(error);
-  //         toast.error("Something went wrong", {
-  //           position: toast.POSITION.TOP_CENTER,
-  //         });
-  //       }
-  //     };
-
-  //     if (searchString) {
-  //       fetchSearchResults();
-  //     }
-  //   }, [searchString, searchBy]);
   useEffect(() => {
     onSearch();
   }, []);
 
   useEffect(() => {
-    const newSearchParams = new URLSearchParams();
-    if (searchString) newSearchParams.append("q", searchString);
-    if (searchBy) newSearchParams.append("searchby", searchBy);
-
-    // Replace the current entry in the history stack with the new URL
-    navigate({
-      search: newSearchParams.toString(),
-    });
-  }, [searchString, searchBy, navigate]);
+    onSearch();
+  }, [tab]);
 
   const onSearch = async () => {
     try {
@@ -82,6 +43,14 @@ const SearchPage = () => {
         setSearchResults([]);
         return;
       }
+      const newSearchParams = new URLSearchParams();
+      if (searchString) newSearchParams.append("q", searchString);
+      if (searchBy) newSearchParams.append("searchby", searchBy);
+
+      // Replace the current entry in the history stack with the new URL
+      navigate({
+        search: newSearchParams.toString(),
+      });
       setLoading(true);
       const res = await axios.get(
         `http://localhost:8070/api/v1/user/searchCaregivers?term=${searchString}&searchBy=${searchBy}&tab=${tab}`,
@@ -96,16 +65,13 @@ const SearchPage = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something went wrong", {
-        position: toast.POSITION.TOP_CENTER,
-      });
+      toast.error("Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    //TODO:SHOW BABYSITTERS AND NURSES SEPERATELY
     <Layout>
       <div className="relative">
         <Link
@@ -114,6 +80,11 @@ const SearchPage = () => {
         >
           <IoIosArrowBack />
         </Link>
+        <div className="mb-8">
+          <Typography variant="h4" className="font-bold">
+            Find your caregiver
+          </Typography>
+        </div>
         <SearchBar
           onSearch={onSearch}
           searchString={searchString}
@@ -158,16 +129,40 @@ const SearchPage = () => {
         </div>
 
         {loading ? (
-          <div className="flex flex-wrap justify-start items-center gap-6">
+          <div className="flex gap-0 flex-col items-start space-y-1">
+            {/* <CaregiverCardSkeleton />
             <CaregiverCardSkeleton />
             <CaregiverCardSkeleton />
-            <CaregiverCardSkeleton />
-            <CaregiverCardSkeleton />
+            <CaregiverCardSkeleton /> */}
+            <Skeleton
+              animation="wave"
+              variant="text"
+              sx={{ fontSize: "6rem", margin: "0" }}
+              className="w-full"
+            />
+            <Skeleton
+              animation="wave"
+              variant="text"
+              sx={{ fontSize: "6rem", margin: "0" }}
+              className="w-full"
+            />
+            <Skeleton
+              animation="wave"
+              variant="text"
+              sx={{ fontSize: "6rem", margin: "0" }}
+              className="w-full "
+            />
+            <Skeleton
+              animation="wave"
+              variant="text"
+              sx={{ fontSize: "6rem", margin: "0" }}
+              className="w-full"
+            />
           </div>
         ) : searchResults.length > 0 ? (
-          <div className="flex flex-wrap justify-start items-center gap-11 mt-5">
+          <div className="flex flex-wrap justify-start items-center gap-5 mt-5">
             {searchResults.map((caregiver, index) => (
-              <CaregiverCard
+              <SearchedCaregiverCard
                 key={caregiver._id}
                 caregiver={caregiver}
                 index={index}

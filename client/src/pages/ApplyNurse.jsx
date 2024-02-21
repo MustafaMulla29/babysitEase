@@ -283,18 +283,18 @@ const ApplyNurse = () => {
     formData.append("ageRange", JSON.stringify(ageRange));
     formData.append("userId", user._id);
 
-    preferredCities.forEach((city, index) => {
+    preferredCities.forEach((city) => {
       formData.append(`preferredCities[]`, city);
     });
-    qualification.forEach((qual, index) => {
+    qualification.forEach((qual) => {
       formData.append("qualification[]", qual);
     });
-    specialisation.forEach((spec, index) => {
+    specialisation.forEach((spec) => {
       formData.append("specialisation[]", spec);
     });
 
     // Append certificates to the form data
-    certifications.forEach((file, index) => {
+    certifications.forEach((file) => {
       formData.append(`certifications`, file);
     });
 
@@ -324,9 +324,7 @@ const ApplyNurse = () => {
     } catch (error) {
       dispatch(hideLoading());
       console.log(error);
-      toast.error("Something went wrong", {
-        position: toast.POSITION.TOP_CENTER,
-      });
+      toast.error("Something went wrong");
     }
   };
 

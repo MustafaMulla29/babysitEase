@@ -2,6 +2,7 @@ import {
   Avatar,
   Box,
   Button,
+  Chip,
   FormControl,
   InputLabel,
   MenuItem,
@@ -118,7 +119,6 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
   const handleCertificateImageChange = (e) => {
     const files = e.target.files;
     const fileList = Array.from(files);
-    console.log("fileList:", fileList);
     setCaregiverData((prevData) => ({
       ...prevData,
       certifications: [...prevData.certifications, ...fileList],
@@ -194,21 +194,15 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
       );
       dispatch(hideLoading());
       if (res.data.success) {
-        toast.success(res.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        toast.success(res.data.message);
         onClose();
       } else {
-        toast.error(res.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        toast.error(res.data.message);
       }
     } catch (error) {
       dispatch(hideLoading());
       console.log(error);
-      toast.error("Something went wrong", {
-        position: toast.POSITION.TOP_CENTER,
-      });
+      toast.error("Something went wrong");
     }
   };
 
@@ -279,6 +273,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         fullWidth
                         className="mb-2"
                         required
+                        variant="filled"
                       />
 
                       {/* Address */}
@@ -290,6 +285,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         fullWidth
                         className="mb-2"
                         required
+                        variant="filled"
                       />
                       <TextField
                         label="Years of experience"
@@ -299,6 +295,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         fullWidth
                         className="mb-2"
                         required
+                        variant="filled"
                       />
                     </div>
 
@@ -318,6 +315,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         fullWidth
                         className="mb-2"
                         required
+                        variant="filled"
                       />
                       <TextField
                         label="Age Range Upper Limit"
@@ -333,8 +331,14 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         fullWidth
                         className="mb-2"
                         required
+                        variant="filled"
                       />
-                      <FormControl fullWidth required className="mb-3">
+                      <FormControl
+                        fullWidth
+                        required
+                        variant="filled"
+                        className="mb-3"
+                      >
                         <InputLabel id="demo-simple-select-label">
                           Availability
                         </InputLabel>
@@ -346,6 +350,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                           className="w-full rounded-md bg-[#f3f4f6] border transition-[outline] duration-200 outline-blue-600"
                           value={CaregiverData?.availability}
                           onChange={handleInputChange}
+                          variant="filled"
                         >
                           {/* <MenuItem value=""  className="">
                     {" "}
@@ -361,22 +366,13 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                       </FormControl>
                     </div>
 
-                    {/* Availability */}
-                    {/* <TextField
-                      label="Availability"
-                      name="availability"
-                      value={CaregiverData?.availability}
-                      onChange={handleInputChange}
-                      fullWidth
-                      className="mb-2"
-                    /> */}
-
                     <TextField
                       name="description"
                       label="Description"
                       fullWidth
-                      value={CaregiverData?.description}
+                      variant="filled"
                       multiline
+                      value={CaregiverData?.description}
                       rows={6}
                       className="mb-2"
                     />
@@ -410,10 +406,8 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                           </div>
                         </div>
                       </div>
-                      <div className="h-4">
-                        <span className="text-red-500 text-sm mt-1"></span>
-                      </div>
-                      {/* <div className="flex items-center justify-start gap-2 w-full flex-wrap">
+
+                      <div className="flex items-center justify-start gap-2 w-full flex-wrap">
                         {CaregiverData?.certifications &&
                           CaregiverData?.certifications?.map((img, index) => {
                             return (
@@ -421,11 +415,13 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                                 <div>
                                   <Chip
                                     key={index}
-                                    label={img}
+                                    label={img.name ? img.name : img}
                                     onDelete={() => removeCertificate(img)}
                                   />
                                   <a
-                                    href={`http://localhost:8070/${img}`}
+                                    href={`http://localhost:8070/${
+                                      img.name ? img.name : img
+                                    }`}
                                     rel="noreferrer"
                                     target="_blank"
                                   >
@@ -435,7 +431,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                               </>
                             );
                           })}
-                      </div> */}
+                      </div>
                     </div>
                     {/* <TextField
                   label="Certifications"
@@ -458,6 +454,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         onChange={handleInputChange}
                         fullWidth
                         className="mb-2"
+                        variant="filled"
                       />
                       <TextField
                         label="Preferred cities"
@@ -466,6 +463,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         onChange={handleInputChange}
                         fullWidth
                         className="mb-2"
+                        variant="filled"
                       />
                       <TextField
                         label="Qualification"
@@ -474,6 +472,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         onChange={handleInputChange}
                         fullWidth
                         className="mb-2"
+                        variant="filled"
                       />
                       {/* <div>
                     {CaregiverData.preferredCities.map((city, index) => (
@@ -489,6 +488,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                       onChange={handleInputChange}
                       fullWidth
                       className="mb-2"
+                      variant="filled"
                     />
 
                     <Button

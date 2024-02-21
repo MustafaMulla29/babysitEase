@@ -92,9 +92,7 @@ const Login = () => {
     } catch (error) {
       dispatch(hideLoading());
       console.log(error);
-      toast.error("Something went wrong!", {
-        position: toast.POSITION.TOP_CENTER,
-      });
+      toast.error("Something went wrong!");
       // message.error("Something went wrong!");
     }
   };

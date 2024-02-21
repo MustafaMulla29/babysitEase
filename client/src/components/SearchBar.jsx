@@ -1,4 +1,4 @@
-import { MenuItem, Select, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { CiSearch } from "react-icons/ci";
 import { PropTypes } from "prop-types";
@@ -20,14 +20,19 @@ const SearchBar = ({
   };
 
   useEffect(() => {
-    if (searchStringLength === 0) setSearchError("");
-    else if (searchBy === "-1")
+    if (searchStringLength === 0) {
+      setSearchError("");
+    }
+    if (searchBy === "-1" && searchStringLength > 0) {
       setSearchError("Please select the search by option");
+    } else {
+      setSearchError("");
+    }
   }, [searchBy, searchStringLength]);
 
   return (
     <>
-      <div className="relative mb-8 flex items-center justify-between gap-2">
+      <div className="relative mb-4 flex items-center justify-between gap-2 ">
         <span className="absolute inset-y-0 left-0 pl-3  flex items-center">
           <CiSearch className="text-2xl" />
         </span>
@@ -36,7 +41,7 @@ const SearchBar = ({
           name=""
           className={`${
             searchError && "border-red-600 focus:border-red-600"
-          } pl-10 w-full py-4 pr-4 rounded-full outline-none border-[#d9edd9] hover:border-[#282928] border-2 focus:border-[#9ed49e]`}
+          } pl-10 w-full py-3 pr-4 rounded-full bg-slate-100  outline-none border-[#d9edd9] hover:border-[#282928] border-2 focus:border-[#9ed49e]`}
           placeholder="Search caregiver"
           id=""
           value={searchString}
@@ -44,47 +49,50 @@ const SearchBar = ({
           onKeyDown={handleSearch}
         />
 
-        <div className=" flex items-center p-0">
-          <Select
-            className="appearance-none text-center rounded-full  bg-white border-[#d9edd9] hover:border-[#848e84] border-2 py-2 px-4  outline-none"
+        <div className=" flex items-center space-x-2 absolute cursor-pointer  right-0  outline-none">
+          <select
+            className="appearance-none  hover:bg-slate-100  text-center  outline-none rounded-full bg-white border-[#d9edd9] hover:border-[#848e84] border-2 py-[11px] px-3 "
             id="searchDropdown"
             value={searchBy}
-            style={{ padding: "0px" }}
+            // style={{ padding: "0px" }}
             onChange={(e) => setSearchBy(e.target.value)}
           >
-            <MenuItem
+            <option
               style={{ paddingTop: "10px", paddingBottom: "10px" }}
               value="-1"
               className=""
             >
               Search by
-            </MenuItem>
-            <MenuItem
+            </option>
+            <option
               style={{ paddingTop: "10px", paddingBottom: "10px" }}
               value="preferredCities"
               className=""
             >
               Preferred Cities
-            </MenuItem>
-            <MenuItem
+            </option>
+            <option
               style={{ paddingTop: "10px", paddingBottom: "10px" }}
               value="specialisation"
               className=""
             >
               Specialisation
-            </MenuItem>
-            <MenuItem
+            </option>
+            <option
               style={{ paddingTop: "10px", paddingBottom: "10px" }}
               value="ageRange"
               className=""
             >
               Age range
-            </MenuItem>
-          </Select>
+            </option>
+          </select>
+          {/* <span>
+            <IoIosArrowUp className="rotate-180" />
+          </span> */}
         </div>
       </div>
       <div className="h-4">
-        <Typography className="text-red-500 text-sm mt-3 ml-4">
+        <Typography className="text-red-500 text-sm mt-2 ml-4">
           {searchError}
         </Typography>
       </div>

@@ -15,7 +15,6 @@ import {
   Grid,
   Paper,
   Skeleton,
-  TextField,
   Typography,
 } from "@mui/material";
 import { AiOutlineArrowLeft, AiOutlineCheck } from "react-icons/ai";
@@ -36,8 +35,6 @@ const Subscription = () => {
   const [purchaseDate, setPurchaseDate] = useState(null);
   const [expiryDate, setExpiryDate] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState([]);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
 
   const { user } = useSelector((state) => state.user);
@@ -100,17 +97,8 @@ const Subscription = () => {
     } catch (error) {
       dispatch(hideLoading());
       console.log(error);
-      toast.error("Something went wrong", {
-        position: toast.POSITION.TOP_CENTER,
-      });
+      toast.error("Something went wrong");
     }
-  };
-
-  const handleNameChange = (e) => {
-    setName(e.target.value);
-  };
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value);
   };
 
   const handleNext = () => {
@@ -189,7 +177,7 @@ const Subscription = () => {
                 {loading ? (
                   <Skeleton animation="wave" />
                 ) : (
-                  "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Iusto corrupti repudiandae, obcaecati ratione quos excepturi ad at sequi soluta earum."
+                  "Experience the convenience of premium features and personalized services. Subscribe today and enjoy a hassle-free childcare and parentcare experience with BabysitEase."
                 )}
               </Typography>
             </div>
@@ -279,17 +267,21 @@ const Subscription = () => {
 
         {step === 2 && (
           <div>
-            <div className="mt-10">
-              <Button onClick={() => setStep((prev) => prev - 1)}>
-                <AiOutlineArrowLeft className="text-lg" />
-              </Button>
-            </div>
             <Container
               className={`mt-32 opacity-0 transition-[opacity] duration-500 ease-in-out ${
                 step === 2 ? "opacity-100" : ""
               }`}
             >
-              <Grid container spacing={3} className="shadow-none">
+              <div className="mt-10">
+                <Button onClick={() => setStep((prev) => prev - 1)}>
+                  <AiOutlineArrowLeft className="text-lg" />
+                </Button>
+              </div>
+              <Grid
+                container
+                spacing={3}
+                className="shadow-none justify-center"
+              >
                 <Grid item xs={12} md={6} className="shadow-none pl-0 sm:pl-6">
                   <Paper elevation={3} className="p-4 shadow-none">
                     <Typography variant="h5" gutterBottom>
@@ -447,69 +439,25 @@ const Subscription = () => {
                             {loading ? (
                               <Skeleton width={100} animation="wave" />
                             ) : (
-                              purchaseDate
+                              moment(purchaseDate).format("DD/MM/YYYY")
                             )}
                           </Typography>
                           <Typography className="text-[13px] sm:text-base">
                             {loading ? (
                               <Skeleton width={100} animation="wave" />
                             ) : (
-                              expiryDate
+                              moment(expiryDate).format("DD/MM/YYYY")
                             )}
                           </Typography>
                         </div>
                       </div>
                     </div>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} md={6} className="shadow-none">
-                  <Paper elevation={3} className="p-4 shadow-none">
-                    <Typography variant="h5" className="mb-4" gutterBottom>
-                      {loading ? (
-                        <Skeleton animation="wave" />
-                      ) : (
-                        "Subscribe Now"
-                      )}
-                    </Typography>
-                    <form action="" method="post" onSubmit={handleSubscription}>
-                      {loading ? (
-                        <Skeleton animation="wave" height={80} />
-                      ) : (
-                        <TextField
-                          id="outlined-textarea"
-                          label="Name"
-                          type="text"
-                          name="name"
-                          placeholder="Enter your name"
-                          multiline
-                          autoComplete="off"
-                          className={`w-full rounded-md mb-6 border  outline-blue-600 `}
-                          // minLength={3}
-                          inputProps={{ minLength: 3, type: "text" }}
-                          value={name}
-                          onChange={handleNameChange}
-                          required
-                        />
-                      )}
-                      {loading ? (
-                        <Skeleton animation="wave" height={80} />
-                      ) : (
-                        <TextField
-                          id="outlined-textarea"
-                          label="email"
-                          type="email"
-                          name="email"
-                          placeholder="Enter your email"
-                          multiline
-                          autoComplete="off"
-                          className={`w-full rounded-md mb-6 border  outline-blue-600 `}
-                          // minLength={3}
-                          // inputProps={{ type: "email" }}
-                          value={email}
-                          onChange={handleEmailChange}
-                          required
-                        />
-                      )}
+                    <form
+                      action=""
+                      method="post"
+                      onSubmit={handleSubscription}
+                      className="mt-3"
+                    >
                       {loading ? (
                         <Skeleton animation="wave" height={60} />
                       ) : (
@@ -525,6 +473,16 @@ const Subscription = () => {
                     </form>
                   </Paper>
                 </Grid>
+                {/* <Grid
+                  item
+                  xs={12}
+                  md={6}
+                  className="shadow-none "
+                >
+                  <Paper elevation={3} className="p-4 shadow-none">
+                    
+                  </Paper>
+                </Grid> */}
               </Grid>
             </Container>
           </div>

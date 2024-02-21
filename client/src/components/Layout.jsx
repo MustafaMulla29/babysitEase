@@ -148,7 +148,7 @@ const Layout = ({ children }) => {
       <section className="main ">
         <header
           className={` sticky top-0 left-0 z-10 transition-colors  ${
-            navBg ? "bg-[#adc0ea]" : "bg-transparent"
+            navBg ? "bg-slate-200" : "bg-transparent"
           }`}
         >
           <nav className={`flex w-[80%] m-auto  items-center justify-between `}>

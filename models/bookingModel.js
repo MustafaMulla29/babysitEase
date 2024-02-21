@@ -29,6 +29,10 @@ const bookingSchema = new mongoose.Schema({
         type: Date,
         required: [true, "Booking date is required"]
     },
+    endDate: {
+        type: Date,
+        required: [true, "Booking end date is required"]
+    },
     status: {
         type: String,
         // required: true,

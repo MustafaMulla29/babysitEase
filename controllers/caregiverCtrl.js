@@ -233,11 +233,14 @@ const getBookingsController = async (req, res) => {
                 bookedOn: booking.bookedAt,
                 bookedFor: booking.bookedFor,
                 date: booking.date,
+                bookingEndDate: booking.endDate,
                 status: booking.status,
                 createdAt: booking.createdAt,
                 clientId: client ? client._id.toString() : null,
                 clientName: client ? client.name : null,
-                clientProfilePicture: client ? client.profilePicture : null
+                clientProfilePicture: client ? client.profilePicture : null,
+                clientAddress: client ? client.address : null
+
             };
         });
 
@@ -296,7 +299,6 @@ const getBookingsController = async (req, res) => {
 //     }
 // };
 
-//TODO: HAVE TO ADD STATUS:COMPLETED CODE 
 const bookingStatusController = async (req, res) => {
     try {
         const currentDate = moment().format("YYYY-MM-DD");
@@ -330,6 +332,7 @@ const bookingStatusController = async (req, res) => {
         });
 
         await Promise.all(updatePromises);
+
 
         return res.status(200).send({
             success: true,
@@ -374,7 +377,7 @@ const approveBookingController = async (req, res) => {
 
         res.status(200).send({
             success: true,
-            message: "Successfully changed booking status"
+            message: `Booking has been ${status}`
         })
     } catch (error) {
         console.log(error);

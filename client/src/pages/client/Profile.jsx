@@ -5,8 +5,9 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import DependentInputModal from "./DependentInputModal";
 import DependentCard from "./DependentCard";
-import { FaPen } from "react-icons/fa6";
 import { MdOutlineAddCircleOutline } from "react-icons/md";
+import { FaRegEdit } from "react-icons/fa";
+import { CiLocationOn } from "react-icons/ci";
 
 const Profile = () => {
   const [client, setClient] = useState(null);
@@ -75,7 +76,7 @@ const Profile = () => {
           </div>
         </div>
       )}
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-4 ">
         <div className="bg-white p-6 rounded-md shadow-md">
           <div className="flex items-center gap-4 mb-8">
             {loading ? (
@@ -98,16 +99,35 @@ const Profile = () => {
             )}
 
             <div>
-              <Typography variant="h4" className="mb-2 font-bold">
+              <Typography
+                variant="h4"
+                className="mb-2 font-bold flex items-center gap-5"
+              >
                 {loading ? (
                   <Skeleton
                     animation="wave"
+                    width={100}
                     variant="text"
                     sx={{ fontSize: "2rem" }}
                   />
                 ) : (
                   client?.name
                 )}
+                <div className="items-start ml-3">
+                  {loading ? (
+                    <Skeleton
+                      animation="wave"
+                      variant="circular"
+                      width={20}
+                      height={20}
+                    />
+                  ) : (
+                    <FaRegEdit
+                      className="text-base cursor-pointer"
+                      onClick={handleEditClick}
+                    />
+                  )}
+                </div>
               </Typography>
               <Typography>
                 {loading ? (
@@ -118,7 +138,10 @@ const Profile = () => {
                     width={200}
                   />
                 ) : (
-                  client?.address
+                  <span className="flex items-center gap-1">
+                    <CiLocationOn />
+                    {client?.address}
+                  </span>
                 )}
               </Typography>
               <Typography>
@@ -134,16 +157,6 @@ const Profile = () => {
                 )}
               </Typography>
             </div>
-            <div className="items-start">
-              {loading ? (
-                <Skeleton animation="wave" width={40} />
-              ) : (
-                <FaPen
-                  className="text-base cursor-pointer"
-                  onClick={handleEditClick}
-                />
-              )}
-            </div>
           </div>
           <hr className="mb-8" />
 
@@ -155,6 +168,7 @@ const Profile = () => {
                   <Skeleton
                     animation="wave"
                     variant="text"
+                    width={100}
                     sx={{ fontSize: "1rem" }}
                   />
                 ) : (
