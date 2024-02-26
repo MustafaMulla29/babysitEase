@@ -1,13 +1,14 @@
 import { useState } from "react";
 import Layout from "../components/Layout";
-import { Box, Button, Tab, Tabs } from "@mui/material";
+import { Box, Button, Tab, Tabs, Typography } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { toast } from "react-toastify";
 import { hideLoading, showLoading } from "../redux/features/alertSlice";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { GiPartyPopper } from "react-icons/gi";
 import { FcApproval } from "react-icons/fc";
+import NoNotifications from "../components/NoNotifications";
+import { openAlert } from "../redux/features/messageSlice";
 
 const Notification = () => {
   //   const handleChange = () => {};
@@ -35,19 +36,24 @@ const Notification = () => {
       );
       dispatch(hideLoading());
       if (res.data.success) {
-        toast.success(res.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        // toast.success(res.data.message, {
+        //   position: toast.POSITION.TOP_CENTER,
+        // });
+        dispatch(openAlert({ severity: "success", content: res.data.message }));
         window.location.reload();
       } else {
-        toast.error(res.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        // toast.error(res.data.message, {
+        //   position: toast.POSITION.TOP_CENTER,
+        // });
+        dispatch(openAlert({ severity: "error", content: res.data.message }));
       }
     } catch (error) {
       dispatch(hideLoading());
       console.log(error);
-      toast.error("Something went wrong");
+      // toast.error("Something went wrong");
+      dispatch(
+        openAlert({ severity: "error", content: "Something went wrong!" })
+      );
     }
   };
   const handleDeleteRead = async () => {
@@ -64,18 +70,23 @@ const Notification = () => {
       );
       dispatch(hideLoading());
       if (res.data.success) {
-        toast.success(res.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        // toast.success(res.data.message, {
+        //   position: toast.POSITION.TOP_CENTER,
+        // });
+        dispatch(openAlert({ severity: "success", content: res.data.message }));
         window.location.reload();
       } else {
-        toast.error(res.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        // toast.error(res.data.message, {
+        //   position: toast.POSITION.TOP_CENTER,
+        // });
+        dispatch(openAlert({ severity: "error", content: res.data.message }));
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something went wrong");
+      // toast.error("Something went wrong");
+      dispatch(
+        openAlert({ severity: "error", content: "Something went wrong" })
+      );
     }
   };
   return (
@@ -126,12 +137,14 @@ const Notification = () => {
                     );
                   })
                 ) : (
-                  <div className="flex items-center justify-center mt-4">
-                    <img
+                  <div className="flex items-center gap-2 flex-col justify-center mt-4">
+                    {/* <img
                       src="./../../img/no_notifications.png"
                       className="w-1/2"
                       alt=""
-                    />
+                    /> */}
+                    <NoNotifications />
+                    <Typography variant="h6">No notifications</Typography>
                   </div>
                 )}
               </div>
@@ -164,12 +177,14 @@ const Notification = () => {
                     );
                   })
                 ) : (
-                  <div className="flex items-center justify-center mt-4">
-                    <img
+                  <div className="flex items-center justify-center gap-2 flex-col mt-4">
+                    {/* <img
                       src="./../../img/no_notifications.png"
                       className="w-1/2"
                       alt=""
-                    />
+                    /> */}
+                    <NoNotifications />
+                    <Typography variant="h6">No notifications</Typography>
                   </div>
                 )}
               </div>

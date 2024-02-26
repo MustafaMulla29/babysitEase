@@ -3,19 +3,21 @@ import {
   FormControlLabel,
   Radio,
   RadioGroup,
-  Skeleton,
   Typography,
 } from "@mui/material";
 // import CaregiverCard from "./CaregiverCard";
 import SearchBar from "../../components/SearchBar";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
 import Layout from "../../components/Layout";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
 // import CaregiverCardSkeleton from "./CaregiverCardSkeleton";
 import SearchedCaregiverCard from "./SearchedCaregiverCard";
+import Error404 from "../../components/Error404";
+import Loading from "../../components/Loading";
+import { useDispatch } from "react-redux";
+import { openAlert } from "../../redux/features/messageSlice";
 
 const SearchPage = () => {
   const [searchResults, setSearchResults] = useState([]);
@@ -28,6 +30,7 @@ const SearchPage = () => {
   const [searchString, setSearchString] = useState(searchParams.get("q"));
   const [searchBy, setSearchBy] = useState(searchParams.get("searchby"));
 
+  const dispatch = useDispatch();
   useEffect(() => {
     onSearch();
   }, []);
@@ -65,7 +68,13 @@ const SearchPage = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something went wrong");
+      // toast.error("Something went wrong");
+      dispatch(
+        openAlert({
+          severity: "error",
+          content: "Something went wrong!",
+        })
+      );
     } finally {
       setLoading(false);
     }
@@ -95,8 +104,8 @@ const SearchPage = () => {
         />
 
         <div className="flex items-center justify-between">
-          <Typography variant="h6" className="my-3">
-            Search Results for: {searchString}
+          <Typography variant="h6" className="my-3 font-semibold ">
+            Search results for &quot;{searchString}&ldquo;
           </Typography>
           <FormControl>
             <RadioGroup
@@ -129,12 +138,13 @@ const SearchPage = () => {
         </div>
 
         {loading ? (
-          <div className="flex gap-0 flex-col items-start space-y-1">
+          // <div className="flex gap-0 flex-col items-start space-y-1">
+          <div>
             {/* <CaregiverCardSkeleton />
             <CaregiverCardSkeleton />
             <CaregiverCardSkeleton />
             <CaregiverCardSkeleton /> */}
-            <Skeleton
+            {/* <Skeleton
               animation="wave"
               variant="text"
               sx={{ fontSize: "6rem", margin: "0" }}
@@ -157,7 +167,8 @@ const SearchPage = () => {
               variant="text"
               sx={{ fontSize: "6rem", margin: "0" }}
               className="w-full"
-            />
+            /> */}
+            <Loading />
           </div>
         ) : searchResults.length > 0 ? (
           <div className="flex flex-wrap justify-start items-center gap-5 mt-5">
@@ -171,8 +182,9 @@ const SearchPage = () => {
           </div>
         ) : (
           <figure className="w-1/3 m-auto">
-            <img src="./../../img/404.jpg" className="w-full h-full" />
-            <Typography variant="h6" className="my-2 text-center">
+            {/* <img src="./../../img/404.jpg" className="w-full h-full" /> */}
+            <Error404 />
+            <Typography variant="h5" className="my-2 text-center">
               No results found
             </Typography>
           </figure>

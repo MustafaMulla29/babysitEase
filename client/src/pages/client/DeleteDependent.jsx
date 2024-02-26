@@ -1,9 +1,9 @@
 import axios from "axios";
 import { CgTrash } from "react-icons/cg";
 import { useDispatch, useSelector } from "react-redux";
-import { toast } from "react-toastify";
 import { hideLoading, showLoading } from "../../redux/features/alertSlice";
 import { PropTypes } from "prop-types";
+import { openAlert } from "../../redux/features/messageSlice";
 
 const DeleteDependent = ({ dependentId }) => {
   const { user } = useSelector((state) => state.user);
@@ -22,13 +22,22 @@ const DeleteDependent = ({ dependentId }) => {
       );
 
       if (res.data.success) {
-        toast.success(res.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        dispatch(
+          openAlert({
+            severity: "success",
+            content: res.data.message,
+          })
+        );
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something went wrong");
+      // toast.error("Something went wrong");
+      dispatch(
+        openAlert({
+          severity: "error",
+          content: "Something went wrong!",
+        })
+      );
     } finally {
       dispatch(hideLoading());
     }

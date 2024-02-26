@@ -39,14 +39,14 @@ const SearchedCaregiverCard = React.memo(({ caregiver }) => {
                 {name?.charAt(0).toUpperCase()}
                 {name?.slice(1, name.length)}
               </Typography>
-              <Typography className=" flex items-center gap-1 text-gray-600">
+              <Typography
+                variant="span"
+                className=" flex items-center gap-1 text-gray-600"
+              >
                 <span>
                   <CiLocationOn />
                 </span>{" "}
-                <span>
-                  {city?.charAt(0).toUpperCase()}
-                  {city?.slice(1, city.length)}
-                </span>
+                <span>{city}</span>
               </Typography>
             </div>
             <div className="flex items-center gap-1 mt-1">
@@ -65,7 +65,7 @@ const SearchedCaregiverCard = React.memo(({ caregiver }) => {
                   />
                 </Typography>
               )}
-              <Typography variant="body2" color="text.secondary" className="">
+              <Typography variant="span" color="text.secondary" className="">
                 <span className="flex items-center">
                   &#40;
                   <FaIndianRupeeSign />
@@ -76,6 +76,7 @@ const SearchedCaregiverCard = React.memo(({ caregiver }) => {
             </div>
           </div>
           <Typography
+            variant="span"
             className="cursor-pointer absolute right-4 p-2 hover:bg-slate-100 rounded-full group-hover:translate-x-2 transition-[transform]"
             onClick={() => navigate(`/caregiver/${userId}`)}
           >

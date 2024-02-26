@@ -16,9 +16,9 @@ import { AiOutlineCloudUpload } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoading, showLoading } from "../../redux/features/alertSlice";
 import axios from "axios";
-import { toast } from "react-toastify";
 // import { useParams } from "react-router-dom";
 import { PropTypes } from "prop-types";
+import { openAlert } from "../../redux/features/messageSlice";
 
 const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
   const [CaregiverData, setCaregiverData] = useState(null);
@@ -194,15 +194,31 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
       );
       dispatch(hideLoading());
       if (res.data.success) {
-        toast.success(res.data.message);
+        dispatch(
+          openAlert({
+            severity: "success",
+            content: res.data.message,
+          })
+        );
         onClose();
       } else {
-        toast.error(res.data.message);
+        dispatch(
+          openAlert({
+            severity: "error",
+            content: "Something went wrong",
+          })
+        );
       }
     } catch (error) {
       dispatch(hideLoading());
       console.log(error);
-      toast.error("Something went wrong");
+      // toast.error("Something went wrong");
+      dispatch(
+        openAlert({
+          severity: "error",
+          content: "Something went wrong",
+        })
+      );
     }
   };
 
@@ -247,7 +263,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                                 onChange={handleFileChange}
                               />
                             </label>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs  text-gray-600">
                               PNG, JPG, JPEG up to 10MB
                             </p>
                           </div>
@@ -400,7 +416,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                                 onChange={handleCertificateImageChange}
                               />
                             </label>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs  text-gray-600">
                               PNG, JPG, JPEG up to 10MB
                             </p>
                           </div>

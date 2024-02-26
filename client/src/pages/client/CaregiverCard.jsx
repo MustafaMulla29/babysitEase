@@ -1,8 +1,18 @@
 import React from "react";
-import { Card, CardContent, Typography, Avatar, Rating } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Avatar,
+  Rating,
+  Tooltip,
+  IconButton,
+  Zoom,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { PropTypes } from "prop-types";
 import { CiLocationOn } from "react-icons/ci";
+import { IoMdHeartEmpty } from "react-icons/io";
 
 const CaregiverCard = React.memo(({ caregiver, index }) => {
   const {
@@ -30,12 +40,19 @@ const CaregiverCard = React.memo(({ caregiver, index }) => {
   return (
     <>
       <Card
-        className="w-[16rem] max-w-xs pt-8  rounded-md overflow-hidden shadow-md transition"
+        className="w-[16rem] relative max-w-xs pt-8 z-10 rounded-md overflow-hidden shadow-md transition"
         sx={{
           background: `${bgColor}`,
           // background: "-webkit-linear-gradient(180deg,#c446ee 30%,white 33%)",
         }}
       >
+        <div className="absolute top-2 right-2 ">
+          <Tooltip title="Add to favourites" TransitionComponent={Zoom} arrow>
+            <IconButton>
+              <IoMdHeartEmpty className="text-3xl text-gray-700" />
+            </IconButton>
+          </Tooltip>
+        </div>
         <Avatar
           className="border-4 border-white"
           alt={name}
@@ -45,30 +62,30 @@ const CaregiverCard = React.memo(({ caregiver, index }) => {
 
         <CardContent>
           <Typography
-            variant="h6"
+            variant="h4"
             component="div"
-            className="font-semibold text-center text-xl mb-3 cursor-pointer hover:underline hover:underline-offset-4"
+            className={`font-semibold text-center text-xl mb-3 cursor-pointer hover:underline hover:underline-offset-4 transition-all duration-200 hover:text-gray-500`}
             onClick={() => navigate(`/caregiver/${userId}`)}
           >
             {name?.charAt(0).toUpperCase()}
             {name?.slice(1, name.length)}
           </Typography>
           <Typography
-            variant="body2"
+            variant="p"
             color="text.secondary"
-            className="mb-2 text-gray-500 flex items-center"
+            className="mb-2  text-gray-600 flex items-center"
           >
-            <CiLocationOn className="mr-1 text-lg" /> {city},{" "}
-            {address.substring(0, 15) + "..."}
+            <CiLocationOn className="mr-1 text-lg" /> {city.substring(0, 6)},{" "}
+            {address.substring(0, 10) + "..."}
           </Typography>
           <Typography
-            variant="body2"
+            variant="p"
             color="text.secondary"
             className="mb-2 flex items-center gap-2"
           >
             <Rating name="read-only" value={rating} readOnly precision={0.5} />
           </Typography>
-          <Typography variant="body2" color="text.secondary" className="mb-2">
+          <Typography variant="p" color="text.secondary" className="mb-2">
             Age range - &#40; {ageRange.lowerLimit} - {ageRange.upperLimit}{" "}
             years&#41;
           </Typography>

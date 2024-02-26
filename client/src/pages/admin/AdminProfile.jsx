@@ -51,21 +51,23 @@ const AdminProfile = () => {
               adminData?.name
             )}
           </Typography>
-          <Typography variant="body1" className="mb-2">
-            {!adminData ? (
-              <Skeleton animation="wave" width={100} />
-            ) : (
-              adminData?.email
-            )}
-          </Typography>
+          <div className="flex flex-col">
+            <Typography variant="p" className="mb-2 w-full">
+              {!adminData ? (
+                <Skeleton animation="wave" width={100} />
+              ) : (
+                "email : " + adminData?.email?.substring(0, 10) + "..."
+              )}
+            </Typography>
 
-          <Typography variant="body1" className="mb-2">
-            {!adminData ? (
-              <Skeleton animation="wave" width={100} />
-            ) : (
-              `${adminData?.address}, ${adminData?.city}`
-            )}
-          </Typography>
+            <Typography variant="p" className="mb-2 ">
+              {!adminData ? (
+                <Skeleton animation="wave" width={100} />
+              ) : (
+                `address : ${adminData?.address}, ${adminData?.city}`
+              )}
+            </Typography>
+          </div>
         </Grid>
       </Grid>
     </Paper>

@@ -20,7 +20,7 @@ const ReviewCard = ({ caregiverReviews }) => {
           <Typography variant="h6">{clientName}</Typography>
         </div>
         <CardContent>
-          <Typography variant="caption" color="text.secondary" gutterBottom>
+          <Typography variant="span" color="text.secondary" gutterBottom>
             {new Date(date).toLocaleDateString()} - {feedback}
           </Typography>
           <Rating name="read-only" value={rating} readOnly />
@@ -52,7 +52,7 @@ const ReviewCard = ({ caregiverReviews }) => {
             <span>
               <Rating name="read-only" value={rating} readOnly />
             </span>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="span" color="text.secondary">
               {new Date(date).toLocaleDateString()}
             </Typography>
           </Typography>
@@ -76,17 +76,21 @@ const ReviewCard = ({ caregiverReviews }) => {
               />
             </div>
             <div className="flex items-start flex-col">
-              <Typography variant="h6">{clientName}</Typography>
+              <Typography variant="h6" className="font-semibold">
+                {clientName}
+              </Typography>
               <div className="flex items-center gap-2">
                 <Rating name="read-only" value={rating} readOnly />
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="span" color="text.secondary">
                   {new Date(date).toLocaleDateString()}
                 </Typography>
               </div>
-              <Typography className="mb-3">
+              <Typography variant="p" className="mb-3 text-gray-600">
                 <i>~{comment}</i>
               </Typography>
-              <Typography>{feedback}</Typography>
+              <Typography variant="p" className="text-base">
+                {feedback}
+              </Typography>
             </div>
           </div>
         </CardContent>

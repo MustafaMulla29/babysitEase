@@ -19,6 +19,10 @@ import { FaExclamationCircle } from "react-icons/fa";
 import { CiLocationOn } from "react-icons/ci";
 import BookingModal from "./BookingModal";
 import { useSelector } from "react-redux";
+import {
+  MdOutlineCurrencyRupee,
+  MdOutlineWorkspacePremium,
+} from "react-icons/md";
 
 const CaregiverDetails = () => {
   const [caregiver, setCaregiver] = useState(null);
@@ -116,9 +120,9 @@ const CaregiverDetails = () => {
                   <Skeleton width={200} animation="wave" />
                 )}
               </Typography>
-              <Typography className="mb-2">
+              <Typography variant="span" className="mb-2">
                 {caregiver ? (
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-1 text-gray-600">
                     <CiLocationOn className="text-lg" />
                     {caregiver.address}
                   </span>
@@ -182,7 +186,10 @@ const CaregiverDetails = () => {
 
           {/* Description Section */}
           <div className="mb-8">
-            <Typography>
+            <Typography variant="h6" className="mb-2 font-semibold">
+              {caregiver ? "About" : <Skeleton animation="wave" width={250} />}
+            </Typography>
+            <Typography variant="p">
               {caregiver ? (
                 caregiver.description
               ) : (
@@ -193,7 +200,7 @@ const CaregiverDetails = () => {
           <hr className="mb-8" />
 
           {/* Other Details Section */}
-          <div className="mb-8">
+          {/* <div className="mb-8">
             <Typography variant="h6">
               {caregiver ? (
                 "Other details"
@@ -239,10 +246,10 @@ const CaregiverDetails = () => {
               </Typography>
             </div>
           </div>
-          <hr className="mb-8" />
+          <hr className="mb-8" /> */}
 
           {/* Preferred Cities Section */}
-          <div className="mb-8">
+          {/* <div className="mb-8">
             <Typography variant="h6">
               {caregiver ? (
                 "Preferred cities"
@@ -289,10 +296,10 @@ const CaregiverDetails = () => {
               )}
             </div>
           </div>
-          <hr className="mb-8" />
+          <hr className="mb-8" /> */}
 
           {/* Qualification Section */}
-          <div className="mb-8">
+          {/* <div className="mb-8">
             <Typography variant="h6">
               {caregiver ? (
                 "Qualification"
@@ -339,10 +346,10 @@ const CaregiverDetails = () => {
               )}
             </div>
           </div>
-          <hr className="mb-8" />
+          <hr className="mb-8" /> */}
 
           {/* Specialisation Section */}
-          <div className="mb-8">
+          {/* <div className="mb-8">
             <Typography variant="h6">
               {caregiver ? (
                 "Specialisation"
@@ -388,12 +395,258 @@ const CaregiverDetails = () => {
                 </div>
               )}
             </div>
+          </div> */}
+          {/* <hr className="mb-8" /> */}
+
+          <div className="mb-8">
+            {/* Client Details */}
+            <div className="mb-8">
+              <Typography variant="h6" className="mb-2 font-semibold">
+                {caregiver ? (
+                  "Client Details"
+                ) : (
+                  <Skeleton animation="wave" width={250} />
+                )}
+              </Typography>
+              <div className="flex items-center gap-4">
+                <Typography variant="p">
+                  {caregiver ? (
+                    `Age range : ${
+                      caregiver?.ageRange?.lowerLimit
+                        ? caregiver?.ageRange.lowerLimit
+                        : "N/L"
+                    }`
+                  ) : (
+                    <Skeleton animation="wave" width={150} />
+                  )}
+                </Typography>
+                <span>-</span>
+                <Typography variant="span">
+                  {caregiver ? (
+                    ` ${
+                      caregiver?.ageRange?.upperLimit
+                        ? caregiver?.ageRange.upperLimit + " years"
+                        : "N/L"
+                    }`
+                  ) : (
+                    <Skeleton animation="wave" width={150} />
+                  )}
+                </Typography>
+              </div>
+            </div>
+            <hr className="mb-8" />
+
+            {/* Fees */}
+            <div className="mb-8">
+              <Typography variant="h6" className="mb-2 font-semibold">
+                Fees
+              </Typography>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Typography variant="span">
+                  {caregiver ? (
+                    <span className="flex items-center gap-1">
+                      <MdOutlineCurrencyRupee className="text-xl" />
+                      {caregiver?.feesPerDay ? caregiver?.feesPerDay : "N/L"}
+                      /day
+                    </span>
+                  ) : (
+                    <Skeleton animation="wave" width={100} />
+                  )}
+                </Typography>
+              </div>
+            </div>
+
+            <hr className="mb-8" />
+
+            {/* Experience */}
+            <div className="mt-8">
+              <Typography variant="h6" className="mb-2 font-semibold">
+                Experience
+              </Typography>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Typography variant="span">
+                  {caregiver ? (
+                    <span className="flex items-center gap-1">
+                      <MdOutlineWorkspacePremium className="text-xl" />
+                      {caregiver?.yearsExperience
+                        ? caregiver.yearsExperience
+                        : "N/L"}{" "}
+                      years
+                    </span>
+                  ) : (
+                    <Skeleton animation="wave" width={100} />
+                  )}
+                </Typography>
+              </div>
+            </div>
+          </div>
+          <hr className="mb-8" />
+
+          {/* Preferred Cities Section */}
+          <div className="mb-8">
+            <Typography variant="h6" className="mb-2 font-semibold">
+              {caregiver ? (
+                "Preferred cities"
+              ) : (
+                <Skeleton animation="wave" width={150} />
+              )}
+            </Typography>
+            <div className="flex flex-wrap gap-2">
+              {caregiver ? (
+                caregiver?.preferredCities ? (
+                  caregiver?.preferredCities?.map((city, index) => (
+                    <Chip
+                      key={index}
+                      label={city}
+                      className="text-base bg-[#f2f7f2]"
+                    />
+                  ))
+                ) : (
+                  <Chip label={"N/L"} className="text-base bg-[#f2f7f2]" />
+                )
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  <Skeleton
+                    animation="wave"
+                    width={70}
+                    height={40}
+                    className="rounded-2xl"
+                  />
+                  <Skeleton
+                    animation="wave"
+                    width={70}
+                    height={40}
+                    className="rounded-2xl"
+                  />
+                  <Skeleton
+                    animation="wave"
+                    width={70}
+                    height={40}
+                    className="rounded-2xl"
+                  />
+                  <Skeleton
+                    animation="wave"
+                    width={70}
+                    height={40}
+                    className="rounded-2xl"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+          <hr className="mb-8" />
+
+          {/* Qualification Section */}
+          <div className="mb-8">
+            <Typography variant="h6" className="mb-2 font-semibold">
+              {caregiver ? (
+                "Qualification"
+              ) : (
+                <Skeleton animation="wave" width={150} />
+              )}
+            </Typography>
+            <div className="flex flex-wrap gap-2">
+              {caregiver ? (
+                caregiver?.qualification ? (
+                  caregiver?.qualification?.map((qual, index) => (
+                    <Chip
+                      key={index}
+                      label={qual}
+                      className="text-base bg-[#f2f7f2]"
+                    />
+                  ))
+                ) : (
+                  <Chip label={"N/L"} className="text-base bg-[#f2f7f2]" />
+                )
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  <Skeleton
+                    animation="wave"
+                    width={70}
+                    height={40}
+                    className="rounded-2xl"
+                  />
+                  <Skeleton
+                    animation="wave"
+                    width={70}
+                    height={40}
+                    className="rounded-2xl"
+                  />
+                  <Skeleton
+                    animation="wave"
+                    width={70}
+                    height={40}
+                    className="rounded-2xl"
+                  />
+                  <Skeleton
+                    animation="wave"
+                    width={70}
+                    height={40}
+                    className="rounded-2xl"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+          <hr className="mb-8" />
+
+          {/* Specialisation Section */}
+          <div className="mb-8">
+            <Typography variant="h6" className="mb-2 font-semibold">
+              {caregiver ? (
+                "Specialisation"
+              ) : (
+                <Skeleton animation="wave" width={150} />
+              )}
+            </Typography>
+            <div className="flex flex-wrap gap-2">
+              {caregiver ? (
+                caregiver?.specialisation ? (
+                  caregiver?.specialisation?.map((spec, index) => (
+                    <Chip
+                      key={index}
+                      label={spec}
+                      className="text-base bg-[#f2f7f2]"
+                    />
+                  ))
+                ) : (
+                  <Chip label={"N/L"} className="text-base bg-[#f2f7f2]" />
+                )
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  <Skeleton
+                    animation="wave"
+                    width={70}
+                    height={40}
+                    className="rounded-2xl"
+                  />
+                  <Skeleton
+                    animation="wave"
+                    width={70}
+                    height={40}
+                    className="rounded-2xl"
+                  />
+                  <Skeleton
+                    animation="wave"
+                    width={70}
+                    height={40}
+                    className="rounded-2xl"
+                  />
+                  <Skeleton
+                    animation="wave"
+                    width={70}
+                    height={40}
+                    className="rounded-2xl"
+                  />
+                </div>
+              )}
+            </div>
           </div>
           <hr className="mb-8" />
           {caregiver?.certifications.length > 0 && (
             <div>
               <div className="mb-8">
-                <Typography variant="h6">
+                <Typography variant="h6" className="mb-2 font-semibold">
                   {caregiver?.certifications ? (
                     "Certifications"
                   ) : (
@@ -445,7 +698,7 @@ const CaregiverDetails = () => {
           )}
 
           <div className="flex items-center justify-between border-b-2 py-2">
-            <Typography variant="h6">
+            <Typography variant="h6" className="mb-2 font-semibold">
               {caregiverReviews ? (
                 "Reviews"
               ) : (

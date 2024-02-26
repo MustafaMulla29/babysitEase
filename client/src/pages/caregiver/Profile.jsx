@@ -9,6 +9,11 @@ import ReviewCard from "./ReviewCard";
 import { FaRegImage } from "react-icons/fa6";
 import { IoFlashOutline } from "react-icons/io5";
 import { CiLocationOn } from "react-icons/ci";
+// import profile from "./../../lotties/profile.json";
+import apply from "./../../lotties/alert.json";
+import Lottie from "react-lottie";
+import { MdOutlineWorkspacePremium } from "react-icons/md";
+import { MdOutlineCurrencyRupee } from "react-icons/md";
 
 const Profile = () => {
   const [caregiver, setCaregiver] = useState(null);
@@ -66,6 +71,24 @@ const Profile = () => {
     };
     getReviews();
   }, [user?._id]);
+
+  // const defaultOptions = {
+  //   loop: true,
+  //   autoplay: true,
+  //   animationData: profile,
+  //   rendererSettings: {
+  //     preserveAspectRatio: "xMidYMid slice",
+  //   },
+  // };
+  const applyOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: apply,
+    rendererSettings: {
+      preserveAspectRatio: "xMidYMid slice",
+    },
+  };
+
   return (
     <>
       <div className="container mx-auto p-4">
@@ -78,7 +101,7 @@ const Profile = () => {
                 className="w-24"
               />
               <div className="max-w-lg">
-                <Typography className="text-lg font-semibold">
+                <Typography variant="h5" className="text-lg font-semibold">
                   Your caregiver account has been blocked by the admin. Reasons
                   could be:{" "}
                 </Typography>
@@ -91,6 +114,56 @@ const Profile = () => {
             </div>
           </div>
         )}
+
+        {!caregiver?.isCaregiver && (
+          <div className=" bg-yellow-100 border border-gray-300  rounded-lg  bg-opacity-80  m-auto">
+            <div className="h-full w-ful flex items-start gap-10">
+              <div className=" flex items-center gap-4">
+                <div className="pointer-events-none">
+                  <Lottie
+                    options={applyOptions}
+                    isClickToPauseDisabled={true}
+                    width={100}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Typography variant="h6" className="text-xl font-semibold ">
+                    Hey {caregiver?.name}! Don&apos;t forget to apply for a{" "}
+                    {caregiver?.role} account.
+                  </Typography>
+                  <Typography
+                    variant="span"
+                    className="text-gray-700 text-[15px]"
+                  >
+                    Click the link on header to apply and wait for the approval
+                    from the admin to unlock more features and opportunities.
+                    <br />
+                    <span className="text-gray-500">
+                      *Ignore this if you already applied
+                    </span>
+                  </Typography>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* <>
+          <div className="pointer-events-none">
+            <Lottie
+              options={defaultOptions}
+              isClickToPauseDisabled={true}
+              width={400}
+              height={400}
+            />
+            <Typography
+              variant="h6"
+              className="text-center w-96 m-auto text-gray-700"
+            >
+              You will see your profile here after you have applied for a
+              {caregiver?.role} account and approved by admin
+            </Typography>
+          </div>
+        </> */}
         <div className="bg-white p-6 rounded-md shadow-md">
           {/* Header Section */}
           <div className="flex items-center gap-4 mb-8">
@@ -118,19 +191,22 @@ const Profile = () => {
               <Typography variant="h4" className="mb-2 font-bold">
                 {caregiver ? (
                   <span className="flex items-center gap-4">
-                    {caregiver.name}
-                    <FaRegEdit
-                      className="text-base cursor-pointer"
-                      onClick={handleEditClick}
-                    />
+                    {caregiver.name.charAt(0).toUpperCase()}
+                    {caregiver.name.slice(1, caregiver.name.length)}
+                    {caregiver?.description && (
+                      <FaRegEdit
+                        className="text-base cursor-pointer"
+                        onClick={handleEditClick}
+                      />
+                    )}
                   </span>
                 ) : (
                   <Skeleton width={200} animation="wave" />
                 )}
               </Typography>
-              <Typography className="mb-2">
+              <Typography variant="p" className="mb-2">
                 {caregiver ? (
-                  <span className="flex items-center gap-1 text-gray-500">
+                  <span className="flex items-center mb-1 gap-1 text-gray-600">
                     <CiLocationOn className="text-lg" />
                     {caregiver.address}
                   </span>
@@ -144,22 +220,19 @@ const Profile = () => {
                     caregiver?.availability === "Available"
                       ? "bg-green-800"
                       : "bg-red-800"
-                  } flex gap-1 items-center py-2 px-3 rounded-full text-white text-[12px] w-fit`}
+                  } flex gap-1 items-center py-2 px-3 rounded-full mb-1 text-white text-[12px] w-fit`}
                 >
                   {caregiver?.availability === "Available" ? (
                     <IoFlashOutline />
                   ) : (
                     <FaExclamationCircle className="" />
                   )}
-                  {caregiver?.availability}
+                  {caregiver?.availability
+                    ? caregiver?.availability
+                    : "Unavailable"}
                 </div>
               ) : (
-                <Skeleton
-                  animation="wave"
-                  width={90}
-                  height={70}
-                  className="rounded-full"
-                />
+                <Chip label={<Skeleton animation="wave" width={40} />} />
               )}
               <Typography>
                 {caregiver ? (
@@ -179,10 +252,18 @@ const Profile = () => {
           <hr className="mb-8" />
 
           {/* Description Section */}
+
           <div className="mb-8">
-            <Typography>
+            <Typography variant="h6" className="mb-2 font-semibold">
+              About
+            </Typography>
+            <Typography variant="p">
               {caregiver ? (
-                caregiver.description
+                !caregiver.description ? (
+                  "N/L"
+                ) : (
+                  caregiver.description
+                )
               ) : (
                 <Skeleton animation="wave" width={250} />
               )}
@@ -191,7 +272,7 @@ const Profile = () => {
           <hr className="mb-8" />
 
           {/* Other Details Section */}
-          <div className="mb-8">
+          {/* <div className="mb-8">
             <Typography variant="h6">
               {caregiver ? (
                 "Other details"
@@ -202,21 +283,31 @@ const Profile = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <Typography>
                 {caregiver ? (
-                  `Lower age limit of client: ${caregiver?.ageRange?.lowerLimit}`
+                  `Lower age limit of client: ${
+                    caregiver?.ageRange?.lowerLimit
+                      ? caregiver?.ageRange.lowerLimit
+                      : "N/L"
+                  }`
                 ) : (
                   <Skeleton animation="wave" width={150} />
                 )}
               </Typography>
               <Typography>
                 {caregiver ? (
-                  `Upper age limit of client: ${caregiver?.ageRange?.upperLimit}`
+                  `Upper age limit of client: ${
+                    caregiver?.ageRange?.upperLimit
+                      ? caregiver?.ageRange.upperLimit
+                      : "N/L"
+                  }`
                 ) : (
                   <Skeleton animation="wave" width={150} />
                 )}
               </Typography>
               <Typography>
                 {caregiver ? (
-                  `Fees per day: ${caregiver?.feesPerDay}/rs`
+                  `Fees per day: ${
+                    caregiver?.feesPerDay ? caregiver?.feesPerDay : "N/L"
+                  }/rs`
                 ) : (
                   <Skeleton animation="wave" width={100} />
                 )}
@@ -230,18 +321,106 @@ const Profile = () => {
               </Typography>
               <Typography>
                 {caregiver ? (
-                  `Experience: ${caregiver?.yearsExperience} years`
+                  `Experience: ${
+                    caregiver?.yearsExperience
+                      ? caregiver.yearsExperience
+                      : "N/L"
+                  } years`
                 ) : (
                   <Skeleton animation="wave" width={100} />
                 )}
               </Typography>
             </div>
           </div>
+          <hr className="mb-8" /> */}
+
+          <div className="mb-8">
+            {/* Client Details */}
+            <div className="mb-8">
+              <Typography variant="h6" className="mb-2 font-semibold">
+                Client Details
+              </Typography>
+              <div className="flex items-center gap-4">
+                <Typography variant="span">
+                  {caregiver ? (
+                    `Age range : ${
+                      caregiver?.ageRange?.lowerLimit
+                        ? caregiver?.ageRange.lowerLimit
+                        : "N/L"
+                    }`
+                  ) : (
+                    <Skeleton animation="wave" width={150} />
+                  )}
+                </Typography>
+                <span>-</span>
+                <Typography variant="span">
+                  {caregiver ? (
+                    ` ${
+                      caregiver?.ageRange?.upperLimit
+                        ? caregiver?.ageRange.upperLimit + " years"
+                        : "N/L"
+                    }`
+                  ) : (
+                    <Skeleton animation="wave" width={150} />
+                  )}
+                </Typography>
+              </div>
+            </div>
+            <hr className="mb-8" />
+
+            {/* Fees */}
+            <div className="mb-8">
+              <Typography variant="h6" className="mb-2 font-semibold">
+                {caregiver ? "Fees" : <Skeleton animation="wave" width={150} />}
+              </Typography>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Typography variant="span">
+                  {caregiver ? (
+                    <span className="flex items-center gap-1">
+                      <MdOutlineCurrencyRupee className="text-xl" />
+                      {caregiver?.feesPerDay ? caregiver?.feesPerDay : "N/L"}
+                      /day
+                    </span>
+                  ) : (
+                    <Skeleton animation="wave" width={100} />
+                  )}
+                </Typography>
+              </div>
+            </div>
+
+            <hr className="mb-8" />
+
+            {/* Experience */}
+            <div className="mt-8">
+              <Typography variant="h6" className="mb-2 font-semibold">
+                {caregiver ? (
+                  "Experience"
+                ) : (
+                  <Skeleton animation="wave" width={150} />
+                )}
+              </Typography>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Typography variant="span">
+                  {caregiver ? (
+                    <span className="flex items-center gap-1">
+                      <MdOutlineWorkspacePremium className="text-xl" />
+                      {caregiver?.yearsExperience
+                        ? caregiver.yearsExperience
+                        : "N/L"}{" "}
+                      years
+                    </span>
+                  ) : (
+                    <Skeleton animation="wave" width={100} />
+                  )}
+                </Typography>
+              </div>
+            </div>
+          </div>
           <hr className="mb-8" />
 
           {/* Preferred Cities Section */}
           <div className="mb-8">
-            <Typography variant="h6">
+            <Typography variant="h6" className="mb-2 font-semibold">
               {caregiver ? (
                 "Preferred cities"
               ) : (
@@ -250,13 +429,17 @@ const Profile = () => {
             </Typography>
             <div className="flex flex-wrap gap-2">
               {caregiver ? (
-                caregiver?.preferredCities?.map((city, index) => (
-                  <Chip
-                    key={index}
-                    label={city}
-                    className="text-base bg-[#f2f7f2]"
-                  />
-                ))
+                caregiver?.preferredCities ? (
+                  caregiver?.preferredCities?.map((city, index) => (
+                    <Chip
+                      key={index}
+                      label={city}
+                      className="text-base bg-[#f2f7f2]"
+                    />
+                  ))
+                ) : (
+                  <Chip label={"N/L"} className="text-base bg-[#f2f7f2]" />
+                )
               ) : (
                 <div className="flex flex-wrap gap-2">
                   <Skeleton
@@ -291,7 +474,7 @@ const Profile = () => {
 
           {/* Qualification Section */}
           <div className="mb-8">
-            <Typography variant="h6">
+            <Typography variant="h6" className="mb-2 font-semibold">
               {caregiver ? (
                 "Qualification"
               ) : (
@@ -300,13 +483,17 @@ const Profile = () => {
             </Typography>
             <div className="flex flex-wrap gap-2">
               {caregiver ? (
-                caregiver?.qualification?.map((qual, index) => (
-                  <Chip
-                    key={index}
-                    label={qual}
-                    className="text-base bg-[#f2f7f2]"
-                  />
-                ))
+                caregiver?.qualification ? (
+                  caregiver?.qualification?.map((qual, index) => (
+                    <Chip
+                      key={index}
+                      label={qual}
+                      className="text-base bg-[#f2f7f2]"
+                    />
+                  ))
+                ) : (
+                  <Chip label={"N/L"} className="text-base bg-[#f2f7f2]" />
+                )
               ) : (
                 <div className="flex flex-wrap gap-2">
                   <Skeleton
@@ -341,7 +528,7 @@ const Profile = () => {
 
           {/* Specialisation Section */}
           <div className="mb-8">
-            <Typography variant="h6">
+            <Typography variant="h6" className="mb-2 font-semibold">
               {caregiver ? (
                 "Specialisation"
               ) : (
@@ -350,13 +537,17 @@ const Profile = () => {
             </Typography>
             <div className="flex flex-wrap gap-2">
               {caregiver ? (
-                caregiver?.specialisation?.map((spec, index) => (
-                  <Chip
-                    key={index}
-                    label={spec}
-                    className="text-base bg-[#f2f7f2]"
-                  />
-                ))
+                caregiver?.specialisation ? (
+                  caregiver?.specialisation?.map((spec, index) => (
+                    <Chip
+                      key={index}
+                      label={spec}
+                      className="text-base bg-[#f2f7f2]"
+                    />
+                  ))
+                ) : (
+                  <Chip label={"N/L"} className="text-base bg-[#f2f7f2]" />
+                )
               ) : (
                 <div className="flex flex-wrap gap-2">
                   <Skeleton
@@ -389,7 +580,7 @@ const Profile = () => {
           </div>
           <hr className="mb-8" />
           <div className="mb-8">
-            <Typography variant="h6">
+            <Typography variant="h6" className="mb-2 font-semibold">
               {caregiver ? (
                 "Certifications"
               ) : (
@@ -456,7 +647,7 @@ const Profile = () => {
           {/* Reviews Section */}
           {caregiverReviews?.length > 0 && (
             <div>
-              <Typography variant="h6">
+              <Typography variant="h6" className="mb-2 font-semibold">
                 {caregiverReviews ? (
                   "Reviews"
                 ) : (
@@ -504,7 +695,7 @@ const Profile = () => {
                           onChange={handleFileChange}
                         />
                       </label>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs  text-gray-600">
                         PNG, JPG, JPEG up to 10MB
                       </p>
                     </div>

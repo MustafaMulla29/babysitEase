@@ -2,16 +2,18 @@ import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import CaregiverBookingDetails from "./BookingDetails";
 import { useSelector } from "react-redux";
-import { toast } from "react-toastify";
 import axios from "axios";
 import { Typography } from "@mui/material";
 import BookingDetailsSkeleton from "../client/BookingDetailsSkeleton";
+import NoBookings from "../../components/NoBookings";
+// import { openAlert } from "../../redux/features/messageSlice";
 
 const Bookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const { user } = useSelector((state) => state.user);
+  // const dispatch = useDispatch();
 
   useEffect(() => {
     const getBookings = async () => {
@@ -30,9 +32,9 @@ const Bookings = () => {
         }
       } catch (error) {
         console.log(error);
-        toast.error("Something went wrong", {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        // toast.error("Something went wrong", {
+        //   position: toast.POSITION.TOP_CENTER,
+        // });
       } finally {
         setLoading(false);
       }
@@ -52,19 +54,27 @@ const Bookings = () => {
           }
         );
       } catch (error) {
-        // console.log(error);
+        console.log(error);
         // toast.error("Something went wrong", {
         //   position: toast.POSITION.TOP_CENTER,
         // });
+        // dispatch(
+        //   openAlert({
+        //     severity: "error",
+        //     content: "Something went wrong! Try again.",
+        //   })
+        // );
+
         return;
       }
     };
     bookingStatus();
   }, []);
+
   return (
     <Layout>
       <h1 className="text-3xl font-bold mb-4">Bookings page</h1>
-      <div className="flex items-start flex-row flex-wrap w-full">
+      <div className="flex items-start flex-row flex-wrap justify-center w-full">
         {loading ? (
           <>
             <BookingDetailsSkeleton />
@@ -77,12 +87,8 @@ const Bookings = () => {
           ))
         ) : (
           <figure className="w-1/3 m-auto">
-            <img
-              src="./../../../img/no_bookings.jpg"
-              className="w-full h-full"
-              alt="no bookings"
-            />
-            <Typography className="my-2 text-[19px] text-center">
+            <NoBookings />
+            <Typography variant="h6" className="my-2 text-[19px] text-center">
               You don&apos;t have any bookings as of now
             </Typography>
           </figure>

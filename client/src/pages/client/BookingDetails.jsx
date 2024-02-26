@@ -8,12 +8,12 @@ import {
   DialogActions,
   Button,
   Chip,
+  Divider,
 } from "@mui/material";
 import { FaRegClock, FaUser } from "react-icons/fa";
 import { BsCalendarDate } from "react-icons/bs";
 import PropTypes from "prop-types";
 import { CgTrash } from "react-icons/cg";
-import { toast } from "react-toastify";
 import { useState } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
@@ -28,6 +28,7 @@ import { FaHandHoldingMedical } from "react-icons/fa6";
 import moment from "moment";
 import Zoom from "@mui/material/Zoom";
 import { useNavigate } from "react-router-dom";
+import { openAlert } from "../../redux/features/messageSlice";
 
 const BookingDetails = ({ booking }) => {
   const [open, setOpen] = useState(false);
@@ -58,11 +59,22 @@ const BookingDetails = ({ booking }) => {
       );
 
       if (res.data.success) {
-        toast.success(res.data.message);
+        dispatch(
+          openAlert({
+            severity: "success",
+            content: res.data.message,
+          })
+        );
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something went wrong");
+      // toast.error("Something went wrong");
+      dispatch(
+        openAlert({
+          severity: "error",
+          content: "Something went wrong",
+        })
+      );
     } finally {
       dispatch(hideLoading());
     }
@@ -183,13 +195,15 @@ const BookingDetails = ({ booking }) => {
         </Dialog>
       </Paper> */}
 
-      <div className="max-w-sm relative m-5 p-8 rounded-lg shadow-md border border-[#d6cfcf] min-h-[18.1rem]">
+      <div className="max-w-sm bg-white relative m-2 p-8 rounded-lg shadow-md border border-[#d6cfcf] min-h-[18.1rem]">
         <div className="flex items-center gap-4 mb-6">
           <Avatar
             alt="Profile Picture"
             src={`http://localhost:8070/${booking?.caregiverProfilePicture}`}
             sx={{ width: 70, height: 70, borderRadius: "10px" }}
           />
+          <Divider orientation="vertical" variant="middle" flexItem />
+
           <div className="flex items-start flex-col gap-1">
             <Typography
               variant="h5"
@@ -198,31 +212,34 @@ const BookingDetails = ({ booking }) => {
             >
               {booking.caregiverName}
             </Typography>
+
             <Chip label={booking.caregiverRole} />
           </div>
         </div>
         <div className="my-2">
-          <Typography className="flex gap-1 items-center">
+          <Typography variant="span" className="flex gap-1 items-center">
             <FaUser /> {bookedOnDate}
           </Typography>
         </div>
+        <Divider variant="middle" component="p" />
         <div className=" flex items-center  gap-2 flex-row flex-wrap my-3">
-          <Typography>
+          <Typography variant="span">
             <span className="flex items-center gap-3 ">
               <BsCalendarDate className="text-lg" />
               {jobDate}
             </span>
           </Typography>
           <span>-</span>
-          <Typography>
+          <Typography variant="span">
             <span className="flex items-center gap-3">
               <BsCalendarDate className="text-lg" />
               {endDate}
             </span>
           </Typography>
         </div>
+        <Divider variant="middle" component="p" />
         <div>
-          <Typography className="flex items-center gap-1">
+          <Typography variant="span" className="flex items-center gap-1">
             {booking.bookedFor === "Child" ? (
               <PiBaby className="text-lg" />
             ) : (
@@ -232,6 +249,7 @@ const BookingDetails = ({ booking }) => {
           </Typography>
         </div>
         <Typography
+          variant="span"
           className={`flex items-center gap-1 absolute top-0 right-0 ${
             booking.status === "Pending"
               ? "bg-orange-400"
@@ -287,11 +305,11 @@ const BookingDetails = ({ booking }) => {
               <AiOutlineWarning className="text-xl" />
             </span>
           </Typography>
-          <DialogTitle className="text-center font-bold">
+          <DialogTitle variant="h5" className="text-center font-bold">
             Confirm Cancellation
           </DialogTitle>
-          <DialogContent>
-            <Typography className="text-center">
+          <DialogContent className="text-center">
+            <Typography variant="p" className="text-center">
               Are you sure you want to cancel this booking? This booking will be
               cancelled and deleted.
             </Typography>

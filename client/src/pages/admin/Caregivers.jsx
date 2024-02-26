@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
-import { toast } from "react-toastify";
 import axios from "axios";
 import {
   Table,
@@ -26,6 +25,7 @@ import Zoom from "@mui/material/Zoom";
 import { TbLockCancel } from "react-icons/tb";
 import CaregiversSkeleton from "./CaregiversSkeleton";
 import { FaRegClock } from "react-icons/fa";
+import { openAlert } from "../../redux/features/messageSlice";
 
 const Caregivers = () => {
   const [caregivers, setCaregivers] = useState([]);
@@ -47,14 +47,26 @@ const Caregivers = () => {
         }
       );
       if (res.data.success) {
-        toast.success(res.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        // toast.success(res.data.message, {
+        //   position: toast.POSITION.TOP_CENTER,
+        // });
         window.location.reload();
+        dispatch(
+          openAlert({
+            severity: "success",
+            content: res.data.message,
+          })
+        );
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something went wrong");
+      // toast.error("Something went wrong");
+      dispatch(
+        openAlert({
+          severity: "error",
+          content: "Something went wrong!",
+        })
+      );
     }
   };
 
@@ -79,9 +91,15 @@ const Caregivers = () => {
         }
       } catch (error) {
         console.log(error);
-        toast.success("Something went wrong", {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        // toast.success("Something went wrong", {
+        //   position: toast.POSITION.TOP_CENTER,
+        // });
+        dispatch(
+          openAlert({
+            severity: "error",
+            content: "Something went wrong!",
+          })
+        );
       }
     };
     getCaregivers();
@@ -101,14 +119,26 @@ const Caregivers = () => {
       );
       if (res.data.success) {
         dispatch(hideLoading());
-        toast.success(res.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        // toast.success(res.data.message, {
+        //   position: toast.POSITION.TOP_CENTER,
+        // });
+        dispatch(
+          openAlert({
+            severity: "success",
+            content: res.data.message,
+          })
+        );
       }
     } catch (error) {
       dispatch(hideLoading());
       console.log(error);
-      toast.error("Something went wrong");
+      // toast.error("Something went wrong");
+      dispatch(
+        openAlert({
+          severity: "error",
+          content: "Something went wrong",
+        })
+      );
     }
   };
   return (
@@ -173,6 +203,7 @@ const Caregivers = () => {
                       </TableCell>
                       <TableCell>
                         <Typography
+                          variant="span"
                           className={`${
                             user.status === "Pending"
                               ? "bg-orange-400"

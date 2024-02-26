@@ -35,16 +35,16 @@ const DependentCard = ({ dependent, loading }) => {
         <Typography variant="h6" gutterBottom>
           {dependent?.name}
         </Typography>
-        <Typography variant="subtitle1" gutterBottom className="text-gray-500">
+        <Typography variant="p" gutterBottom className=" text-gray-600">
           {dependent?.type} | {dependent?.gender} | {dependent?.age} years old
         </Typography>
 
         {dependent?.allergies && dependent.allergies.length > 0 && (
           <div className="mt-4">
             <Typography
-              variant="subtitle1"
+              variant="span"
               gutterBottom
-              className="text-blue-500 text-left"
+              className="text-blue-500 text-left text-xl flex items-center"
             >
               <FaAllergies className="inline mr-2" />
               Allergies
@@ -63,9 +63,9 @@ const DependentCard = ({ dependent, loading }) => {
           dependent.medicalConditions.length > 0 && (
             <div className="mt-4">
               <Typography
-                variant="subtitle1"
+                variant="span"
                 gutterBottom
-                className="text-red-500"
+                className="text-red-500 flex items-center text-xl"
               >
                 <FaHospitalUser className="inline mr-2" />
                 Medical Conditions

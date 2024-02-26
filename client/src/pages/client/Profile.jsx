@@ -6,7 +6,7 @@ import axios from "axios";
 import DependentInputModal from "./DependentInputModal";
 import DependentCard from "./DependentCard";
 import { MdOutlineAddCircleOutline } from "react-icons/md";
-import { FaRegEdit } from "react-icons/fa";
+// import { FaRegEdit } from "react-icons/fa";
 import { CiLocationOn } from "react-icons/ci";
 
 const Profile = () => {
@@ -17,9 +17,9 @@ const Profile = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const handleEditClick = () => {
-    setEditModalOpen(true);
-  };
+  // const handleEditClick = () => {
+  //   setEditModalOpen(true);
+  // };
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -64,7 +64,7 @@ const Profile = () => {
               className="w-24"
             />
             <div className="max-w-lg">
-              <Typography className="text-lg font-semibold">
+              <Typography variant="h6" className="text-lg font-semibold">
                 Your account has been blocked by the admin. Reasons could be:{" "}
               </Typography>
               <ol className="list-disc pl-5">
@@ -113,7 +113,7 @@ const Profile = () => {
                 ) : (
                   client?.name
                 )}
-                <div className="items-start ml-3">
+                {/* <div className="items-start ml-3">
                   {loading ? (
                     <Skeleton
                       animation="wave"
@@ -127,9 +127,9 @@ const Profile = () => {
                       onClick={handleEditClick}
                     />
                   )}
-                </div>
+                </div> */}
               </Typography>
-              <Typography>
+              <Typography variant="p">
                 {loading ? (
                   <Skeleton
                     animation="wave"
@@ -144,7 +144,7 @@ const Profile = () => {
                   </span>
                 )}
               </Typography>
-              <Typography>
+              <Typography variant="p">
                 {loading ? (
                   <Skeleton
                     animation="wave"
@@ -161,9 +161,9 @@ const Profile = () => {
           <hr className="mb-8" />
 
           {/* Other Details Section */}
-          <div className="mb-8">
+          {/* <div className="mb-8">
             <div className="">
-              <Typography>
+              <Typography variant="p">
                 {loading ? (
                   <Skeleton
                     animation="wave"
@@ -177,7 +177,7 @@ const Profile = () => {
               </Typography>
             </div>
           </div>
-          <hr className="mb-8" />
+          <hr className="mb-8" /> */}
 
           <div className="mb-8">
             <Typography variant="h6" className="flex items-center gap-3">
@@ -210,7 +210,7 @@ const Profile = () => {
                   className="w-full h-full"
                   alt=""
                 />
-                <Typography>
+                <Typography variant="h6">
                   No dependents. Add by clicking + icon above
                 </Typography>
               </div>

@@ -14,12 +14,12 @@ import {
   MenuItem,
   InputLabel,
 } from "@mui/material";
-import { toast } from "react-toastify";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 import { useParams } from "react-router-dom";
 import { hideLoading, showLoading } from "../../redux/features/alertSlice";
+import { openAlert } from "../../redux/features/messageSlice";
 
 const ReviewDialog = ({ open, onClose }) => {
   const [rating, setRating] = useState(0);
@@ -68,23 +68,38 @@ const ReviewDialog = ({ open, onClose }) => {
       );
       dispatch(hideLoading());
       if (res.data.success) {
-        toast.success(res.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        dispatch(
+          openAlert({
+            severity: "success",
+            content: res.data.message,
+          })
+        );
         handleClose();
         window.location.reload();
       }
     } catch (error) {
       dispatch(hideLoading());
       if (error.response && error.response.status === 403) {
-        toast.info(error.response.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        // toast.info(error.response.data.message, {
+        //   position: toast.POSITION.TOP_CENTER,
+        // });
+        dispatch(
+          openAlert({
+            severity: "info",
+            content: error.response.data.message,
+          })
+        );
       } else {
         console.log(error);
-        toast.error("Something went wrong", {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        // toast.error("Something went wrong", {
+        //   position: toast.POSITION.TOP_CENTER,
+        // });
+        dispatch(
+          openAlert({
+            severity: "error",
+            content: "Something went wrong!",
+          })
+        );
       }
     } finally {
       dispatch(hideLoading());

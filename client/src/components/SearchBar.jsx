@@ -41,7 +41,7 @@ const SearchBar = ({
           name=""
           className={`${
             searchError && "border-red-600 focus:border-red-600"
-          } pl-10 w-full py-3 pr-4 rounded-full bg-slate-100  outline-none border-[#d9edd9] hover:border-[#282928] border-2 focus:border-[#9ed49e]`}
+          } pl-10 w-full py-3 pr-4 rounded-2xl bg-slate-100  outline-none border-[#d9edd9] hover:border-[#9ed49e] border-2 focus:border-[#9ed49e]`}
           placeholder="Search caregiver"
           id=""
           value={searchString}
@@ -51,7 +51,7 @@ const SearchBar = ({
 
         <div className=" flex items-center space-x-2 absolute cursor-pointer  right-0  outline-none">
           <select
-            className="appearance-none  hover:bg-slate-100  text-center  outline-none rounded-full bg-white border-[#d9edd9] hover:border-[#848e84] border-2 py-[11px] px-3 "
+            className="appearance-none  hover:bg-slate-100  text-center  outline-none rounded-2xl bg-white border-[#d9edd9] hover:border-[#848e84] border-2 py-[11px] px-3 "
             id="searchDropdown"
             value={searchBy}
             // style={{ padding: "0px" }}
@@ -78,13 +78,13 @@ const SearchBar = ({
             >
               Specialisation
             </option>
-            <option
+            {/* <option
               style={{ paddingTop: "10px", paddingBottom: "10px" }}
               value="ageRange"
               className=""
             >
               Age range
-            </option>
+            </option> */}
           </select>
           {/* <span>
             <IoIosArrowUp className="rotate-180" />
@@ -92,7 +92,7 @@ const SearchBar = ({
         </div>
       </div>
       <div className="h-4">
-        <Typography className="text-red-500 text-sm mt-2 ml-4">
+        <Typography variant="span" className="text-red-500 text-sm mt-2 ml-4">
           {searchError}
         </Typography>
       </div>

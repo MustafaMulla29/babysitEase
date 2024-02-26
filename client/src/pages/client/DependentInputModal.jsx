@@ -17,11 +17,11 @@ import {
   InputLabel,
   Chip,
 } from "@mui/material";
-import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { hideLoading, showLoading } from "../../redux/features/alertSlice";
 import { PropTypes } from "prop-types";
+import { openAlert } from "../../redux/features/messageSlice";
 
 const DependentInputModal = ({ open, onClose, dependent }) => {
   const [dependentData, setDependentData] = useState({
@@ -233,14 +233,23 @@ const DependentInputModal = ({ open, onClose, dependent }) => {
       );
 
       if (res.data.success) {
-        toast.success(res.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        dispatch(
+          openAlert({
+            severity: "success",
+            content: res.data.message,
+          })
+        );
         onClose();
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something went wrong");
+      // toast.error("Something went wrong");
+      dispatch(
+        openAlert({
+          severity: "error",
+          content: "Something went wrong!",
+        })
+      );
     } finally {
       dispatch(hideLoading());
     }

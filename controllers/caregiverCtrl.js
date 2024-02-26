@@ -623,4 +623,6 @@ const changeSubscriptionStatusController = async (req, res) => {
 }
 
 
-module.exports = { getCaregiverInfoController, updateCaregiverController, getBookingsController, bookingStatusController, getReviewsController, approveBookingController, subscriptionController, checkSubscriptionController, changeSubscriptionStatusController }
+
+
+module.exports = { getCaregiverInfoController, updateCaregiverController, getBookingsController, bookingStatusController, getReviewsController, approveBookingController, subscriptionController, checkSubscriptionController, changeSubscriptionStatusController, }

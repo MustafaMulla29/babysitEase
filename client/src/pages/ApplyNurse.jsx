@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
-import { AiOutlineCloudUpload } from "react-icons/ai";
-import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+/* eslint-disable no-unused-vars */
+import { useState } from "react";
+import { AiOutlineArrowLeft, AiOutlineCloudUpload } from "react-icons/ai";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoading, showLoading } from "../redux/features/alertSlice";
 import { Button, Typography, TextField, Box, Chip } from "@mui/material";
 import axios from "axios";
+import { openAlert } from "../redux/features/messageSlice";
 
 const ApplyNurse = () => {
   const [yearsExperience, setExperience] = useState(null);
@@ -226,50 +227,6 @@ const ApplyNurse = () => {
     // console.log(preferredCities);
   }
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   // setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  //   const values = {
-  //     experience,
-  //     feesPerDay,
-  //     preferredCities,
-  //     description,
-  //     qualification,
-  //     specialisation,
-  //     ageRange,
-  //     certifications,
-  //   };
-  //   try {
-  //     dispatch(showLoading());
-  //     const res = await axios.post(
-  //       "http://localhost:8070/api/v1/user/apply-caregiver",
-  //       { ...values, userId: user._id },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${localStorage.getItem("token")}`,
-  //         },
-  //       }
-  //     );
-  //     dispatch(hideLoading());
-  //     if (res.data.success) {
-  //       toast.success(res.data.message, {
-  //         position: toast.POSITION.TOP_CENTER,
-  //       });
-  //       navigate("/");
-  //     } else {
-  //       toast.error(res.data.message, {
-  //         position: toast.POSITION.TOP_CENTER,
-  //       });
-  //     }
-  //   } catch (error) {
-  //     dispatch(hideLoading());
-  //     console.log(error);
-  //     toast.error("Something went wrong", {
-  //       position: toast.POSITION.TOP_CENTER,
-  //     });
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -312,19 +269,27 @@ const ApplyNurse = () => {
       );
       dispatch(hideLoading());
       if (res.data.success) {
-        toast.success(res.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        dispatch(
+          openAlert({
+            severity: "success",
+            content: res.data.message,
+          })
+        );
         navigate("/");
+        localStorage.setItem("caregiverApplied", true);
       } else {
-        toast.error(res.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        // toast.error(res.data.message, {
+        //   position: toast.POSITION.TOP_CENTER,
+        // });
+        dispatch(openAlert({ severity: "error", content: res.data.message }));
       }
     } catch (error) {
       dispatch(hideLoading());
       console.log(error);
-      toast.error("Something went wrong");
+      dispatch(
+        openAlert({ severity: "error", content: "Something went wrong!" })
+      );
+      // toast.error("Something went wrong");
     }
   };
 
@@ -336,6 +301,16 @@ const ApplyNurse = () => {
         className="space-y-2 mt-11 py-3 px-4 w-full max-w-3xl m-auto"
         onSubmit={handleSubmit}
       >
+        <div className="flex gap-4 items-center mb-5">
+          <div className="p-2 rounded-full hover:bg-slate-200">
+            <Link to="/">
+              <AiOutlineArrowLeft className="text-lg" />
+            </Link>
+          </div>
+          <Typography variant="h4" className="">
+            Apply for {user?.role} account
+          </Typography>
+        </div>
         <div className="mt-9 flex flex-col gap-7">
           <div className="flex items-center justify-center gap-6">
             <div className="w-full">
@@ -354,7 +329,10 @@ const ApplyNurse = () => {
                 onChange={handleExperienceChange}
               />
               <div className="h-4">
-                <Typography className="text-red-500 text-sm mt-1">
+                <Typography
+                  variant="span"
+                  className="text-red-500 text-sm mt-1"
+                >
                   {experienceError}
                 </Typography>
               </div>
@@ -375,7 +353,10 @@ const ApplyNurse = () => {
                 onChange={handleFeesPerDayChange}
               />
               <div className="h-4">
-                <Typography className="text-red-500 text-sm mt-1">
+                <Typography
+                  variant="span"
+                  className="text-red-500 text-sm mt-1"
+                >
                   {feesPerDayError}
                 </Typography>
               </div>
@@ -387,18 +368,22 @@ const ApplyNurse = () => {
                 id="outlined-textarea"
                 label="Description"
                 multiline
+                rows={4}
                 className={` w-full bg-[#f3f4f6]  text-sm rounded-md transition-[outline] duration-200 outline-blue-600 border`}
                 error={descriptionError ? true : false}
                 type="text"
                 name="description"
-                placeholder="Enter your description"
+                placeholder="Enter about description"
                 autoComplete="off"
                 required
                 value={description}
                 onChange={handleDescriptionChange}
               />
               <div className="h-4">
-                <Typography className="text-red-500 text-sm mt-1">
+                <Typography
+                  variant="span"
+                  className="text-red-500 text-sm mt-1"
+                >
                   {descriptionError}
                 </Typography>
               </div>
@@ -421,7 +406,10 @@ const ApplyNurse = () => {
                 onChange={handleQualificationChange}
               />
               <div className="h-4">
-                <Typography className="text-red-500 text-sm mt-1">
+                <Typography
+                  variant="span"
+                  className="text-red-500 text-sm mt-1"
+                >
                   {qualificationError}
                 </Typography>
               </div>
@@ -466,7 +454,10 @@ const ApplyNurse = () => {
                 onChange={handlePreferredCitiesChange}
               />
               <div className="h-4">
-                <Typography className="text-red-500 text-sm mt-1">
+                <Typography
+                  variant="span"
+                  className="text-red-500 text-sm mt-1"
+                >
                   {preferredCitiesError}
                 </Typography>
               </div>
@@ -511,7 +502,10 @@ const ApplyNurse = () => {
                 onChange={handleSpecialisationChange}
               />
               <div className="h-4">
-                <Typography className="text-red-500 text-sm mt-1">
+                <Typography
+                  variant="span"
+                  className="text-red-500 text-sm mt-1"
+                >
                   {specialisationError}
                 </Typography>
               </div>
@@ -539,7 +533,9 @@ const ApplyNurse = () => {
           </div>
           <div className="mb-8">
             <Box className="flex items-start flex-col space-y-4">
-              <Typography htmlFor="">Preferred age of client</Typography>
+              <Typography variant="h6" htmlFor="">
+                Preferred age of client
+              </Typography>
               <Box className="w-full flex items-center gap-3">
                 <Box className="w-1/2">
                   <TextField
@@ -601,7 +597,7 @@ const ApplyNurse = () => {
                       multiple
                     />
                   </label>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs  text-gray-600">
                     PNG, JPG, JPEG up to 10MB
                   </p>
                 </div>

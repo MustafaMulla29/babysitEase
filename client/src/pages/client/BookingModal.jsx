@@ -7,9 +7,10 @@ import { useDispatch } from "react-redux";
 import moment from "moment";
 import { hideLoading, showLoading } from "../../redux/features/alertSlice";
 import axios from "axios";
-import { toast } from "react-toastify";
 import { Typography } from "@mui/material";
 import { FaRegCalendarAlt } from "react-icons/fa";
+import { PropTypes } from "prop-types";
+import { openAlert } from "../../redux/features/messageSlice";
 
 const BookingModal = ({ open, onClose, userBlocked, params, clientId }) => {
   const [bookingDate, setBookingDate] = useState(null);
@@ -64,7 +65,12 @@ const BookingModal = ({ open, onClose, userBlocked, params, clientId }) => {
     if (bookingError || bookingEndError) {
       return;
     } else if (userBlocked) {
-      return toast.error("Your account is blocked!");
+      return dispatch(
+        openAlert({
+          severity: "error",
+          content: "Your account has been locked. You cannot book!",
+        })
+      );
     }
 
     if (moment(bookingDate).isAfter(bookingEndDate)) {
@@ -100,17 +106,40 @@ const BookingModal = ({ open, onClose, userBlocked, params, clientId }) => {
 
       dispatch(hideLoading());
       if (res.data.success) {
-        toast.success(res.data.message);
+        dispatch(
+          openAlert({
+            severity: "success",
+            content: res.data.message,
+          })
+        );
       } else {
-        toast.info(res.data.message);
+        // toast.info(res.data.message);
+        dispatch(
+          openAlert({
+            severity: "info",
+            content: res.data.message,
+          })
+        );
       }
     } catch (error) {
       dispatch(hideLoading());
       console.log(error);
       if (error.response.status === 401) {
-        toast.error(error.response.data.message);
+        // toast.error(error.response.data.message);
+        dispatch(
+          openAlert({
+            severity: "error",
+            content: error.response.data.message,
+          })
+        );
       } else {
-        toast.error("Something went wrong");
+        // toast.error("Something went wrong");
+        dispatch(
+          openAlert({
+            severity: "error",
+            content: "Something went wrong!",
+          })
+        );
       }
     }
   };
@@ -121,14 +150,17 @@ const BookingModal = ({ open, onClose, userBlocked, params, clientId }) => {
       className="flex items-center justify-center"
     >
       <div className="w-96 p-4 bg-white rounded-md ">
-        <Typography variant="h2" className="text-2xl font-bold mb-1">
+        <Typography variant="h2" className="text-2xl font-bold">
           Select Booking Dates
         </Typography>
-        <Typography className="mb-4 text-sm text-gray-500">
+        <Typography variant="span" className="mb-4 text-sm  text-gray-600">
           *select the same date to book only for 1 day
         </Typography>
         <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <Typography className="flex items-center gap-1 mb-1">
+          <Typography
+            variant="label"
+            className="flex items-center gap-1 mb-1 mt-4"
+          >
             <FaRegCalendarAlt />
             Start date{" "}
           </Typography>
@@ -141,11 +173,14 @@ const BookingModal = ({ open, onClose, userBlocked, params, clientId }) => {
             name="date"
           />
           <div className="h-4 mb-2">
-            <Typography className="text-red-500 text-sm mt-1">
+            <Typography variant="p" className="text-red-500 text-sm mt-1">
               {bookingError}
             </Typography>
           </div>
-          <Typography className="flex items-center gap-1 mb-1">
+          <Typography
+            variant="label"
+            className="flex items-center gap-1 mb-1 mt-2"
+          >
             <FaRegCalendarAlt />
             End date{" "}
           </Typography>
@@ -159,7 +194,7 @@ const BookingModal = ({ open, onClose, userBlocked, params, clientId }) => {
           />
         </LocalizationProvider>
         <div className="h-4 mb-1">
-          <Typography className="text-red-500 text-sm mt-1">
+          <Typography variant="p" className="text-red-500 text-sm mt-1">
             {bookingEndError}
           </Typography>
         </div>
@@ -174,6 +209,14 @@ const BookingModal = ({ open, onClose, userBlocked, params, clientId }) => {
       </div>
     </Modal>
   );
+};
+
+BookingModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  userBlocked: PropTypes.bool.isRequired,
+  params: PropTypes.object.isRequired,
+  clientId: PropTypes.string.isRequired,
 };
 
 export default BookingModal;

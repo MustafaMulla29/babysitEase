@@ -1,14 +1,15 @@
+/* eslint-disable no-unused-vars */
 import Layout from "../components/Layout";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import CaregiverCard from "./client/CaregiverCard";
 import CaregiverCardSkeleton from "./client/CaregiverCardSkeleton";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Profile from "./caregiver/Profile";
 import { Tab, Tabs, Typography } from "@mui/material";
 import { Navigate, useNavigate } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
+import { openAlert } from "../redux/features/messageSlice";
 
 const Homepage = () => {
   const [caregivers, setCaregivers] = useState([]);
@@ -22,6 +23,7 @@ const Homepage = () => {
   const [searchBy, setSearchBy] = useState("-1");
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const getAllCaregivers = async () => {
@@ -42,9 +44,12 @@ const Homepage = () => {
         }
       } catch (error) {
         console.log(error);
-        toast.error("Something went wrong", {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        // toast.error("Something went wrong", {
+        //   position: toast.POSITION.TOP_CENTER,
+        // });
+        dispatch(
+          openAlert({ severity: "error", content: "Something went wrong" })
+        );
       } finally {
         setLoading(false);
       }
@@ -74,7 +79,10 @@ const Homepage = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something went wrong");
+      // toast.error("Something went wrong");
+      dispatch(
+        openAlert({ severity: "error", content: "Something went wrong!" })
+      );
     } finally {
       setLoading(false);
     }
@@ -89,37 +97,6 @@ const Homepage = () => {
   };
 
   const hasMoreCaregivers = caregivers.length < totalCaregivers;
-
-  // const onSearch = async () => {
-  //   try {
-  //     if (searchString.length === 0 || searchBy === "-1") {
-  //       // Reset search results and exit
-  //       setSearchResults([]);
-  //       return;
-  //     }
-  //     setLoading(true);
-  //     setSearchSubmitted(true);
-  //     const res = await axios.get(
-  //       `http://localhost:8070/api/v1/user/searchCaregivers?term=${searchString}&searchBy=${searchBy}&tab=${selectedTab}`,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${localStorage.getItem("token")}`,
-  //         },
-  //       }
-  //     );
-  //     if (res.data.success) {
-  //       setSearchResults(res.data.combinedCaregivers);
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //     toast.error("Something went wrong", {
-  //       position: toast.POSITION.TOP_CENTER,
-  //     });
-  //   } finally {
-  //     setLoading(false);
-  //     setSearchSubmitted(false);
-  //   }
-  // };
 
   const onSearch = () => {
     if (searchString.length === 0 || searchBy === "-1") {
@@ -136,8 +113,13 @@ const Homepage = () => {
       {user?.role === "client" ? (
         <div>
           <div className="space-y-5">
-            <Typography variant="h3" className=" ">
-              Hello {user?.name} 👋
+            <Typography
+              variant="h3"
+              className=""
+              // style={{ fontFamily: "arboria-bold sans serif" }}
+            >
+              Hello {user?.name.charAt(0).toUpperCase()}
+              {user?.name.slice(1, user?.name.length)} 👋
             </Typography>
             <SearchBar
               onSearch={onSearch}
@@ -165,7 +147,7 @@ const Homepage = () => {
 
           {selectedTab === 0 &&
             (loading ? (
-              <div className="flex flex-wrap justify-start items-center gap-6">
+              <div className="flex flex-wrap justify-start items-center gap-6 mt-5">
                 <CaregiverCardSkeleton />
                 <CaregiverCardSkeleton />
                 <CaregiverCardSkeleton />
@@ -186,7 +168,7 @@ const Homepage = () => {
             ))}
 
           {selectedTab === 1 && loading ? (
-            <div className="flex flex-wrap justify-start items-center gap-6">
+            <div className="flex flex-wrap justify-start items-center gap-6 mt-5">
               <CaregiverCardSkeleton />
               <CaregiverCardSkeleton />
               <CaregiverCardSkeleton />
@@ -210,7 +192,7 @@ const Homepage = () => {
             <div className="flex justify-center mt-5">
               <button
                 onClick={loadMore}
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                className="bg-blue-500 hover:ring-1 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
               >
                 Load More
               </button>

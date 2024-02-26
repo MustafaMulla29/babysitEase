@@ -1,7 +1,6 @@
 // Subscription.js
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setSubscribed,
@@ -25,6 +24,7 @@ import { GrPlan } from "react-icons/gr";
 import axios from "axios";
 import { hideLoading, showLoading } from "../redux/features/alertSlice";
 import moment from "moment";
+import { openAlert } from "../redux/features/messageSlice";
 
 const Subscription = () => {
   const dispatch = useDispatch();
@@ -84,20 +84,38 @@ const Subscription = () => {
       if (res.data.success) {
         dispatch(setSubscribed());
         localStorage.setItem("subscriptionStatus", "Active");
-        toast.success(res.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        // toast.success(res.data.message, {
+        //   position: toast.POSITION.TOP_CENTER,
+        // });
+        dispatch(
+          openAlert({
+            severity: "success",
+            content: res.data.message,
+          })
+        );
         navigate("/");
       } else {
         dispatch(hideLoading());
-        toast.error("Something went wrong", {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        // toast.error("Something went wrong", {
+        //   position: toast.POSITION.TOP_CENTER,
+        // });
+        dispatch(
+          openAlert({
+            severity: "error",
+            content: "Something went wrong",
+          })
+        );
       }
     } catch (error) {
       dispatch(hideLoading());
       console.log(error);
-      toast.error("Something went wrong");
+      // toast.error("Something went wrong");
+      dispatch(
+        openAlert({
+          severity: "error",
+          content: "Something went wrong",
+        })
+      );
     }
   };
 
@@ -166,14 +184,17 @@ const Subscription = () => {
             }`}
           >
             <div className="space-y-3">
-              <Typography className="text-2xl text-center font-bold w-1/2 m-auto">
+              <Typography
+                variant="h3"
+                className="text-2xl text-center font-bold w-1/2 m-auto"
+              >
                 {loading ? (
                   <Skeleton animation="wave" />
                 ) : (
                   "Get most out of BabysitEase with right subscription"
                 )}
               </Typography>
-              <Typography className="text-center w-1/2 m-auto">
+              <Typography variant="p" className="text-center w-1/2 m-auto">
                 {loading ? (
                   <Skeleton animation="wave" />
                 ) : (
@@ -231,7 +252,7 @@ const Subscription = () => {
                             RS {plan.price}
                           </Typography>
                           <Typography
-                            variant="body2"
+                            variant="h4"
                             color="text.secondary"
                             className="mb-4"
                           >
@@ -316,7 +337,7 @@ const Subscription = () => {
                           )}
                         </Typography>
                         <Typography
-                          variant="body2"
+                          variant="h4"
                           color="text.secondary"
                           className="mb-4"
                         >
@@ -353,7 +374,10 @@ const Subscription = () => {
                       </div>
                     ))}
                     <div className="">
-                      <Typography className=" my-4 text-[13px] sm:text-base font-bold">
+                      <Typography
+                        variant="h6"
+                        className=" my-4 text-[13px] sm:text-base font-bold"
+                      >
                         {loading ? (
                           <Skeleton width={150} animation="wave" />
                         ) : (
@@ -362,7 +386,7 @@ const Subscription = () => {
                       </Typography>
                       <div className="p-2 flex items-start justify-between flex-row sm:w-[80%] w-full">
                         <div className="space-y-2">
-                          <Typography>
+                          <Typography variant="h6">
                             {loading ? (
                               <Skeleton width={100} animation="wave" />
                             ) : (
@@ -372,7 +396,7 @@ const Subscription = () => {
                               </span>
                             )}
                           </Typography>
-                          <Typography>
+                          <Typography variant="h6">
                             {loading ? (
                               <Skeleton width={100} animation="wave" />
                             ) : (
@@ -382,7 +406,7 @@ const Subscription = () => {
                               </span>
                             )}
                           </Typography>
-                          <Typography>
+                          <Typography variant="h6">
                             {loading ? (
                               <Skeleton width={100} animation="wave" />
                             ) : (
@@ -392,7 +416,7 @@ const Subscription = () => {
                               </span>
                             )}
                           </Typography>
-                          <Typography>
+                          <Typography variant="h6">
                             {loading ? (
                               <Skeleton width={100} animation="wave" />
                             ) : (
@@ -402,7 +426,7 @@ const Subscription = () => {
                               </span>
                             )}
                           </Typography>
-                          <Typography>
+                          <Typography variant="h6">
                             {loading ? (
                               <Skeleton width={100} animation="wave" />
                             ) : (
@@ -414,35 +438,50 @@ const Subscription = () => {
                           </Typography>
                         </div>
                         <div className="space-y-2">
-                          <Typography className="text-[13px] sm:text-base">
+                          <Typography
+                            variant="span"
+                            className="text-[13px] sm:text-base"
+                          >
                             {loading ? (
                               <Skeleton width={100} animation="wave" />
                             ) : (
                               selectedPlan[0].title
                             )}
                           </Typography>
-                          <Typography className="text-[13px] sm:text-base">
+                          <Typography
+                            variant="span"
+                            className="text-[13px] sm:text-base"
+                          >
                             {loading ? (
                               <Skeleton width={100} animation="wave" />
                             ) : (
                               selectedPlan[0].price
                             )}
                           </Typography>
-                          <Typography className="text-[13px] sm:text-base">
+                          <Typography
+                            variant="span"
+                            className="text-[13px] sm:text-base"
+                          >
                             {loading ? (
                               <Skeleton width={100} animation="wave" />
                             ) : (
                               selectedPlan[0].duration
                             )}
                           </Typography>
-                          <Typography className="text-[13px] sm:text-base">
+                          <Typography
+                            variant="span"
+                            className="text-[13px] sm:text-base"
+                          >
                             {loading ? (
                               <Skeleton width={100} animation="wave" />
                             ) : (
                               moment(purchaseDate).format("DD/MM/YYYY")
                             )}
                           </Typography>
-                          <Typography className="text-[13px] sm:text-base">
+                          <Typography
+                            variant="span"
+                            className="text-[13px] sm:text-base"
+                          >
                             {loading ? (
                               <Skeleton width={100} animation="wave" />
                             ) : (

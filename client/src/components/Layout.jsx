@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { adminMenu } from "../data/Menu";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Avatar,
   Badge,
@@ -21,21 +20,25 @@ import { FaList } from "react-icons/fa";
 import { FcApproval, FcCancel } from "react-icons/fc";
 import { PropTypes } from "prop-types";
 import Zoom from "@mui/material/Zoom";
+// import bgGradient from "./../lotties/bg_gradient.json";
+import { openAlert } from "../redux/features/messageSlice";
 
 const Layout = ({ children }) => {
   const [navBg, setNavBg] = useState(false);
   const location = useLocation();
   const { user } = useSelector((state) => state.user);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   //redering menu list
 
   //logout function
   const handleLogout = () => {
     localStorage.removeItem("token");
-    toast.success("Logout success!", {
-      position: toast.POSITION.TOP_CENTER,
-    });
+    // toast.success("Logout success!");
+    dispatch(
+      openAlert({ severity: "success", content: "Logged out successfully!" })
+    );
     // message.success("Logout successfully!");
     navigate("/login");
   };
@@ -143,13 +146,33 @@ const Layout = ({ children }) => {
     };
   }, [setNavBg]);
 
+  // const defaultOptions = {
+  //   loop: true,
+  //   autoplay: true,
+  //   animationData: bgGradient,
+  //   rendererSettings: {
+  //     preserveAspectRatio: "xMidYMid slice",
+  //   },
+  // };
   return (
     <>
-      <section className="main ">
+      <section className="main relative bg-white">
+        {/* <div
+          style={{ backgroundSize: "200% 200%" }}
+          className="fixed z-0 top-0 left-0 blur-lg opacity-30  pointer-events-none animate-change-bg"
+        >
+          <Lottie
+            options={defaultOptions}
+            isClickToPauseDisabled={true}
+            className="cursor-default"
+          />
+        </div> */}
         <header
-          className={` sticky top-0 left-0 z-10 transition-colors  ${
-            navBg ? "bg-slate-200" : "bg-transparent"
-          }`}
+          className={` sticky top-0 left-0 z-[999] transition-colors duration-200  ${
+            navBg
+              ? "bg-[#d2f2f7] bg-opacity-30 backdrop-filter backdrop-blur-md"
+              : "bg-transparent"
+          } border-b border-b-[#d2f2f7]`}
         >
           <nav className={`flex w-[80%] m-auto  items-center justify-between `}>
             <div className="py-2 px-[2px] w-20 cursor-pointer">
@@ -168,12 +191,12 @@ const Layout = ({ children }) => {
                   <li
                     className={`menu-items relative ${
                       isActive ? "bg-gray-200" : "hover:bg-gray-100"
-                    } px-4 flex items-center gap-2 rounded-full transition-all py-2 mb-2`}
+                    }  flex items-center gap-2 rounded-full transition-all  mb-2`}
                     key={index}
                   >
                     <Link
                       to={menu.path}
-                      className={`text-base ${
+                      className={`text-base px-4 py-2 ${
                         isActive ? "text-blue-500" : "text-gray-700"
                       }`}
                     >
@@ -315,7 +338,7 @@ const Layout = ({ children }) => {
         <div className="body flex items-center justify-center m-auto w-full mt-[55px]">
           <div
             className={`children ${
-              user?.role === "admin" ? "w-[95%]" : "w-[70%]"
+              user?.role === "admin" ? "w-[95%]" : "w-[78%]"
             } py-4`}
           >
             {children}

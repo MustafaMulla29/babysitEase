@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
-import { toast } from "react-toastify";
 import axios from "axios";
 import {
   Table,
@@ -25,6 +24,7 @@ import { TbLockCancel } from "react-icons/tb";
 import Zoom from "@mui/material/Zoom";
 import UsersSkeleton from "./UsersSkeleton";
 import { AiFillLock } from "react-icons/ai";
+import { openAlert } from "../../redux/features/messageSlice";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -54,9 +54,15 @@ const Users = () => {
         }
       } catch (error) {
         console.log(error);
-        toast.error("Something went wrong", {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        // toast.error("Something went wrong", {
+        //   position: toast.POSITION.TOP_CENTER,
+        // });
+        dispatch(
+          openAlert({
+            severity: "error",
+            content: "Something went wrong!",
+          })
+        );
       }
     };
     getUsers();
@@ -76,14 +82,26 @@ const Users = () => {
       );
       if (res.data.success) {
         dispatch(hideLoading());
-        toast.success(res.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        // toast.success(res.data.message, {
+        //   position: toast.POSITION.TOP_CENTER,
+        // });
+        dispatch(
+          openAlert({
+            severity: "success",
+            content: res.data.message,
+          })
+        );
       }
     } catch (error) {
       dispatch(hideLoading());
       console.log(error);
-      toast.error("Something went wrong");
+      // toast.error("Something went wrong");
+      dispatch(
+        openAlert({
+          severity: "error",
+          content: "Something went wrong!",
+        })
+      );
     }
   };
   return (
@@ -160,7 +178,10 @@ const Users = () => {
                             </IconButton>
                           </Tooltip>
                         ) : (
-                          <Typography className="bg-red-500 text-white flex items-center w-fit py-2 px-3 rounded-full text-sm gap-1">
+                          <Typography
+                            variant="span"
+                            className="bg-red-500 text-white flex items-center w-fit py-2 px-3 rounded-full text-sm gap-1"
+                          >
                             <AiFillLock className="text-sm" />
                             User Blocked
                           </Typography>

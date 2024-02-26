@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import {
@@ -20,6 +19,9 @@ import { showLoading, hideLoading } from "../redux/features/alertSlice";
 import { Avatar, Box } from "@mui/material";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 import { setUser } from "../redux/features/userSlice";
+import { openAlert } from "../redux/features/messageSlice";
+import Lottie from "react-lottie";
+import animationData from "./../lotties/nurse animation.json";
 // import { CloudUpload } from "@mui/icons-material";
 
 const Register = () => {
@@ -142,71 +144,7 @@ const Register = () => {
     setProfilePictureDisplay(URL.createObjectURL(file));
     setProfilePicture(file);
   };
-  //form handler
-  // const submitHandler = async (e) => {
-  //   e.preventDefault();
-  //   handleNameChange({ target: { value: name } });
-  //   handleEmailChange({ target: { value: email } });
-  //   handlePasswordChange({ target: { value: password } });
-  //   handlePhoneChange({ target: { value: phoneNumber } });
-  //   handleCityChange({ target: { value: city } });
 
-  //   // Check if there are any errors
-  //   if (nameError || emailError || passwordError || phoneError || cityError) {
-  //     toast.error("Please fill in the form correctly", {
-  //       position: toast.POSITION.TOP_CENTER,
-  //     });
-  //     return;
-  //   }
-  //   try {
-  //     const values = {
-  //       name,
-  //       email,
-  //       password,
-  //       phoneNumber,
-  //       role,
-  //       address,
-  //       city,
-  //       gender,
-  //       profilePicture,
-  //     };
-  //     const config = {
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //     };
-  //     dispatch(showLoading());
-  //     const res = await axios.post(
-  //       "http://localhost:8070/api/v1/user/register",
-  //       values,
-  //       config
-  //     );
-
-  //     dispatch(hideLoading());
-  //     if (res.data.success) {
-  //       toast.success("Registered successfully!", {
-  //         position: toast.POSITION.TOP_CENTER,
-  //       });
-  //       localStorage.removeItem("subscriptionStatus");
-  //       dispatch(setUser(values));
-  //       // message.success("Registered successfully!");
-  //       // localStorage.removeItem("isSubscribed");
-  //       navigate("/login");
-  //     } else {
-  //       toast.error(res.data.message, {
-  //         position: toast.POSITION.TOP_CENTER,
-  //       });
-  //       // message.error(res.data.message);
-  //     }
-  //   } catch (error) {
-  //     dispatch(hideLoading());
-  //     console.log(error);
-  //     toast.error("Something went wrong!", {
-  //       position: toast.POSITION.TOP_CENTER,
-  //     });
-  //     // message.error("Something went wrong!");
-  //   }
-  // };
   const submitHandler = async (e) => {
     e.preventDefault();
     handleNameChange({ target: { value: name } });
@@ -217,7 +155,13 @@ const Register = () => {
 
     // Check if there are any errors
     if (nameError || emailError || passwordError || phoneError || cityError) {
-      toast.error("Please fill in the form correctly");
+      // toast.error("Please fill in the form correctly");
+      dispatch(
+        openAlert({
+          severity: "error",
+          content: "Please fill in the form correctly",
+        })
+      );
       return;
     }
 
@@ -254,36 +198,56 @@ const Register = () => {
       dispatch(hideLoading());
 
       if (res.data.success) {
-        toast.success("Registered successfully!", {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        // toast.success("Registered successfully!", {
+        //   position: toast.POSITION.TOP_CENTER,
+        // });
+        dispatch(
+          openAlert({
+            severity: "success",
+            content: "Registered successfully!",
+          })
+        );
         localStorage.removeItem("subscriptionStatus");
         dispatch(setUser(formData));
         navigate("/login");
       } else {
-        toast.error(res.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        // toast.error(res.data.message, {
+        //   position: toast.POSITION.TOP_CENTER,
+        // });
+        dispatch(openAlert({ severity: "error", content: res.data.message }));
       }
     } catch (error) {
       dispatch(hideLoading());
       console.log(error);
-      toast.error("Something went wrong!");
+      // toast.error("Something went wrong!");
+      dispatch(
+        openAlert({ severity: "error", content: "Something went wrong!" })
+      );
     }
+  };
+
+  const defaultOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: animationData,
+    rendererSettings: {
+      preserveAspectRatio: "xMidYMid slice",
+    },
   };
 
   return (
     <>
-      <div className="h-full w-full flex items-center justify-center">
+      <div className="h-full w-full flex items-center  justify-between bg-[url('./../../img/login_bg_3.svg')] bg-center bg-no-repeat bg-cover">
+        <div className="w-1/2">
+          <Lottie options={defaultOptions} width={400} height={400} />
+        </div>
         <form
           action=""
           method="post"
-          className="w-full max-w-[700px] space-y-2 mt-11 py-3 px-4 "
+          className="w-full max-w-[700px] bg-white rounded-md shadow-md space-y-2 mt-1 py-3 px-4 "
           onSubmit={submitHandler}
         >
-          <h1 className="text-5xl text-center mb-9 font-bold">
-            Register for BabysitEase
-          </h1>
+          <h1 className="text-[3rem] text-center mb-3 font-bold">Sign up</h1>
           <div className="flex justify-center flex-col sm:flex-row sm:gap-9">
             <div className="flex items-start justify-start flex-col w-full gap-8">
               <div className="w-full space-y-8">
@@ -303,9 +267,13 @@ const Register = () => {
                     value={name}
                     onChange={handleNameChange}
                     required
+                    autoFocus
                   />
                   <div className="h-4 m-1">
-                    <Typography className="text-red-500 text-sm mt-1">
+                    <Typography
+                      variant="span"
+                      className="text-red-500 text-sm mt-1"
+                    >
                       {nameError}
                     </Typography>
                   </div>
@@ -323,11 +291,13 @@ const Register = () => {
                     error={emailError ? true : false}
                     value={email}
                     onChange={handleEmailChange}
-                    autoFocus
                     required
                   />
                   <div className="h-4 m-1">
-                    <Typography className="text-red-500 text-sm mt-1">
+                    <Typography
+                      variant="span"
+                      className="text-red-500 text-sm mt-1"
+                    >
                       {emailError}
                     </Typography>
                   </div>
@@ -353,7 +323,10 @@ const Register = () => {
                   />
 
                   <div className="h-4 m-1">
-                    <Typography className="text-red-500 text-sm mt-1">
+                    <Typography
+                      variant="span"
+                      className="text-red-500 text-sm mt-1"
+                    >
                       {passwordError}
                     </Typography>
                   </div>
@@ -378,7 +351,10 @@ const Register = () => {
                     required
                   />
                   <div className="h-4 m-1">
-                    <Typography className="text-red-500 text-sm mt-1">
+                    <Typography
+                      variant="span"
+                      className="text-red-500 text-sm mt-1"
+                    >
                       {phoneError}
                     </Typography>
                   </div>
@@ -404,7 +380,10 @@ const Register = () => {
                     required
                   />
                   <div className="h-4 m-1">
-                    <Typography className="text-red-500 text-sm mt-1">
+                    <Typography
+                      variant="span"
+                      className="text-red-500 text-sm mt-1"
+                    >
                       {addressError}
                     </Typography>
                   </div>
@@ -426,7 +405,10 @@ const Register = () => {
                     required
                   />
                   <div className="h-4 m-1">
-                    <Typography className="text-red-500 text-sm mt-1">
+                    <Typography
+                      variant="span"
+                      className="text-red-500 text-sm mt-1"
+                    >
                       {cityError}
                     </Typography>
                   </div>
@@ -527,7 +509,7 @@ const Register = () => {
                       onChange={handleFileChange}
                     />
                   </label>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs  text-gray-600">
                     PNG, JPG, JPEG up to 10MB
                   </p>
                 </div>
@@ -543,8 +525,8 @@ const Register = () => {
               </Box>
             )}
           </div>
-          <div className="">
-            <Typography className="text-[14px] text-center my-3">
+          <div className=" mt-4">
+            <Typography variant="span" className="text-[14px] text-center ">
               Already have an account?{" "}
               <Link to="/login" className="hover:underline">
                 Login here
