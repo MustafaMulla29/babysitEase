@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { showLoading, hideLoading } from "../redux/features/alertSlice";
 import { Button, TextField, Typography } from "@mui/material";
 import { setUser } from "../redux/features/userSlice";
@@ -18,7 +18,8 @@ const Login = () => {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  const { user } = useSelector((state) => state.user);
+  // const { user } = useSelector((state) => state.user);
+  // const isSubscribed = useSelector(selectIsSubscribed);
   //navigate
   const navigate = useNavigate();
 
@@ -74,16 +75,13 @@ const Login = () => {
         // window.location.reload();
         dispatch(setUser(res.data.user));
         //changes made here 04-08-2023
-        if (
-          localStorage.getItem("subscriptionStatus") &&
-          user?.role !== "client"
-        ) {
-          setTimeout(() => {
-            navigate("/");
-          }, 0);
-        } else {
-          navigate("/subscribe");
-        }
+        // if (isSubscribed === "Active" && user?.role !== "client") {
+        //   setTimeout(() => {
+        navigate("/");
+        //   }, 0);
+        // } else {
+        // navigate("/subscribe");
+        // }
 
         //to here
       } else {

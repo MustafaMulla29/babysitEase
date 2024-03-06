@@ -1,13 +1,25 @@
 import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
-import { Avatar, Skeleton, Typography } from "@mui/material";
+import {
+  Avatar,
+  Chip,
+  IconButton,
+  Skeleton,
+  Tooltip,
+  Typography,
+  Zoom,
+} from "@mui/material";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import DependentInputModal from "./DependentInputModal";
 import DependentCard from "./DependentCard";
-import { MdOutlineAddCircleOutline } from "react-icons/md";
 // import { FaRegEdit } from "react-icons/fa";
 import { CiLocationOn } from "react-icons/ci";
+import Lottie from "react-lottie";
+import block from "./../../lotties/alert.json";
+import { FaRegEdit } from "react-icons/fa";
+import { IoMdAddCircle } from "react-icons/io";
+import UpdateClientProfileModal from "./UpdateClientProfileModal";
 
 const Profile = () => {
   const [client, setClient] = useState(null);
@@ -16,10 +28,7 @@ const Profile = () => {
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  // const handleEditClick = () => {
-  //   setEditModalOpen(true);
-  // };
+  const [isProfileModalOpen, setProfileModalOpen] = useState(false);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -27,6 +36,14 @@ const Profile = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleOpenProfileModal = () => {
+    setProfileModalOpen(true);
+  };
+
+  const handleCloseProfileModal = () => {
+    setProfileModalOpen(false);
   };
 
   useEffect(() => {
@@ -53,24 +70,35 @@ const Profile = () => {
     };
     getNurseInfo();
   }, [params.id]);
+
+  const applyOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: block,
+    rendererSettings: {
+      preserveAspectRatio: "xMidYMid slice",
+    },
+  };
   return (
     <Layout>
       {client?.isBlocked && (
-        <div className="py-5 px-8 rounded-lg bg-[#FCE8E6]">
+        <div className="py-1 px-1 rounded-lg bg-red-200 border border-black-300 bg-opacity-80  m-auto">
           <div className="h-full w-ful flex items-start gap-10">
-            <img
-              src="./../../../img/blocked.png"
-              alt="account_blocked"
-              className="w-24"
-            />
-            <div className="max-w-lg">
+            <div className="pointer-events-none">
+              <Lottie
+                options={applyOptions}
+                isClickToPauseDisabled={true}
+                width={100}
+              />
+            </div>
+            <div className="max-w-xl">
               <Typography variant="h6" className="text-lg font-semibold">
                 Your account has been blocked by the admin. Reasons could be:{" "}
               </Typography>
               <ol className="list-disc pl-5">
-                <li>Violation of Community Guidelines</li>
-                <li>Inappropriate Behavior</li>
-                <li>Spam or Misuse</li>
+                <li className="text-sm">Violation of Community Guidelines</li>
+                <li className="text-sm">Inappropriate Behavior</li>
+                <li className="text-sm">Spam or Misuse</li>
               </ol>
             </div>
           </div>
@@ -113,7 +141,7 @@ const Profile = () => {
                 ) : (
                   client?.name
                 )}
-                {/* <div className="items-start ml-3">
+                <div className="items-start ml-3">
                   {loading ? (
                     <Skeleton
                       animation="wave"
@@ -124,10 +152,10 @@ const Profile = () => {
                   ) : (
                     <FaRegEdit
                       className="text-base cursor-pointer"
-                      onClick={handleEditClick}
+                      onClick={handleOpenProfileModal}
                     />
                   )}
-                </div> */}
+                </div>
               </Typography>
               <Typography variant="p">
                 {loading ? (
@@ -178,9 +206,85 @@ const Profile = () => {
             </div>
           </div>
           <hr className="mb-8" /> */}
+          <div className="mb-8">
+            <Typography
+              variant="p"
+              className="text-[18px] font-[500] flex items-center gap-3"
+            >
+              <span>
+                {loading ? (
+                  <Skeleton
+                    animation="wave"
+                    variant="text"
+                    sx={{ fontSize: "1rem" }}
+                    width={100}
+                  />
+                ) : (
+                  "Additional addresses"
+                )}
+              </span>
+            </Typography>
+            {client?.additionalAddresses.length === 0 && (
+              <div className="flex items-center justify-center w-3/4 m-auto h-16">
+                <Typography variant="p" className="text-sm text-center ">
+                  You can add other potential addresses of your dependents and
+                  You can use these addresses while booking caregiver. Click on
+                  update profile icon to add
+                </Typography>
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-2">
+              {client ? (
+                client?.additionalAddresses ? (
+                  client?.additionalAddresses?.map((address, index) => (
+                    <Chip
+                      key={index}
+                      label={address}
+                      className="text-base bg-[#f2f7f2]"
+                    />
+                  ))
+                ) : (
+                  <Chip label={"N/L"} className="text-base bg-[#f2f7f2]" />
+                )
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  <Skeleton
+                    animation="wave"
+                    width={70}
+                    height={40}
+                    className="rounded-2xl"
+                  />
+                  <Skeleton
+                    animation="wave"
+                    width={70}
+                    height={40}
+                    className="rounded-2xl"
+                  />
+                  <Skeleton
+                    animation="wave"
+                    width={70}
+                    height={40}
+                    className="rounded-2xl"
+                  />
+                  <Skeleton
+                    animation="wave"
+                    width={70}
+                    height={40}
+                    className="rounded-2xl"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          <hr className="mb-8" />
 
           <div className="mb-8">
-            <Typography variant="h6" className="flex items-center gap-3">
+            <Typography
+              variant="p"
+              className="text-[18px] font-[500] flex items-center gap-3"
+            >
               <span>
                 {loading ? (
                   <Skeleton
@@ -193,12 +297,21 @@ const Profile = () => {
                   "Dependents"
                 )}
               </span>
-              {client?.dependents.length < 2 && (
+              {client?.dependents.length < 5 && (
                 <span>
-                  <MdOutlineAddCircleOutline
-                    className="text-lg cursor-pointer"
-                    onClick={handleOpenModal}
-                  />
+                  <Tooltip
+                    title="Add dependent"
+                    TransitionComponent={Zoom}
+                    arrow
+                    placement="right-start"
+                  >
+                    <IconButton onClick={handleOpenModal}>
+                      <IoMdAddCircle
+                        className="text-lg cursor-pointer"
+                        onClick={handleOpenModal}
+                      />
+                    </IconButton>
+                  </Tooltip>
                 </span>
               )}
             </Typography>
@@ -229,6 +342,11 @@ const Profile = () => {
         </div>
 
         <DependentInputModal open={isModalOpen} onClose={handleCloseModal} />
+        <UpdateClientProfileModal
+          open={isProfileModalOpen}
+          onClose={handleCloseProfileModal}
+          client={client}
+        />
       </div>
     </Layout>
   );

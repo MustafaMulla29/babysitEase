@@ -12,6 +12,7 @@ import { PiBaby } from "react-icons/pi";
 import { CiLocationOn } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
 import { openAlert } from "../../redux/features/messageSlice";
+// import { MdOutlineWork } from "react-icons/md";
 
 const BookingDetails = ({ booking }) => {
   const dispatch = useDispatch();
@@ -84,7 +85,7 @@ const BookingDetails = ({ booking }) => {
               className="flex items-center gap-1 text-gray-400"
             >
               <CiLocationOn className="text-lg" />
-              {booking.clientAddress}
+              {booking.jobAddress ? booking.jobAddress : booking.clientAddress}
             </Typography>
           </div>
         </div>
@@ -112,7 +113,7 @@ const BookingDetails = ({ booking }) => {
         <Divider variant="middle" component="p" />
         <div>
           <Typography variant="span" className="flex items-center gap-1">
-            {booking.bookedFor === "Child" ? (
+            {booking.dependentType === "Child" ? (
               <PiBaby className="text-lg" />
             ) : (
               <FaHandHoldingMedical className="text-lg" />
@@ -120,6 +121,19 @@ const BookingDetails = ({ booking }) => {
             {booking.bookedFor}
           </Typography>
         </div>
+        {/* {booking.jobAddress && (
+          <>
+            <Divider variant="middle" component="p" />
+
+            <div>
+              <Typography variant="span" className="flex items-center gap-1">
+                <MdOutlineWork className="text-lg" />
+                {booking.jobAddress}
+              </Typography>
+            </div>
+          </>
+        )} */}
+
         <Typography
           variant="span"
           className={`flex items-center gap-1 absolute top-0 right-0 ${
@@ -204,12 +218,14 @@ BookingDetails.propTypes = {
     clientId: PropTypes.string.isRequired,
     clientProfilePicture: PropTypes.string.isRequired,
     clientName: PropTypes.string.isRequired,
+    dependentType: PropTypes.string.isRequired,
     date: PropTypes.string.isRequired,
     clientAddress: PropTypes.string.isRequired,
     bookingEndDate: PropTypes.string.isRequired,
     bookedOn: PropTypes.string.isRequired,
     bookedFor: PropTypes.string.isRequired,
     status: PropTypes.string.isRequired,
+    jobAddress: PropTypes.string,
   }).isRequired,
 };
 

@@ -711,7 +711,7 @@ const CaregiverDetails = () => {
                 color="primary"
                 onClick={handleOpenDialog}
               >
-                <FaPen className="mr-2" /> Post a review
+                <FaPen className="mr-2" /> Write a review
               </Button>
             )}
           </div>

@@ -110,6 +110,11 @@ const Layout = ({ children }) => {
       icon: "fa-solid fa-list",
     },
     {
+      name: "Favourites",
+      path: `/client/favourites/${user?._id}`,
+      icon: "fa-solid fa-user",
+    },
+    {
       name: "Profile",
       path: `/client/${user?._id}`,
       icon: "fa-solid fa-user",
@@ -335,7 +340,7 @@ const Layout = ({ children }) => {
             </div>
           </nav>
         </header>
-        <div className="body flex items-center justify-center m-auto w-full mt-[55px]">
+        <div className="body flex items-center justify-center m-auto w-full mt-[20px]">
           <div
             className={`children ${
               user?.role === "admin" ? "w-[95%]" : "w-[78%]"

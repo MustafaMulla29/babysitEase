@@ -29,6 +29,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
   // eslint-disable-next-line no-unused-vars
   const [profilePictureDisplay, setProfilePictureDisplay] = useState(null);
   const [deleteCertificates, setDeleteCertificates] = useState([]);
+  const [validationError, setValidationError] = useState({});
   // const [deleteProfilePicture, setDeleteProfilePicture] = useState(null);
 
   const { user } = useSelector((state) => state.user);
@@ -69,8 +70,29 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
   //   getNurseInfo();
   // }, [params.id, CaregiverData]);
 
+  const validateInput = (name, value) => {
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    const errors = {};
+
+    if (value.length === 0) {
+      errors[name] = "This field is required";
+    } else if (name === "name" && !nameRegex.test(value)) {
+      errors[name] = "Enter a valid input";
+    } else {
+      errors[name] = "";
+    }
+
+    return errors;
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    const validationErrors = validateInput(name, value);
+
+    setValidationError((prevError) => ({
+      ...prevError,
+      ...validationErrors,
+    }));
 
     // Special handling for preferredCities to convert the string to an array
     if (name === "preferredCities") {
@@ -290,6 +312,8 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         className="mb-2"
                         required
                         variant="filled"
+                        helperText={validationError.name}
+                        error={validationError.name && true}
                       />
 
                       {/* Address */}
@@ -428,9 +452,8 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                           CaregiverData?.certifications?.map((img, index) => {
                             return (
                               <>
-                                <div>
+                                <div key={index}>
                                   <Chip
-                                    key={index}
                                     label={img.name ? img.name : img}
                                     onDelete={() => removeCertificate(img)}
                                   />
@@ -528,7 +551,7 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
 UpdateProfileModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  caregiver: PropTypes.object.isRequired, // Adjust the type according to the actual structure
+  caregiver: PropTypes.object,
 };
 
 export default UpdateProfileModal;

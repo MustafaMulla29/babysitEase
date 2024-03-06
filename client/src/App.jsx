@@ -10,7 +10,7 @@ import { Slide, ToastContainer } from "react-toastify";
 import Subscription from "./pages/Subscription";
 import { StyledEngineProvider } from "@mui/material";
 import Notification from "./pages/Notification";
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import {
   resetSubscription,
   setSubscribed,
@@ -31,6 +31,7 @@ import AlertComponent from "./components/AlertComponent";
 import { closeAlert } from "./redux/features/messageSlice";
 import { ThemeProvider } from "@emotion/react";
 import Theme from "./components/Theme";
+import FavouritedCaregiver from "./pages/client/FavouritedCaregiver";
 
 function App() {
   const dispatch = useDispatch();
@@ -38,11 +39,8 @@ function App() {
 
   const { user } = useSelector((state) => state.user);
   const { open, severity, content } = useSelector((state) => state.message);
-
-  useEffect(() => {
-    // Reset subscription status when the component mounts
-    dispatch(resetSubscription());
-  }, [dispatch]);
+  const { isSubscribed } = useSelector((state) => state.subscription);
+  const user_id = user?._id;
 
   useEffect(() => {
     const bookingStatus = async () => {
@@ -63,66 +61,160 @@ function App() {
     bookingStatus();
   }, []);
 
-  useEffect(() => {
-    const changeSubscriptionStatus = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:8070/api/v1/caregiver/changeSubscriptionStatus/${user?._id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+  // useEffect(() => {
+  //   const changeSubscriptionStatus = async () => {
+  //     try {
+  //       const res = await axios.get(
+  //         `http://localhost:8070/api/v1/caregiver/changeSubscriptionStatus/${user_id}`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //           },
+  //         }
+  //       );
+  //       if (res.data.success) {
+  //         if (res.data.data.subscriptionStatus === "Expired") {
+  //           // dispatch(resetSubscription());
+  //           localStorage.setItem(
+  //             "subscriptionStatus",
+  //             res.data.data.subscriptionStatus
+  //           );
+  //         }
+  //       } else {
+  //         // dispatch(setSubscribed());
+  //         localStorage.setItem(
+  //           "subscriptionStatus",
+  //           res.data.data.subscriptionStatus
+  //         );
+  //       }
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
 
-        if (res.data.success) {
-          localStorage.setItem(
-            "subscriptionStatus",
-            res.data.data.subscriptionStatus
-          );
-          dispatch(resetSubscription());
+  //   const checkSubscription = async () => {
+  //     try {
+  //       const token = localStorage.getItem("token");
+  //       const res = await axios.get(
+  //         `http://localhost:8070/api/v1/caregiver/checkSubscription/${user_id}`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         }
+  //       );
+  //       if (res.data.success) {
+  //         // dispatch(setSubscribed());
+  //         localStorage.setItem("subscriptionStatus", "Active");
+  //       } else {
+  //         // dispatch(resetSubscription());
+  //         localStorage.setItem("subscriptionStatus", "Expired");
+  //       }
+  //     } catch (error) {
+  //       if (!error.response.data.success) {
+  //         localStorage.setItem("subscriptionStatus", "Expired");
+  //       }
+  //       console.log(error);
+  //     }
+  //   };
+
+  //   if (user?.role !== "client") {
+  //     // changeSubscriptionStatus();
+  //     checkSubscription();
+  //   }
+
+  //   if (localStorage.getItem("subscriptionStatus") === "Active") {
+  //     dispatch(setSubscribed());
+  //   }
+
+  //   if (localStorage.getItem("subscriptionStatus") === "Expired") {
+  //     dispatch(resetSubscription());
+  //   }
+  // }, [user_id, dispatch, user]);
+
+  const changeSubscriptionStatus = useCallback(async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8070/api/v1/caregiver/changeSubscriptionStatus/${user_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
-      } catch (error) {
-        console.log(error);
+      );
+      if (res.data.success) {
+        if (res.data.data.subscriptionStatus === "Expired") {
+          // dispatch(resetSubscription());
+          localStorage.setItem(
+            "subscriptionStatus",
+            res.data.data.subscriptionStatus
+          );
+        }
+      } else {
+        // dispatch(setSubscribed());
+        localStorage.setItem(
+          "subscriptionStatus",
+          res.data.data.subscriptionStatus
+        );
       }
-    };
+    } catch (error) {
+      console.log(error);
+    }
+  }, [user_id]);
 
-    if (user?.role !== "client") changeSubscriptionStatus();
-  }, [dispatch, user]);
+  const checkSubscription = useCallback(async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(
+        `http://localhost:8070/api/v1/caregiver/checkSubscription/${user_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (res.data.success) {
+        // dispatch(setSubscribed());
+        localStorage.setItem("subscriptionStatus", "Active");
+      } else {
+        // dispatch(resetSubscription());
+        localStorage.setItem("subscriptionStatus", "Expired");
+      }
+    } catch (error) {
+      if (!error.response.data.success) {
+        localStorage.setItem("subscriptionStatus", "Expired");
+      }
+      console.log(error);
+    }
+  }, [user_id]);
+
+  const subscriptionStatus = useMemo(
+    () => localStorage.getItem("subscriptionStatus"),
+    []
+  );
 
   useEffect(() => {
-    const checkSubscription = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:8070/api/v1/caregiver/checkSubscription/${user?._id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+    if (user?.role !== "client") {
+      // changeSubscriptionStatus();
+      checkSubscription();
+    }
 
-        if (res.data.success) {
-          localStorage.setItem(
-            "subscriptionStatus",
-            res.data.data.subscriptionStatus
-          );
-          dispatch(setSubscribed());
-        } else {
-          localStorage.setItem(
-            "subscriptionStatus",
-            res.data.data.subscriptionStatus
-          );
-          dispatch(resetSubscription());
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
+    if (subscriptionStatus === "Active") {
+      dispatch(setSubscribed());
+    }
 
-    if (user?.role !== "client") checkSubscription();
-  }, [dispatch, user]);
+    if (subscriptionStatus === "Expired") {
+      dispatch(resetSubscription());
+    }
+  }, [
+    user,
+    changeSubscriptionStatus,
+    checkSubscription,
+    dispatch,
+    subscriptionStatus,
+  ]);
 
+  // const subscriptionStatus = localStorage.getItem("subscriptionStatus");
   return (
     <>
       <ThemeProvider theme={Theme}>
@@ -149,11 +241,12 @@ function App() {
                   path="/"
                   element={
                     <ProtectedRoutes>
-                      {localStorage.getItem("subscriptionStatus") ===
-                      "Active" ? (
+                      {user?.role === "client" ? (
                         <Homepage />
-                      ) : user?.role === "babysitter" ||
-                        user?.role === "nurse" ? (
+                      ) : (user?.role === "babysitter" ||
+                          user?.role === "nurse") &&
+                        user?.isCaregiver &&
+                        !isSubscribed ? (
                         <Navigate to="/subscribe" replace={true} />
                       ) : (
                         <Homepage />
@@ -161,6 +254,14 @@ function App() {
                     </ProtectedRoutes>
                   }
                 />
+                {/* <Route
+                    path="/"
+                    element={
+                      <ProtectedRoutes>
+                        <Homepage />
+                      </ProtectedRoutes>
+                    }
+                  /> */}
                 <Route
                   path="/login"
                   element={
@@ -225,6 +326,14 @@ function App() {
                   element={
                     <ProtectedRoutes>
                       <UserProfile />
+                    </ProtectedRoutes>
+                  }
+                />
+                <Route
+                  path={`/client/favourites/:id`}
+                  element={
+                    <ProtectedRoutes>
+                      <FavouritedCaregiver />
                     </ProtectedRoutes>
                   }
                 />

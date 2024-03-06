@@ -26,20 +26,70 @@ import { TbLockCancel } from "react-icons/tb";
 import CaregiversSkeleton from "./CaregiversSkeleton";
 import { FaRegClock } from "react-icons/fa";
 import { openAlert } from "../../redux/features/messageSlice";
+import RejectReasonModal from "./RejectReasonModal";
 
 const Caregivers = () => {
   const [caregivers, setCaregivers] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [selectedUserForRejection, setSelectedUserForRejection] =
+    useState(null);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleAccountStatus = async (record, status) => {
     try {
+      if (status === "Rejected") {
+        // Open the rejection modal and set the selected user
+        setSelectedUserForRejection(record);
+        setRejectModalOpen(true);
+      } else {
+        const res = await axios.post(
+          "http://localhost:8070/api/v1/admin/changeAccountStatus",
+          { caregiverId: record._id, userId: record.userId, status: status },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        if (res.data.success) {
+          // toast.success(res.data.message, {
+          //   position: toast.POSITION.TOP_CENTER,
+          // });
+          window.location.reload();
+          dispatch(
+            openAlert({
+              severity: "success",
+              content: res.data.message,
+            })
+          );
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      // toast.error("Something went wrong");
+      dispatch(
+        openAlert({
+          severity: "error",
+          content: "Something went wrong!",
+        })
+      );
+    }
+  };
+
+  const handleReject = async (user, reason) => {
+    try {
       const res = await axios.post(
         "http://localhost:8070/api/v1/admin/changeAccountStatus",
-        { caregiverId: record._id, userId: record.userId, status: status },
+        {
+          caregiverId: user._id,
+          userId: user.userId,
+          status: "Rejected",
+          reason: reason,
+        },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -47,20 +97,18 @@ const Caregivers = () => {
         }
       );
       if (res.data.success) {
-        // toast.success(res.data.message, {
-        //   position: toast.POSITION.TOP_CENTER,
-        // });
-        window.location.reload();
+        // Close the modal after rejection
+        setRejectModalOpen(false);
         dispatch(
           openAlert({
             severity: "success",
             content: res.data.message,
           })
         );
+        window.location.reload();
       }
     } catch (error) {
       console.log(error);
-      // toast.error("Something went wrong");
       dispatch(
         openAlert({
           severity: "error",
@@ -166,6 +214,13 @@ const Caregivers = () => {
                   </TableCell>
                   <TableCell>
                     {caregivers && caregivers.length > 0 ? (
+                      "Attempts"
+                    ) : (
+                      <Skeleton animation="wave" width={100} />
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {caregivers && caregivers.length > 0 ? (
                       "Created at"
                     ) : (
                       <Skeleton animation="wave" width={100} />
@@ -198,6 +253,7 @@ const Caregivers = () => {
                         {user.name}
                       </TableCell>
                       <TableCell>{user.email}</TableCell>
+                      <TableCell>{user.attempts}</TableCell>
                       <TableCell>
                         {new Date(user.createdAt).toLocaleDateString()}
                       </TableCell>
@@ -317,6 +373,13 @@ const Caregivers = () => {
           </Stack>
         </div>
       </div>
+      <RejectReasonModal
+        open={rejectModalOpen}
+        handleClose={() => setRejectModalOpen(false)}
+        handleReject={(reason) =>
+          handleReject(selectedUserForRejection, reason)
+        }
+      />
     </Layout>
   );
 };

@@ -79,6 +79,9 @@ const userSchema = mongoose.Schema({
         required: [true, 'Address is required'],
         trim: true,
     },
+    additionalAddresses: {
+        type: [String],
+    },
     city: {
         type: String,
         required: [true, 'City is required'],

@@ -16,7 +16,7 @@ import PropTypes from "prop-types";
 import { CgTrash } from "react-icons/cg";
 import { useState } from "react";
 import axios from "axios";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { hideLoading, showLoading } from "../../redux/features/alertSlice";
 import {
   AiFillCheckCircle,
@@ -29,6 +29,7 @@ import moment from "moment";
 import Zoom from "@mui/material/Zoom";
 import { useNavigate } from "react-router-dom";
 import { openAlert } from "../../redux/features/messageSlice";
+import { CiLocationOn } from "react-icons/ci";
 
 const BookingDetails = ({ booking }) => {
   const [open, setOpen] = useState(false);
@@ -42,6 +43,7 @@ const BookingDetails = ({ booking }) => {
   const handleClose = () => {
     setOpen(false);
   };
+  const { user } = useSelector((state) => state.user);
 
   const cancelBooking = async (bookingId) => {
     try {
@@ -86,116 +88,7 @@ const BookingDetails = ({ booking }) => {
 
   return (
     <>
-      {/* <Paper
-        elevation={3}
-        className="py-7 px-6 mb-8 relative bg-white rounded-md shadow-md"
-      >
-        <div>
-          <div className="flex items-center justify-between">
-            <Avatar
-              alt="Profile Picture"
-              src={`http://localhost:8070/${booking?.caregiverProfilePicture}`}
-              sx={{ width: 80, height: 80 }}
-            />
-
-            <Typography>{booking.caregiverName}</Typography>
-            <Typography
-              className={`flex items-center gap-1 absolute top-0 right-0 ${
-                booking.status === "Pending"
-                  ? "bg-orange-400"
-                  : booking.status === "Approved"
-                  ? "bg-blue-500"
-                  : booking.status === "Completed"
-                  ? "bg-green-500"
-                  : "bg-red-500"
-              } text-[12px] px-2 py-1 rounded-bl-lg text-white flex items-center`}
-            >
-              {booking.status === "Pending" ? (
-                <FaRegClock className="text-sm" />
-              ) : booking.status === "Approved" ? (
-                <AiFillCheckCircle className="text-sm" />
-              ) : booking.status === "Completed" ? (
-                <AiFillCheckCircle className="text-sm" />
-              ) : (
-                <AiFillCloseCircle className="text-sm" />
-              )}
-              {booking.status === "Nullified" ? (
-                <Tooltip
-                  TransitionComponent={Zoom}
-                  title="Accepted nor rejected by caregiver"
-                >
-                  {booking.status}
-                </Tooltip>
-              ) : (
-                booking.status
-              )}
-            </Typography>
-            <Typography>Booked on: {bookedOnDate}</Typography>
-
-            <Typography>
-              <span className="flex items-center gap-3">
-                Job Date:
-                <BsCalendarDate className="text-lg" />
-                {jobDate}
-              </span>
-            </Typography>
-            <Typography>
-              <span className="flex items-center gap-3">
-                End Date:
-                <BsCalendarDate className="text-lg" />
-                {endDate}
-              </span>
-            </Typography>
-            <Typography>For {booking.bookedFor}</Typography>
-
-            {booking.status === "Pending" && (
-              <Typography>
-                <span className=" gap-3 absolute top-0 right-24">
-                  <Tooltip
-                    title="Cancel Booking"
-                    TransitionComponent={Zoom}
-                    arrow
-                    placement="right-start"
-                  >
-                    <IconButton onClick={handleOpen}>
-                      <CgTrash className="text-xl text-black" />
-                    </IconButton>
-                  </Tooltip>
-                </span>
-              </Typography>
-            )}
-          </div>
-        </div>
-
-        <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>Confirm Cancellation</DialogTitle>
-          <DialogContent>
-            <Typography>
-              Are you sure you want to cancel this booking?
-            </Typography>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={() => cancelBooking(booking?._id)}
-              variant="contained"
-              color="success"
-              className="py-2 px-4 w-full bg-[#2e7d32] hover:bg-[#1b5e20]"
-            >
-              Yes
-            </Button>
-            <Button
-              onClick={handleClose}
-              variant="contained"
-              className="w-full bg-[#d32f2f] hover:bg-[#c62828]"
-              color="error"
-            >
-              No
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Paper> */}
-
-      <div className="max-w-sm bg-white relative m-2 p-8 rounded-lg shadow-md border border-[#d6cfcf] min-h-[18.1rem]">
+      <div className="max-w-sm bg-white relative m-2 px-8 pt-8 py-3 rounded-lg shadow-md border border-[#d6cfcf] min-h-[18rem]">
         <div className="flex items-center gap-4 mb-6">
           <Avatar
             alt="Profile Picture"
@@ -222,7 +115,7 @@ const BookingDetails = ({ booking }) => {
           </Typography>
         </div>
         <Divider variant="middle" component="p" />
-        <div className=" flex items-center  gap-2 flex-row flex-wrap my-3">
+        <div className=" flex items-center  gap-2 flex-row flex-wrap my-2">
           <Typography variant="span">
             <span className="flex items-center gap-3 ">
               <BsCalendarDate className="text-lg" />
@@ -238,9 +131,9 @@ const BookingDetails = ({ booking }) => {
           </Typography>
         </div>
         <Divider variant="middle" component="p" />
-        <div>
+        <div className="my-2">
           <Typography variant="span" className="flex items-center gap-1">
-            {booking.bookedFor === "Child" ? (
+            {booking.dependentType === "Child" ? (
               <PiBaby className="text-lg" />
             ) : (
               <FaHandHoldingMedical className="text-lg" />
@@ -248,6 +141,17 @@ const BookingDetails = ({ booking }) => {
             {booking.bookedFor}
           </Typography>
         </div>
+        <Divider variant="middle" component="p" />
+        <div className="my-2">
+          <Typography
+            variant="span"
+            className="flex items-center gap-1 truncate"
+          >
+            <CiLocationOn className="text-lg" />
+            {booking.jobAddress ? booking.jobAddress : user?.address}
+          </Typography>
+        </div>
+
         <Typography
           variant="span"
           className={`flex items-center gap-1 absolute top-0 right-0 ${
@@ -274,7 +178,7 @@ const BookingDetails = ({ booking }) => {
               TransitionComponent={Zoom}
               title="Accepted nor rejected by caregiver"
             >
-              {booking.status}
+              <Typography variant="span">{booking.status}</Typography>
             </Tooltip>
           ) : (
             booking.status
@@ -349,9 +253,11 @@ BookingDetails.propTypes = {
     endDate: PropTypes.string,
     bookedOn: PropTypes.string,
     bookedFor: PropTypes.string,
+    dependentType: PropTypes.string,
     status: PropTypes.string,
     createdAt: PropTypes.string,
     _id: PropTypes.string,
+    jobAddress: PropTypes.string,
   }).isRequired,
 };
 

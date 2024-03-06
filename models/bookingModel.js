@@ -19,10 +19,14 @@ const bookingSchema = new mongoose.Schema({
     },
     bookedFor: {
         type: String,
+        required: [true, "Booked for is required"]
+    },
+    dependentType: {
+        type: String,
         required: true,
         enum: {
-            values: ['Parent', 'Child'],
-            message: 'BookedFor must be Parent or Child'
+            values: ["Parent", "Child"],
+            message: "Dependent type must be parent or child"
         }
     },
     date: {
@@ -32,6 +36,10 @@ const bookingSchema = new mongoose.Schema({
     endDate: {
         type: Date,
         required: [true, "Booking end date is required"]
+    },
+    jobAddress: {
+        type: String,
+        default: ""
     },
     status: {
         type: String,

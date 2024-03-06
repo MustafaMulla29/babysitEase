@@ -44,7 +44,7 @@ const DependentCard = ({ dependent, loading }) => {
             <Typography
               variant="span"
               gutterBottom
-              className="text-blue-500 text-left text-xl flex items-center"
+              className="text-blue-500 text-left text-lg flex items-center"
             >
               <FaAllergies className="inline mr-2" />
               Allergies
@@ -65,7 +65,7 @@ const DependentCard = ({ dependent, loading }) => {
               <Typography
                 variant="span"
                 gutterBottom
-                className="text-red-500 flex items-center text-xl"
+                className="text-red-500 flex items-center text-lg"
               >
                 <FaHospitalUser className="inline mr-2" />
                 Medical Conditions

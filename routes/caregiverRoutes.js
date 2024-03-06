@@ -21,11 +21,13 @@ router.post("/bookingStatus", authMiddleware, bookingStatusController)
 router.post("/subscribe", authMiddleware, subscriptionController)
 
 router.get("/checkSubscription/:id", authMiddleware, checkSubscriptionController)
+
 router.get("/changeSubscriptionStatus/:id", authMiddleware, changeSubscriptionStatusController)
 
 router.get("/getReviews/:caregiverId", authMiddleware, getReviewsController)
 
 router.patch("/changeBookingStatus", authMiddleware, approveBookingController)
+
 
 
 module.exports = router

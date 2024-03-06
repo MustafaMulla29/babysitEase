@@ -231,7 +231,9 @@ const getBookingsController = async (req, res) => {
                 _id: booking._id,
                 clientId: booking.clientId,
                 bookedOn: booking.bookedAt,
+                jobAddress: booking.jobAddress,
                 bookedFor: booking.bookedFor,
+                dependentType: booking.dependentType,
                 date: booking.date,
                 bookingEndDate: booking.endDate,
                 status: booking.status,
@@ -539,42 +541,24 @@ const checkSubscriptionController = async (req, res) => {
         let subscription = await subscriptionModel.findOne({
             user_id: req.params.id,
             status: "Active",
-            expiryDate: { $lt: moment(currentDate).toDate() },
+            expiryDate: { $gte: moment(currentDate).toDate() },
         });
 
-        // console.log("Current Date:", moment(currentDate).toDate());
-        // console.log("Subscription Expiry Date:", subscription?.expiryDate);
         if (subscription) {
-            res.status(200).send({
+            return res.status(200).send({
                 success: true,
                 message: "Subscription is active",
                 data: {
-                    subscriptionStatus: "Expired"
+                    subscriptionStatus: "Active"
                 },
             });
-        } else {
-            // Subscription not found or has expired, update status if expired
-            // subscription = await subscriptionModel.findOneAndUpdate(
-            //     { user_id: req.params.id, status: "Active", expiryDate: { $lt: moment(currentDate).toDate() } },
-            //     { $set: { status: "Expired" } },
-            //     { new: true, runValidators: true }
-            // );
-
-            // if (subscription) {
-            //     res.status(200).send({
-            //         success: true,
-            //         message: "Subscription has expired",
-            //         data: {
-            //             subscriptionStatus: subscription?.status
-            //         },
-            //     });
-            // } else {
-            res.status(401).send({
-                success: false,
-                message: "Subscription not found",
-            });
-            // }
         }
+
+
+        res.status(404).send({
+            success: false,
+            message: "Subscription not found",
+        });
     } catch (error) {
         console.log(error);
         res.status(500).send({
@@ -609,7 +593,11 @@ const changeSubscriptionStatusController = async (req, res) => {
             })
         }
         res.status(200).send({
-            message: "No subscription expired"
+            success: false,
+            message: "No subscription expired",
+            data: {
+                subscriptionStatus: "Active"
+            }
         })
 
     } catch (error) {
@@ -621,8 +609,6 @@ const changeSubscriptionStatusController = async (req, res) => {
         });
     }
 }
-
-
 
 
 module.exports = { getCaregiverInfoController, updateCaregiverController, getBookingsController, bookingStatusController, getReviewsController, approveBookingController, subscriptionController, checkSubscriptionController, changeSubscriptionStatusController, }

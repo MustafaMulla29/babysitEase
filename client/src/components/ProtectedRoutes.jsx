@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { hideLoading, showLoading } from "../redux/features/alertSlice";
 import axios from "axios";
@@ -50,7 +50,6 @@ const ProtectedRoutes = ({ children }) => {
   if (localStorage.getItem("token")) {
     return children;
   } else {
-    // return <Navigate to="/login" />;
     return navigate("/login");
   }
 };

@@ -1,20 +1,16 @@
-import React from "react";
-import {
-  Card,
-  CardContent,
-  Typography,
-  Avatar,
-  Rating,
-  Tooltip,
-  IconButton,
-  Zoom,
-} from "@mui/material";
+import React, { useState } from "react";
+import { Card, CardContent, Typography, Avatar, Rating } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { PropTypes } from "prop-types";
 import { CiLocationOn } from "react-icons/ci";
-import { IoMdHeartEmpty } from "react-icons/io";
+import AddFavourite from "./AddFavourite";
+import { useSelector } from "react-redux";
 
 const CaregiverCard = React.memo(({ caregiver, index }) => {
+  // eslint-disable-next-line no-unused-vars
+  const [isFavourited, setIsFavourited] = useState(caregiver?.isFavourited);
+  const { user } = useSelector((state) => state.user);
+
   const {
     user: { name, address, city, profilePicture },
     rating,
@@ -22,6 +18,27 @@ const CaregiverCard = React.memo(({ caregiver, index }) => {
     userId,
   } = caregiver;
   const navigate = useNavigate();
+
+  // useEffect(() => {
+  //   const checkFavourited = async () => {
+  //     try {
+  //       const res = await axios.get(
+  //         `http://localhost:8070/api/v1/user/checkFavourited/${user?._id}/${userId}`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //           },
+  //         }
+  //       );
+  //       if (res.data.success) {
+  //         setIsFavourited(res.data.success);
+  //       }
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
+  //   checkFavourited();
+  // }, [user?._id, userId]);
 
   const bgColors = [
     "linear-gradient(180deg, #72ffd5 30%, #72ffd5 33%, white 33%)",
@@ -46,13 +63,11 @@ const CaregiverCard = React.memo(({ caregiver, index }) => {
           // background: "-webkit-linear-gradient(180deg,#c446ee 30%,white 33%)",
         }}
       >
-        <div className="absolute top-2 right-2 ">
-          <Tooltip title="Add to favourites" TransitionComponent={Zoom} arrow>
-            <IconButton>
-              <IoMdHeartEmpty className="text-3xl text-gray-700" />
-            </IconButton>
-          </Tooltip>
-        </div>
+        <AddFavourite
+          clientId={user?._id}
+          caregiverId={userId}
+          isFavourited={isFavourited}
+        />
         <Avatar
           className="border-4 border-white"
           alt={name}
@@ -91,53 +106,6 @@ const CaregiverCard = React.memo(({ caregiver, index }) => {
           </Typography>
         </CardContent>
       </Card>
-
-      {/* <Card className="space-y-3 py-2 px-4 w-full">
-        <div className="flex items-center gap-2">
-          <Avatar
-            alt={name}
-            src={
-              profilePicture
-                ? `http://localhost:8070/${profilePicture}`
-                : "./../../img/default_avatar.jpg"
-            }
-            sx={{ width: 100, height: 100 }}
-          />
-          <div>
-            <Typography
-              variant="h6"
-              component="div"
-              className="font-semibold text-xl mb-2 cursor-pointer"
-              onClick={() => navigate(`/caregiver/${caregiver?.userId}`)}
-            >
-              {name}
-            </Typography>
-            <Typography>
-              <span className="flex items-center gap-1">
-                <CiLocationOn />
-                {city}
-              </span>
-            </Typography>
-          </div>
-        </div>
-        <div>
-          <Typography>RS{feesPerDay}/day</Typography>
-        </div>
-        <div>
-          {preferredCities?.map((city, index) => {
-            return (
-              <Chip
-                key={index}
-                label={city}
-                className="text-base bg-[#f2f7f2]"
-              />
-            );
-          })}
-        </div>
-        <div>
-          <Typography>{description?.substring(0, 150)}...</Typography>
-        </div>
-      </Card> */}
     </>
   );
 });
@@ -159,6 +127,7 @@ CaregiverCard.propTypes = {
       lowerLimit: PropTypes.number.isRequired,
       upperLimit: PropTypes.number.isRequired,
     }).isRequired,
+    isFavourited: PropTypes.bool.isRequired,
   }).isRequired,
   index: PropTypes.number.isRequired,
 };

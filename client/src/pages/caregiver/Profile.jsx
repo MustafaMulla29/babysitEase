@@ -14,6 +14,7 @@ import apply from "./../../lotties/alert.json";
 import Lottie from "react-lottie";
 import { MdOutlineWorkspacePremium } from "react-icons/md";
 import { MdOutlineCurrencyRupee } from "react-icons/md";
+import { format, parse } from "date-fns";
 
 const Profile = () => {
   const [caregiver, setCaregiver] = useState(null);
@@ -89,6 +90,10 @@ const Profile = () => {
     },
   };
 
+  const convertToAmPm = (timeString) => {
+    const parsedTime = parse(timeString, "HH:mm", new Date());
+    return format(parsedTime, "h:mm a");
+  };
   return (
     <>
       <div className="container mx-auto p-4">
@@ -115,38 +120,83 @@ const Profile = () => {
           </div>
         )}
 
-        {!caregiver?.isCaregiver && (
-          <div className=" bg-yellow-100 border border-gray-300  rounded-lg  bg-opacity-80  m-auto">
-            <div className="h-full w-ful flex items-start gap-10">
-              <div className=" flex items-center gap-4">
-                <div className="pointer-events-none">
-                  <Lottie
-                    options={applyOptions}
-                    isClickToPauseDisabled={true}
-                    width={100}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Typography variant="h6" className="text-xl font-semibold ">
-                    Hey {caregiver?.name}! Don&apos;t forget to apply for a{" "}
-                    {caregiver?.role} account.
-                  </Typography>
-                  <Typography
-                    variant="span"
-                    className="text-gray-700 text-[15px]"
-                  >
-                    Click the link on header to apply and wait for the approval
-                    from the admin to unlock more features and opportunities.
-                    <br />
-                    <span className="text-gray-500">
-                      *Ignore this if you already applied
-                    </span>
-                  </Typography>
+        {!caregiver
+          ? ""
+          : caregiver?.description === undefined && (
+              <div className=" bg-yellow-100 border border-gray-300  rounded-lg  bg-opacity-80  m-auto">
+                <div className="h-full w-ful flex items-start gap-10">
+                  <div className=" flex items-center gap-4">
+                    <div className="pointer-events-none">
+                      <Lottie
+                        options={applyOptions}
+                        isClickToPauseDisabled={true}
+                        width={100}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Typography
+                        variant="h6"
+                        className="text-xl font-semibold "
+                      >
+                        Hey {caregiver?.name}! Don&apos;t forget to apply for a{" "}
+                        {caregiver?.role} account.
+                      </Typography>
+                      <Typography
+                        variant="span"
+                        className="text-gray-700 text-[15px]"
+                      >
+                        Click the link on header to apply and wait for the
+                        approval from the admin to unlock more features and
+                        opportunities.
+                        <br />
+                        <span className="text-gray-500">
+                          *Ignore this if you already applied
+                        </span>
+                      </Typography>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
+            )}
+        {!caregiver
+          ? ""
+          : caregiver?.status === "Rejected" &&
+            caregiver?.rejectionReason && (
+              <div className=" bg-red-200 border border-black-300  rounded-lg  bg-opacity-80  m-auto">
+                <div className="h-full w-ful flex items-start gap-10">
+                  <div className=" flex items-center gap-4">
+                    <div className="pointer-events-none">
+                      <Lottie
+                        options={applyOptions}
+                        isClickToPauseDisabled={true}
+                        width={100}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Typography
+                        variant="h6"
+                        className="text-xl font-semibold "
+                      >
+                        Hey {caregiver?.name}! Your {caregiver?.role} account
+                        request has been rejected.
+                      </Typography>
+                      <Typography
+                        variant="span"
+                        className="text-gray-800 text-[15px]"
+                      >
+                        Admin has a message for you :{" "}
+                        {caregiver?.rejectionReason}
+                        <br />
+                        <span className="text-gray-600">
+                          *You can apply {3 - caregiver?.attempts} more time out
+                          of 3.
+                        </span>
+                      </Typography>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
         {/* <>
           <div className="pointer-events-none">
             <Lottie
@@ -358,6 +408,27 @@ const Profile = () => {
                     ` ${
                       caregiver?.ageRange?.upperLimit
                         ? caregiver?.ageRange.upperLimit + " years"
+                        : "N/L"
+                    }`
+                  ) : (
+                    <Skeleton animation="wave" width={150} />
+                  )}
+                </Typography>
+              </div>
+            </div>
+            <hr className="mb-8" />
+            <div className="mb-8">
+              <Typography variant="h6" className="mb-2 font-semibold">
+                Working Hours
+              </Typography>
+              <div className="flex items-center gap-4">
+                <Typography variant="span">
+                  {caregiver ? (
+                    ` ${
+                      caregiver?.workingHours
+                        ? convertToAmPm(caregiver?.workingHours.from) +
+                          " - " +
+                          convertToAmPm(caregiver?.workingHours.to)
                         : "N/L"
                     }`
                   ) : (

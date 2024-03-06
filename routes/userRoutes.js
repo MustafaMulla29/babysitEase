@@ -1,5 +1,5 @@
 const express = require('express')
-const { loginController, registerController, authController, getNotificationsController, deleteNotificationsController, applyCaregiverController, addDependentController, getAllCaregiversController, getCaregiverDetails, bookCaregiverController, getBookingsController, addReviewController, cancelBookingController, searchCaregiversController, deleteDependentController } = require('../controllers/userCtrl')
+const { loginController, registerController, authController, getNotificationsController, deleteNotificationsController, applyCaregiverController, addDependentController, getAllCaregiversController, getCaregiverDetails, bookCaregiverController, getBookingsController, addReviewController, cancelBookingController, searchCaregiversController, deleteDependentController, addFavouritesController, checkFavouritedController, getFavouritesController, updateUserController, getAdditionalAddressesController, getDependentNamesController } = require('../controllers/userCtrl')
 const authMiddleware = require('../middlewares/authMiddleware')
 const upload = require('../multerConfig')
 
@@ -20,6 +20,7 @@ router.post('/getUserData', authMiddleware, authController)
 
 //APPLY NURSE || POST
 router.post("/apply-caregiver", upload.array("certifications"), authMiddleware, applyCaregiverController)
+router.patch("/updateUser", upload.single("profilePicture"), authMiddleware, updateUserController)
 
 //NOTIFICATION || POST
 router.post("/get-notifications", authMiddleware, getNotificationsController)
@@ -28,6 +29,7 @@ router.post("/delete-notifications", authMiddleware, deleteNotificationsControll
 
 //ADD DEPENDENT ROUTE || POST
 router.post("/addDependent", authMiddleware, addDependentController)
+router.get("/getDependentNames/:caregiverId/:clientId", authMiddleware, getDependentNamesController)
 
 //Delete DEPENDENT ROUTE || POST
 router.delete("/deleteDependent/:userId/:dependentId", authMiddleware, deleteDependentController)
@@ -52,5 +54,12 @@ router.post("/cancelBooking", authMiddleware, cancelBookingController)
 
 //GET SEARCH CAREGIVERS
 router.get("/searchCaregivers", authMiddleware, searchCaregiversController)
+
+router.post("/addFavourite", authMiddleware, addFavouritesController)
+
+router.get("/getFavourites/:clientId", authMiddleware, getFavouritesController)
+router.get("/getAdditionalAddresses/:clientId", authMiddleware, getAdditionalAddressesController)
+// router.get("/checkFavourited/:clientId/:caregiverId", authMiddleware, checkFavouritedController)
+
 
 module.exports = router

@@ -40,7 +40,24 @@ const caregiverSchema = new mongoose.Schema({
             message: "Availability can be either Available or Unavailable"
         }
     },
-
+    workingHours: {
+        from: {
+            type: String,
+            required: [true, "Working hours start time is required"]
+        },
+        to: {
+            type: String,
+            required: [true, "Working hours end time is required"]
+        }
+    },
+    attempts: {
+        type: Number,
+        default: 1,
+        max: 3
+    },
+    rejectionReason: {
+        type: String,
+    },
     preferredCities: {
         type: [String],
         required: [true, 'Preferred cities are required'],

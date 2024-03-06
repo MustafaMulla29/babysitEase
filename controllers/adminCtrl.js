@@ -105,8 +105,8 @@ const getAdminDetailsController = async (req, res) => {
 //CAREGIVER ACCOUNT STATUS
 const changeAccountStatusController = async (req, res) => {
     try {
-        const { caregiverId, status } = req.body
-        const caregiver = await caregiverModel.findByIdAndUpdate(caregiverId, { status })
+        const { caregiverId, status, } = req.body
+        const caregiver = await caregiverModel.findByIdAndUpdate(caregiverId, { status, rejectionReason: status === "Approved" ? "" : req.body?.reason })
         const user = await userModel.findOne({ _id: caregiver.userId })
         const notification = user.notification
         if (status === "Approved") {
@@ -120,7 +120,7 @@ const changeAccountStatusController = async (req, res) => {
         if (status === "Rejected") {
             notification.push({
                 type: `${user?.role}-account-request-rejected`,
-                message: `Your caregiver account request has been ${status}`,
+                message: `Your caregiver account request has been ${status} ${req.body.reason && ":" + req.body.reason}`,
                 onClickPath: "/notification"
             })
         }
@@ -151,6 +151,7 @@ const changeAccountStatusController = async (req, res) => {
             body: {
                 name: user?.name,
                 intro: `Dear ${user?.name},\n\nYour ${user?.role} account has been ${status} by the admin.`,
+                message: req.body.reason,
                 action: {
                     instructions: 'Visit our platform to see more.',
                     button: {

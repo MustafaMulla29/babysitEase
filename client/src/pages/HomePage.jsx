@@ -10,8 +10,14 @@ import { Tab, Tabs, Typography } from "@mui/material";
 import { Navigate, useNavigate } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
 import { openAlert } from "../redux/features/messageSlice";
+import {
+  resetSubscription,
+  selectIsSubscribed,
+  setSubscribed,
+} from "../redux/features/subscriptionSlice";
+import React from "react";
 
-const Homepage = () => {
+const Homepage = React.memo(() => {
   const [caregivers, setCaregivers] = useState([]);
   const { user } = useSelector((state) => state.user);
   const [selectedTab, setSelectedTab] = useState(0);
@@ -24,46 +30,49 @@ const Homepage = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const isSubscribed = useSelector(selectIsSubscribed);
 
   useEffect(() => {
     const getAllCaregivers = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(
-          `http://localhost:8070/api/v1/user/getAllCaregivers?page=1&pageSize=${pageSize}&tab=${selectedTab}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
 
-        if (res.data.success) {
-          setCaregivers(res.data.data.caregivers);
-          setTotalCaregivers(res.data.data.totalCaregivers);
+        // Check if user is defined and has an _id before making the request
+        if (user?._id) {
+          const res = await axios.get(
+            `http://localhost:8070/api/v1/user/getAllCaregivers?page=1&pageSize=${pageSize}&tab=${selectedTab}&clientId=${user._id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+
+          if (res.data.success) {
+            setCaregivers(res.data.data.caregivers);
+            setTotalCaregivers(res.data.data.totalCaregivers);
+          }
         }
       } catch (error) {
         console.log(error);
-        // toast.error("Something went wrong", {
-        //   position: toast.POSITION.TOP_CENTER,
-        // });
         dispatch(
-          openAlert({ severity: "error", content: "Something went wrong" })
+          openAlert({ severity: "error", content: "Something went wrong!" })
         );
       } finally {
         setLoading(false);
       }
     };
-    getAllCaregivers();
-  }, [page, pageSize, selectedTab]);
+
+    if (user?.role === "client") getAllCaregivers();
+  }, [page, pageSize, selectedTab, user?._id]);
 
   const loadMore = async () => {
     try {
       setLoading(true);
-      const nextPage = Math.ceil(caregivers.length / pageSize) + 1; // Calculate the next page based on the current list length
+      const nextPage = Math.ceil(caregivers.length / pageSize) + 1;
 
       const res = await axios.get(
-        `http://localhost:8070/api/v1/user/getAllCaregivers?page=${nextPage}&pageSize=${pageSize}&tab=${selectedTab}`,
+        `http://localhost:8070/api/v1/user/getAllCaregivers?page=${nextPage}&pageSize=${pageSize}&tab=${selectedTab}&clientId=${user?._id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -145,7 +154,7 @@ const Homepage = () => {
             </Tabs>
           </div>
 
-          {selectedTab === 0 &&
+          {/* {selectedTab === 0 &&
             (loading ? (
               <div className="flex flex-wrap justify-start items-center gap-6 mt-5">
                 <CaregiverCardSkeleton />
@@ -165,9 +174,34 @@ const Homepage = () => {
                     />
                   ))}
               </div>
-            ))}
+            ))} */}
 
-          {selectedTab === 1 && loading ? (
+          {selectedTab === 0 && (
+            <div>
+              <div className="flex flex-wrap justify-start items-center gap-11 mt-5">
+                {caregivers
+                  ?.filter((caregiver) => caregiver.user?.role === "babysitter")
+                  .map((caregiver, index) => (
+                    <CaregiverCard
+                      key={caregiver._id}
+                      caregiver={caregiver}
+                      index={index}
+                    />
+                  ))}
+              </div>
+
+              {loading && (
+                <div className="flex flex-wrap justify-start items-center gap-6 mt-5">
+                  <CaregiverCardSkeleton />
+                  <CaregiverCardSkeleton />
+                  <CaregiverCardSkeleton />
+                  <CaregiverCardSkeleton />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* {selectedTab === 1 && loading ? (
             <div className="flex flex-wrap justify-start items-center gap-6 mt-5">
               <CaregiverCardSkeleton />
               <CaregiverCardSkeleton />
@@ -185,6 +219,31 @@ const Homepage = () => {
                     index={index}
                   />
                 ))}
+            </div>
+          )} */}
+
+          {selectedTab === 1 && (
+            <div>
+              <div className="flex flex-wrap justify-start items-center gap-11 mt-5">
+                {caregivers
+                  ?.filter((caregiver) => caregiver.user?.role === "nurse")
+                  .map((caregiver, index) => (
+                    <CaregiverCard
+                      key={caregiver._id}
+                      caregiver={caregiver}
+                      index={index}
+                    />
+                  ))}
+              </div>
+
+              {loading && (
+                <div className="flex flex-wrap justify-start items-center gap-6 mt-5">
+                  <CaregiverCardSkeleton />
+                  <CaregiverCardSkeleton />
+                  <CaregiverCardSkeleton />
+                  <CaregiverCardSkeleton />
+                </div>
+              )}
             </div>
           )}
 
@@ -206,6 +265,7 @@ const Homepage = () => {
       )}
     </Layout>
   );
-};
+});
 
+Homepage.displayName = "Homepage";
 export default Homepage;

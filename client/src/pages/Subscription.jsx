@@ -2,10 +2,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  setSubscribed,
-  resetSubscription,
-} from "../redux/features/subscriptionSlice";
+import { setSubscribed } from "../redux/features/subscriptionSlice";
 import {
   Button,
   Card,
@@ -156,15 +153,32 @@ const Subscription = () => {
     }
   }, [step, selectedPlan, expiryDate]);
 
-  useEffect(() => {
-    const storedStatus = localStorage.getItem("subscriptionStatus");
+  // useEffect(() => {
+  //   console.log("user:", user);
+  //   console.log("isSubscribed:", isSubscribed);
 
-    if (storedStatus === "Active") {
-      dispatch(setSubscribed());
-    } else {
-      dispatch(resetSubscription());
-    }
-  }, [dispatch]);
+  //   if (
+  //     user?.role !== "client" &&
+  //     user?.isCaregiver &&
+  //     isSubscribed === "Expired"
+  //   ) {
+  //     console.log("Navigating to /subscribe");
+  //     return navigate("/subscribe");
+  //   } else {
+  //     console.log("Navigating to /");
+  //     return navigate("/");
+  //   }
+  // }, [user, isSubscribed, navigate]);
+
+  // useEffect(() => {
+  //   const storedStatus = localStorage.getItem("subscriptionStatus");
+
+  //   if (storedStatus === "Active") {
+  //     dispatch(setSubscribed());
+  //   } else {
+  //     dispatch(resetSubscription());
+  //   }
+  // }, [dispatch]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -194,13 +208,13 @@ const Subscription = () => {
                   "Get most out of BabysitEase with right subscription"
                 )}
               </Typography>
-              <Typography variant="p" className="text-center w-1/2 m-auto">
+              <p className="text-center w-2/3 m-auto">
                 {loading ? (
                   <Skeleton animation="wave" />
                 ) : (
                   "Experience the convenience of premium features and personalized services. Subscribe today and enjoy a hassle-free childcare and parentcare experience with BabysitEase."
                 )}
-              </Typography>
+              </p>
             </div>
             <Grid container spacing={4} className="mt-8">
               {loading ? (
@@ -384,62 +398,77 @@ const Subscription = () => {
                           "Your plan details"
                         )}
                       </Typography>
-                      <div className="p-2 flex items-start justify-between flex-row sm:w-[80%] w-full">
+                      <div className="p-2 flex items-start gap-6 flex-row sm:w-[80%] w-full">
                         <div className="space-y-2">
-                          <Typography variant="h6">
+                          <Typography
+                            variant="h6"
+                            className="text-[13px] sm:text-base flex items-center justify-start gap-1"
+                          >
                             {loading ? (
                               <Skeleton width={100} animation="wave" />
                             ) : (
-                              <span className="text-[13px] sm:text-base flex items-center justify-start gap-1">
+                              <>
                                 <GrPlan />
                                 Plan
-                              </span>
+                              </>
                             )}
                           </Typography>
-                          <Typography variant="h6">
+                          <Typography
+                            variant="h6"
+                            className="text-[13px] sm:text-base flex items-center justify-start gap-1"
+                          >
                             {loading ? (
                               <Skeleton width={100} animation="wave" />
                             ) : (
-                              <span className="text-[13px] sm:text-base flex items-center justify-start gap-1">
+                              <>
                                 <IoIosPricetags />
                                 Price
-                              </span>
+                              </>
                             )}
                           </Typography>
-                          <Typography variant="h6">
+                          <Typography
+                            variant="h6"
+                            className="text-[13px] sm:text-base flex items-center justify-start gap-1"
+                          >
                             {loading ? (
                               <Skeleton width={100} animation="wave" />
                             ) : (
-                              <span className="text-[13px] sm:text-base flex items-center justify-start gap-1">
+                              <>
                                 <GiDuration />
                                 Duration
-                              </span>
+                              </>
                             )}
                           </Typography>
-                          <Typography variant="h6">
+                          <Typography
+                            variant="h6"
+                            className="text-[13px] sm:text-base flex items-center justify-start gap-1 w-36"
+                          >
                             {loading ? (
                               <Skeleton width={100} animation="wave" />
                             ) : (
-                              <span className="text-[13px] sm:text-base flex items-center justify-start gap-1">
+                              <>
                                 <MdDateRange />
                                 Purchase Date
-                              </span>
+                              </>
                             )}
                           </Typography>
-                          <Typography variant="h6">
+                          <Typography
+                            variant="h6"
+                            className="text-[13px] sm:text-base flex items-center justify-start gap-1"
+                          >
                             {loading ? (
                               <Skeleton width={100} animation="wave" />
                             ) : (
-                              <span className="text-[13px] sm:text-base flex items-center justify-start gap-1">
+                              <>
                                 <MdDateRange />
                                 Expiry date
-                              </span>
+                              </>
                             )}
                           </Typography>
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-2 flex flex-col">
                           <Typography
-                            variant="span"
+                            variant="p"
                             className="text-[13px] sm:text-base"
                           >
                             {loading ? (
@@ -449,7 +478,7 @@ const Subscription = () => {
                             )}
                           </Typography>
                           <Typography
-                            variant="span"
+                            variant="p"
                             className="text-[13px] sm:text-base"
                           >
                             {loading ? (
@@ -459,7 +488,7 @@ const Subscription = () => {
                             )}
                           </Typography>
                           <Typography
-                            variant="span"
+                            variant="p"
                             className="text-[13px] sm:text-base"
                           >
                             {loading ? (
@@ -469,7 +498,7 @@ const Subscription = () => {
                             )}
                           </Typography>
                           <Typography
-                            variant="span"
+                            variant="p"
                             className="text-[13px] sm:text-base"
                           >
                             {loading ? (
@@ -479,7 +508,7 @@ const Subscription = () => {
                             )}
                           </Typography>
                           <Typography
-                            variant="span"
+                            variant="p"
                             className="text-[13px] sm:text-base"
                           >
                             {loading ? (

@@ -74,7 +74,7 @@ const Bookings = () => {
   return (
     <Layout>
       <h1 className="text-3xl font-bold mb-4">Bookings page</h1>
-      <div className="flex items-start flex-row flex-wrap justify-center w-full">
+      <div className="flex items-start flex-row flex-wrap justify-start w-full">
         {loading ? (
           <>
             <BookingDetailsSkeleton />

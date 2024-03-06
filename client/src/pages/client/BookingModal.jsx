@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Modal from "@mui/material/Modal";
 import Button from "@mui/material/Button";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
@@ -7,7 +7,14 @@ import { useDispatch } from "react-redux";
 import moment from "moment";
 import { hideLoading, showLoading } from "../../redux/features/alertSlice";
 import axios from "axios";
-import { Typography } from "@mui/material";
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Skeleton,
+  Typography,
+} from "@mui/material";
 import { FaRegCalendarAlt } from "react-icons/fa";
 import { PropTypes } from "prop-types";
 import { openAlert } from "../../redux/features/messageSlice";
@@ -17,6 +24,18 @@ const BookingModal = ({ open, onClose, userBlocked, params, clientId }) => {
   const [bookingError, setBookingError] = useState(false);
   const [bookingEndDate, setBookingEndDate] = useState(null);
   const [bookingEndError, setBookingEndError] = useState(false);
+  const [clientAdditionalAddresses, setClientAdditionalAddresses] = useState(
+    []
+  );
+  const [dependentNames, setDependentNames] = useState([]);
+  const [bookedFor, setBookedFor] = useState("-1");
+  const [bookingAddress, setBookingAddress] = useState("-1");
+  // const [loading, setLoading] = useState(false);
+  const loadingInitialState = {
+    additionalAddresses: true,
+    dependentNames: true,
+  };
+  const [loading, setLoading] = useState(loadingInitialState);
 
   const dispatch = useDispatch();
 
@@ -85,6 +104,16 @@ const BookingModal = ({ open, onClose, userBlocked, params, clientId }) => {
       return;
     }
 
+    if (bookedFor === "-1") {
+      dispatch(
+        openAlert({
+          severity: "warning",
+          content: "Please select the dependent whom you are booking",
+        })
+      );
+      return;
+    }
+
     try {
       dispatch(showLoading());
       const date = moment(bookingDate).format("YYYY-MM-DD");
@@ -96,6 +125,8 @@ const BookingModal = ({ open, onClose, userBlocked, params, clientId }) => {
           caregiverId: params.userId,
           date: date,
           endDate,
+          jobAddress: bookingAddress === "-1" ? "" : bookingAddress,
+          bookedFor,
         },
         {
           headers: {
@@ -143,6 +174,126 @@ const BookingModal = ({ open, onClose, userBlocked, params, clientId }) => {
       }
     }
   };
+
+  // useEffect(() => {
+  //   const getAdditionalAddresses = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const res = await axios.get(
+  //         `http://localhost:8070/api/v1/user/getAdditionalAddresses/${clientId}`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //           },
+  //         }
+  //       );
+
+  //       if (res.data.success) {
+  //         setLoading(false);
+  //         setClientAdditionalAddresses(res.data.additionalAddresses);
+  //       }
+  //     } catch (error) {
+  //       setLoading(false);
+  //       console.log(error);
+  //       dispatch(
+  //         openAlert({ severity: "error", content: "Something went wrong!" })
+  //       );
+  //     }
+  //   };
+
+  //   const getDependentNames = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const res = await axios.get(
+  //         `http://localhost:8070/api/v1/user/getDependentNames/${params.userId}/${clientId}`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //           },
+  //         }
+  //       );
+  //       if (res.data.success) {
+  //         setLoading(false);
+  //         setDependentNames(res.data.dependentNames);
+  //       }
+  //     } catch (error) {
+  //       setLoading(false);
+  //       console.log(error);
+  //       dispatch(
+  //         openAlert({ severity: "error", content: "Something went wrong!" })
+  //       );
+  //     }
+  //   };
+  //   getAdditionalAddresses();
+  //   getDependentNames();
+  // }, [dispatch, open, clientId, params.userId]);
+
+  const getAdditionalAddresses = useCallback(async () => {
+    try {
+      setLoading((prevLoading) => ({
+        ...prevLoading,
+        additionalAddresses: true,
+      }));
+      const res = await axios.get(
+        `http://localhost:8070/api/v1/user/getAdditionalAddresses/${clientId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (res.data.success) {
+        setLoading((prevLoading) => ({
+          ...prevLoading,
+          additionalAddresses: false,
+        }));
+        setClientAdditionalAddresses(res.data.additionalAddresses);
+      }
+    } catch (error) {
+      setLoading((prevLoading) => ({
+        ...prevLoading,
+        additionalAddresses: false,
+      }));
+      console.log(error);
+      dispatch(
+        openAlert({ severity: "error", content: "Something went wrong!" })
+      );
+    }
+  }, [dispatch, clientId]);
+
+  const getDependentNames = useCallback(async () => {
+    try {
+      setLoading((prevLoading) => ({ ...prevLoading, dependentNames: true }));
+      const res = await axios.get(
+        `http://localhost:8070/api/v1/user/getDependentNames/${params.userId}/${clientId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (res.data.success) {
+        setLoading((prevLoading) => ({
+          ...prevLoading,
+          dependentNames: false,
+        }));
+        setDependentNames(res.data.dependentNames);
+      }
+    } catch (error) {
+      setLoading((prevLoading) => ({ ...prevLoading, dependentNames: false }));
+      console.log(error);
+      dispatch(
+        openAlert({ severity: "error", content: "Something went wrong!" })
+      );
+    }
+  }, [dispatch, clientId, params.userId]);
+
+  useEffect(() => {
+    getAdditionalAddresses();
+    getDependentNames();
+  }, [getAdditionalAddresses, getDependentNames, open]);
+
   return (
     <Modal
       open={open}
@@ -198,6 +349,75 @@ const BookingModal = ({ open, onClose, userBlocked, params, clientId }) => {
             {bookingEndError}
           </Typography>
         </div>
+        {clientAdditionalAddresses?.length > 0 ? (
+          <>
+            <FormControl fullWidth className="mb-3" required>
+              <InputLabel id="demo-simple-select-label">
+                Booking address
+              </InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                label="Booking address"
+                name="bookingAddress"
+                className="w-full rounded-md bg-[#f3f4f6] border transition-[outline] duration-200 outline-blue-600"
+                value={bookingAddress}
+                onChange={(e) => setBookingAddress(e.target.value)}
+                defaultValue="-1"
+              >
+                <MenuItem value="-1" className="px-3 py-2">
+                  Select address (optional)
+                </MenuItem>
+                {clientAdditionalAddresses.map((address, index) => (
+                  <MenuItem key={index} value={address} className="px-3 py-2">
+                    {address}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </>
+        ) : loading.additionalAddresses ? (
+          <Skeleton
+            animation="wave"
+            width={200}
+            height={100}
+            className="w-full"
+          />
+        ) : null}
+        {dependentNames?.length > 0 ? (
+          <>
+            <FormControl fullWidth className="mb-2">
+              <InputLabel id="demo-simple-select-label">Booking for</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                label="Booking for"
+                name="bookedFor"
+                className="w-full rounded-md bg-[#f3f4f6] border transition-[outline] duration-200 outline-blue-600"
+                value={bookedFor}
+                onChange={(e) => setBookedFor(e.target.value)}
+                defaultValue="-1"
+              >
+                <MenuItem value="-1" className="px-3 py-2">
+                  Select booking for
+                </MenuItem>
+                {dependentNames.map((name, index) => (
+                  <MenuItem key={index} value={name} className="px-3 py-2">
+                    {name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </>
+        ) : loading.dependentNames ? (
+          <Skeleton
+            animation="wave"
+            width={200}
+            height={100}
+            className="w-full"
+          />
+        ) : null}
+
         <Button
           variant="contained"
           onClick={handleBooking}

@@ -207,7 +207,6 @@ const Register = () => {
             content: "Registered successfully!",
           })
         );
-        localStorage.removeItem("subscriptionStatus");
         dispatch(setUser(formData));
         navigate("/login");
       } else {

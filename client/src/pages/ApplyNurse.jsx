@@ -7,6 +7,10 @@ import { hideLoading, showLoading } from "../redux/features/alertSlice";
 import { Button, Typography, TextField, Box, Chip } from "@mui/material";
 import axios from "axios";
 import { openAlert } from "../redux/features/messageSlice";
+import { LocalizationProvider, TimePicker } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import moment from "moment";
+import { format, parse, parseISO } from "date-fns";
 
 const ApplyNurse = () => {
   const [yearsExperience, setExperience] = useState(null);
@@ -30,9 +34,15 @@ const ApplyNurse = () => {
   const [experienceError, setExperienceError] = useState("");
   const [feesPerDayError, setFeesPerDayError] = useState("");
   const [descriptionError, setDescriptionError] = useState("");
+  const [lowerLimitError, setLowerLimitError] = useState("");
+  const [upperLimitError, setupperLimitError] = useState("");
+  const [startTime, setStartTime] = useState(null);
+  const [endTime, setEndTime] = useState(null);
 
   const [preferredCitiesError, setPreferredCitiesError] = useState("");
   const [qualificationError, setQualificationError] = useState("");
+  const [startTimeError, setStartTimeError] = useState("");
+  const [endTimeError, setEndTimeError] = useState("");
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -125,7 +135,7 @@ const ApplyNurse = () => {
       !/[aeiouAEIOU]/.test(e.target.value) ||
       e.target.value.length < 3
     ) {
-      setSpecialisationError("Enter valid qualification");
+      setSpecialisationError("Enter valid specialisation");
       setSpecBtnDisabled(true);
     } else {
       setSpecialisationError("");
@@ -227,9 +237,250 @@ const ApplyNurse = () => {
     // console.log(preferredCities);
   }
 
+  const handleLowerLimitChange = (e) => {
+    const newValue = e.target.value;
+    const role = user?.role;
+
+    if (newValue.length === 0) {
+      setLowerLimitError("");
+    } else if (isNaN(newValue)) {
+      setLowerLimitError("Enter a valid number");
+    } else if (role === "babysitter" && newValue > 10) {
+      setLowerLimitError("Lower limit cannot exceed 10 for babysitters");
+    } else if (role === "nurse" && newValue < 10) {
+      setLowerLimitError("Lower limit cannot be less than 10 for nurse");
+    } else if (parseInt(newValue) > parseInt(ageRange.upperLimit)) {
+      setLowerLimitError("Lower limit cannot be greater than upper limit");
+    } else {
+      setLowerLimitError("");
+    }
+
+    setAgeRange((prevAgeRange) => ({
+      ...prevAgeRange,
+      lowerLimit: newValue,
+    }));
+  };
+
+  const handleUpperLimitChange = (e) => {
+    const newValue = e.target.value;
+    const role = user?.role; // Assuming you have the user's role available
+
+    if (newValue.length === 0) {
+      setupperLimitError("");
+    } else if (isNaN(newValue)) {
+      setupperLimitError("Enter a valid number");
+    } else if (role === "nurse" && newValue < 10) {
+      setupperLimitError("Upper limit cannot be less than 10 for nurses");
+    } else if (role === "babysitter" && newValue > 10) {
+      setupperLimitError("Upper limit cannot exceed 10 for babysitters");
+    } else if (parseInt(newValue) < parseInt(ageRange.lowerLimit)) {
+      setupperLimitError("Upper limit cannot be less than lower limit");
+    } else {
+      setupperLimitError("");
+    }
+
+    setAgeRange((prevAgeRange) => ({
+      ...prevAgeRange,
+      upperLimit: newValue,
+    }));
+  };
+
+  // const handleStartTimeChange = (newTime) => {
+  //   // const parseTime = parseISO(newTime);
+  //   // const startTimeTime = moment(parseTime, "HH:mm").format("HH:mm");
+
+  //   if (!newTime) {
+  //     setStartTimeError("");
+  //     return;
+  //   }
+
+  //   const parsedTime = parse(newTime, "HH:mm", new Date());
+  //   const startTimeTime = format(parsedTime, "HH:mm");
+  //   console.log("parsetime", parsedTime);
+  //   console.log("start time", startTimeTime);
+  //   if (startTimeTime >= endTime) {
+  //     setStartTimeError("Start time must be earlier than end time");
+  //   } else if (endTime <= startTimeTime) {
+  //     setStartTimeError("Start time must be greater than end time");
+  //   } else {
+  //     setStartTime(startTimeTime);
+  //     setStartTimeError("");
+  //   }
+  // };
+
+  // const handleStartTimeChange = (newTime) => {
+  //   try {
+  //     if (!newTime) {
+  //       setStartTimeError("");
+  //       return;
+  //     }
+
+  //     const dateTime = new Date(newTime);
+
+  //     if (isNaN(dateTime.getTime())) {
+  //       console.error("Invalid time value after parsing:", newTime);
+  //       return;
+  //     }
+
+  //     const hours = dateTime.getHours();
+  //     const minutes = dateTime.getMinutes();
+  //     const parsedTime = parse(`${hours}:${minutes}`, "HH:mm", new Date());
+
+  //     if (isNaN(parsedTime.getTime())) {
+  //       console.error("Invalid time value after parsing:", newTime);
+  //       return;
+  //     }
+
+  //     const startTimeTime = format(parsedTime, "HH:mm");
+  //     setStartTime(startTimeTime);
+  //     console.log(startTimeTime);
+
+  //     if (startTimeTime >= endTime) {
+  //       setStartTimeError("Start time must be earlier than end time");
+  //     } else if (endTime <= startTimeTime) {
+  //       setStartTimeError("Start time must be greater than end time");
+  //     } else {
+  //       setStartTime(startTimeTime);
+  //       setStartTimeError("");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error in handleStartTimeChange:", error);
+  //   }
+  // };
+  const handleStartTimeChange = (newTime) => {
+    try {
+      if (!newTime) {
+        setStartTimeError("");
+        return;
+      }
+
+      const dateTime = new Date(newTime);
+
+      if (isNaN(dateTime.getTime())) {
+        console.error("Invalid time value after parsing:", newTime);
+        return;
+      }
+
+      const hours = dateTime.getHours();
+      const minutes = dateTime.getMinutes();
+      const parsedTime = parse(`${hours}:${minutes}`, "HH:mm", new Date());
+
+      if (isNaN(parsedTime.getTime())) {
+        console.error("Invalid time value after parsing:", newTime);
+        return;
+      }
+
+      const startTimeTime = format(parsedTime, "HH:mm");
+      setStartTime(startTimeTime);
+      console.log(startTimeTime);
+
+      if (endTime && startTimeTime >= endTime) {
+        setStartTimeError("Start time must be earlier than end time");
+      } else if (endTime && startTimeTime <= endTime) {
+        setStartTimeError("Start time must be greater than end time");
+      } else {
+        setStartTimeError("");
+      }
+    } catch (error) {
+      console.error("Error in handleStartTimeChange:", error);
+    }
+  };
+
+  const handleEndTimeChange = (newTime) => {
+    try {
+      if (!newTime) {
+        setEndTimeError("");
+        return;
+      }
+
+      const dateTime = new Date(newTime);
+
+      if (isNaN(dateTime.getTime())) {
+        console.error("Invalid time value after parsing:", newTime);
+        return;
+      }
+
+      const hours = dateTime.getHours();
+      const minutes = dateTime.getMinutes();
+      const endTimeTime = format(
+        parse(`${hours}:${minutes}`, "HH:mm", new Date()),
+        "HH:mm"
+      );
+      setEndTime(endTimeTime);
+      console.log(endTimeTime);
+
+      if (startTime && endTimeTime <= startTime) {
+        setEndTimeError("End time must be later than start time");
+      } else if (startTime && endTimeTime >= startTime) {
+        setEndTimeError("");
+      } else {
+        setEndTimeError("End time must be earlier than start time");
+      }
+    } catch (error) {
+      console.error("Error in handleEndTimeChange:", error);
+    }
+  };
+
+  // const handleEndTimeChange = (newTime) => {
+  //   // Extract time part only
+
+  //   const endTimeTime = moment(parseISO(newTime), "HH:mm").format("HH:mm");
+  //   console.log(endTimeTime);
+  //   if (newTime.length === 0) {
+  //     setEndTimeError("");
+  //   } else if (endTimeTime <= startTime) {
+  //     setEndTimeError("End time must be later than start time");
+  //   } else if (startTime >= endTimeTime) {
+  //     setEndTimeError("End time must be earlier than start time");
+  //   } else {
+  //     setEndTime(endTimeTime);
+  //     setEndTimeError("");
+  //   }
+  // };
+
+  // const handleEndTimeChange = (newTime) => {
+  //   try {
+  //     if (!newTime) {
+  //       setEndTimeError("");
+  //       return;
+  //     }
+
+  //     const dateTime = new Date(newTime);
+
+  //     if (isNaN(dateTime.getTime())) {
+  //       console.error("Invalid time value after parsing:", newTime);
+  //       return;
+  //     }
+
+  //     const hours = dateTime.getHours();
+  //     const minutes = dateTime.getMinutes();
+  //     const endTimeTime = format(
+  //       parse(`${hours}:${minutes}`, "HH:mm", new Date()),
+  //       "HH:mm"
+  //     );
+  //     setEndTime(endTimeTime);
+  //     console.log(endTimeTime);
+
+  //     if (endTimeTime <= startTime) {
+  //       setEndTimeError("End time must be later than start time");
+  //     } else if (startTime >= endTimeTime) {
+  //       setEndTimeError("End time must be earlier than start time");
+  //     } else {
+  //       setEndTimeError("");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error in handleEndTimeChange:", error);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
+    const workingHours = {
+      from: startTime,
+      to: endTime,
+    };
+    console.log(workingHours);
 
     formData.append("yearsExperience", yearsExperience);
     formData.append("feesPerDay", feesPerDay);
@@ -238,6 +489,7 @@ const ApplyNurse = () => {
     // formData.append("qualification", qualification);
     // formData.append("specialisation", specialisation);
     formData.append("ageRange", JSON.stringify(ageRange));
+    formData.append("workingHours", JSON.stringify(workingHours));
     formData.append("userId", user._id);
 
     preferredCities.forEach((city) => {
@@ -531,6 +783,52 @@ const ApplyNurse = () => {
                 );
               })}
           </div>
+          <div className="flex items-start flex-col gap-3">
+            <Typography variant="h6" htmlFor="">
+              Working hours
+            </Typography>
+            <div className="flex items-start flex-row gap-3 w-full">
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <div className="w-1/2">
+                  <TimePicker
+                    label="From"
+                    value={startTime}
+                    name="workingHours"
+                    onChange={handleStartTimeChange}
+                    className="mt-1 w-full bg-[#f3f4f6] text-sm rounded-md transition-[outline] duration-200 outline-blue-600 border"
+                    error={startTimeError ? true : false}
+                  />
+                  <div className="h-4">
+                    <Typography
+                      variant="span"
+                      className="text-red-500 text-sm mt-1"
+                    >
+                      {startTimeError}
+                    </Typography>
+                  </div>
+                </div>
+                <div className="w-1/2">
+                  <TimePicker
+                    label="To"
+                    name="workingHours"
+                    value={endTime}
+                    onChange={handleEndTimeChange}
+                    className="mt-1 w-full bg-[#f3f4f6] text-sm rounded-md transition-[outline] duration-200 outline-blue-600 border"
+                    error={endTimeError ? true : false}
+                  />
+                  <div className="h-4">
+                    <Typography
+                      variant="span"
+                      className="text-red-500 text-sm mt-1"
+                    >
+                      {endTimeError}
+                    </Typography>
+                  </div>
+                </div>
+              </LocalizationProvider>
+            </div>
+          </div>
+
           <div className="mb-8">
             <Box className="flex items-start flex-col space-y-4">
               <Typography variant="h6" htmlFor="">
@@ -544,15 +842,19 @@ const ApplyNurse = () => {
                     multiline
                     className="mt-1 w-full bg-[#f3f4f6] text-sm rounded-md  transition-[outline] duration-200 outline-blue-600 border"
                     value={ageRange.lowerLimit}
+                    error={lowerLimitError ? true : false}
                     name="ageRange"
-                    onChange={(e) =>
-                      setAgeRange((prevAgeRange) => ({
-                        ...prevAgeRange,
-                        lowerLimit: e.target.value,
-                      }))
-                    }
+                    onChange={handleLowerLimitChange}
                     inputProps={{ minLength: 1, maxLength: 99 }}
                   />
+                  <div className="h-4">
+                    <Typography
+                      variant="span"
+                      className="text-red-500 text-sm mt-1"
+                    >
+                      {lowerLimitError}
+                    </Typography>
+                  </div>
                 </Box>
                 <Box className="w-1/2">
                   <TextField
@@ -561,15 +863,19 @@ const ApplyNurse = () => {
                     type="number"
                     className="mt-1 w-full bg-[#f3f4f6] text-sm rounded-md transition-[outline] duration-200 outline-blue-600 border "
                     value={ageRange.upperLimit}
+                    error={upperLimitError ? true : false}
                     name="ageRange"
-                    onChange={(e) =>
-                      setAgeRange((prevAgeRange) => ({
-                        ...prevAgeRange,
-                        upperLimit: e.target.value,
-                      }))
-                    }
+                    onChange={handleUpperLimitChange}
                     inputProps={{ minLength: 2, maxLength: 100 }}
                   />
+                  <div className="h-4">
+                    <Typography
+                      variant="span"
+                      className="text-red-500 text-sm mt-1"
+                    >
+                      {upperLimitError}
+                    </Typography>
+                  </div>
                 </Box>
               </Box>
             </Box>
