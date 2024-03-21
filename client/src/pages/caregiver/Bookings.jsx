@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import CaregiverBookingDetails from "./BookingDetails";
 import { useSelector } from "react-redux";
@@ -15,61 +15,64 @@ const Bookings = () => {
   const { user } = useSelector((state) => state.user);
   // const dispatch = useDispatch();
 
-  useEffect(() => {
-    const getBookings = async () => {
-      try {
-        const res = await axios.get(
-          "http://localhost:8070/api/v1/caregiver/getBookings",
-          {
-            params: { caregiverId: user?._id },
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        if (res.data.success) {
-          setBookings(res.data.data);
+  const getBookings = useCallback(async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:8070/api/v1/caregiver/getBookings",
+        {
+          params: { caregiverId: user?._id },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
-      } catch (error) {
-        console.log(error);
-        // toast.error("Something went wrong", {
-        //   position: toast.POSITION.TOP_CENTER,
-        // });
-      } finally {
-        setLoading(false);
+      );
+      if (res.data.success) {
+        setBookings(res.data.data);
       }
-    };
-    getBookings();
-  }, [user]);
+    } catch (error) {
+      console.log(error);
+      // toast.error("Something went wrong", {
+      //   position: toast.POSITION.TOP_CENTER,
+      // });
+    } finally {
+      setLoading(false);
+    }
+  }, [user?._id]);
 
   useEffect(() => {
-    const bookingStatus = async () => {
-      try {
-        await axios.post(
-          "http://localhost:8070/api/v1/caregiver/bookingStatus",
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-      } catch (error) {
-        console.log(error);
-        // toast.error("Something went wrong", {
-        //   position: toast.POSITION.TOP_CENTER,
-        // });
-        // dispatch(
-        //   openAlert({
-        //     severity: "error",
-        //     content: "Something went wrong! Try again.",
-        //   })
-        // );
+    getBookings();
+  }, [getBookings]);
 
-        return;
-      }
-    };
-    bookingStatus();
+  const bookingStatus = useCallback(async () => {
+    try {
+      await axios.post(
+        "http://localhost:8070/api/v1/caregiver/bookingStatus",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.log(error);
+      // toast.error("Something went wrong", {
+      //   position: toast.POSITION.TOP_CENTER,
+      // });
+      // dispatch(
+      //   openAlert({
+      //     severity: "error",
+      //     content: "Something went wrong! Try again.",
+      //   })
+      // );
+
+      return;
+    }
   }, []);
+
+  useEffect(() => {
+    bookingStatus();
+  }, [bookingStatus]);
 
   return (
     <Layout>

@@ -16,6 +16,7 @@ import {
   setSubscribed,
 } from "../redux/features/subscriptionSlice";
 import React from "react";
+import { useCallback } from "react";
 
 const Homepage = React.memo(() => {
   const [caregivers, setCaregivers] = useState([]);
@@ -23,7 +24,7 @@ const Homepage = React.memo(() => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(2);
+  const [pageSize, setPageSize] = useState(4);
   const [totalCaregivers, setTotalCaregivers] = useState(1);
   const [searchString, setSearchString] = useState("");
   const [searchBy, setSearchBy] = useState("-1");
@@ -32,39 +33,42 @@ const Homepage = React.memo(() => {
   const dispatch = useDispatch();
   const isSubscribed = useSelector(selectIsSubscribed);
 
-  useEffect(() => {
-    const getAllCaregivers = async () => {
-      try {
-        setLoading(true);
+  const getAllCaregivers = useCallback(async () => {
+    if (user?.role !== "client") {
+      return;
+    }
+    try {
+      setLoading(true);
 
-        // Check if user is defined and has an _id before making the request
-        if (user?._id) {
-          const res = await axios.get(
-            `http://localhost:8070/api/v1/user/getAllCaregivers?page=1&pageSize=${pageSize}&tab=${selectedTab}&clientId=${user._id}`,
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              },
-            }
-          );
-
-          if (res.data.success) {
-            setCaregivers(res.data.data.caregivers);
-            setTotalCaregivers(res.data.data.totalCaregivers);
+      // Check if user is defined and has an _id before making the request
+      if (user?._id) {
+        const res = await axios.get(
+          `http://localhost:8070/api/v1/user/getAllCaregivers?page=1&pageSize=${pageSize}&tab=${selectedTab}&clientId=${user._id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
           }
-        }
-      } catch (error) {
-        console.log(error);
-        dispatch(
-          openAlert({ severity: "error", content: "Something went wrong!" })
         );
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    if (user?.role === "client") getAllCaregivers();
-  }, [page, pageSize, selectedTab, user?._id]);
+        if (res.data.success) {
+          setCaregivers(res.data.data.caregivers);
+          setTotalCaregivers(res.data.data.totalCaregivers);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      dispatch(
+        openAlert({ severity: "error", content: "Something went wrong!" })
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [pageSize, selectedTab, user?._id, dispatch, user?.role]);
+
+  useEffect(() => {
+    getAllCaregivers();
+  }, [getAllCaregivers]);
 
   const loadMore = async () => {
     try {
@@ -178,7 +182,7 @@ const Homepage = React.memo(() => {
 
           {selectedTab === 0 && (
             <div>
-              <div className="flex flex-wrap justify-start items-center gap-11 mt-5">
+              <div className="flex flex-wrap justify-start items-center gap-9 mt-5">
                 {caregivers
                   ?.filter((caregiver) => caregiver.user?.role === "babysitter")
                   .map((caregiver, index) => (
@@ -224,7 +228,7 @@ const Homepage = React.memo(() => {
 
           {selectedTab === 1 && (
             <div>
-              <div className="flex flex-wrap justify-start items-center gap-11 mt-5">
+              <div className="flex flex-wrap justify-start items-center gap-9 mt-5">
                 {caregivers
                   ?.filter((caregiver) => caregiver.user?.role === "nurse")
                   .map((caregiver, index) => (

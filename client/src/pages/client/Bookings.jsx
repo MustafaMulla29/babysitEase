@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import { useSelector } from "react-redux";
 import axios from "axios";
@@ -13,32 +13,33 @@ const Bookings = () => {
 
   const { user } = useSelector((state) => state.user);
 
-  useEffect(() => {
-    const getBookings = async () => {
-      try {
-        const res = await axios.get(
-          "http://localhost:8070/api/v1/user/getBookings",
-          {
-            params: { clientId: user?._id },
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        if (res.data.success) {
-          setBookings(res.data.data);
+  const getBookings = useCallback(async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:8070/api/v1/user/getBookings",
+        {
+          params: { clientId: user?._id },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
-      } catch (error) {
-        console.log(error);
-        // toast.error("Something went wrong", {
-        //   position: toast.POSITION.TOP_CENTER,
-        // });
-      } finally {
-        setLoading(false);
+      );
+      if (res.data.success) {
+        setBookings(res.data.data);
       }
-    };
+    } catch (error) {
+      console.log(error);
+      // toast.error("Something went wrong", {
+      //   position: toast.POSITION.TOP_CENTER,
+      // });
+    } finally {
+      setLoading(false);
+    }
+  }, [user?._id]);
+
+  useEffect(() => {
     getBookings();
-  }, [user]);
+  }, [getBookings]);
 
   // useEffect(() => {
   //   const bookingStatus = async () => {

@@ -1,6 +1,13 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import { Avatar, Chip, Rating, Skeleton, Typography } from "@mui/material";
+import {
+  Avatar,
+  Button,
+  Chip,
+  Rating,
+  Skeleton,
+  Typography,
+} from "@mui/material";
 import UpdateProfileModal from "./UpdateProfileModal";
 import { useSelector } from "react-redux";
 import { FaExclamationCircle } from "react-icons/fa";
@@ -30,48 +37,50 @@ const Profile = () => {
     setEditModalOpen(false);
   };
 
-  useEffect(() => {
-    const getNurseInfo = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:8070/api/v1/caregiver/getCaregiverInfo/${user?._id}`,
-          // { userId: user?._id },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        if (res.data.success) {
-          setCaregiver(res.data.data);
+  const getCaregiverInfo = useCallback(async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8070/api/v1/caregiver/getCaregiverInfo/${user?._id}`,
+        // { userId: user?._id },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
-      } catch (error) {
-        console.log(error);
+      );
+      if (res.data.success) {
+        setCaregiver(res.data.data);
       }
-    };
-    getNurseInfo();
+    } catch (error) {
+      console.log(error);
+    }
   }, [user?._id]);
 
   useEffect(() => {
-    const getReviews = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:8070/api/v1/caregiver/getReviews/${user?._id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        if (res.data.success) {
-          setCaregiverReviews(res.data.data);
+    getCaregiverInfo();
+  }, [getCaregiverInfo]);
+
+  const getReviews = useCallback(async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8070/api/v1/caregiver/getReviews/${user?._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
-      } catch (error) {
-        console.log(error);
+      );
+      if (res.data.success) {
+        setCaregiverReviews(res.data.data);
       }
-    };
-    getReviews();
+    } catch (error) {
+      console.log(error);
+    }
   }, [user?._id]);
+
+  useEffect(() => {
+    getReviews();
+  }, [getReviews]);
 
   // const defaultOptions = {
   //   loop: true,
@@ -96,7 +105,7 @@ const Profile = () => {
   };
   return (
     <>
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-4 relative">
         {caregiver?.isBlocked && (
           <div className="py-5 px-8 rounded-lg bg-[#FCE8E6]">
             <div className="h-full w-ful flex items-start gap-10">
@@ -237,18 +246,24 @@ const Profile = () => {
               />
             )}
 
+            <div className="absolute top-12 right-12">
+              {caregiver?.description && (
+                <Button
+                  onClick={handleEditClick}
+                  className="hover:ring-1 hover:ring-gray-200 bg-slate-300 rounded-lg hover:bg-slate-200 transition-all duration-300  px-2 flex items-center gap-1 font-semibold text-sm text-black "
+                >
+                  <FaRegEdit className="text-base cursor-pointer" />
+                  <span className="">Edit profile</span>
+                </Button>
+              )}
+            </div>
+
             <div className="">
               <Typography variant="h4" className="mb-2 font-bold">
                 {caregiver ? (
-                  <span className="flex items-center gap-4">
+                  <span className="">
                     {caregiver.name.charAt(0).toUpperCase()}
                     {caregiver.name.slice(1, caregiver.name.length)}
-                    {caregiver?.description && (
-                      <FaRegEdit
-                        className="text-base cursor-pointer"
-                        onClick={handleEditClick}
-                      />
-                    )}
                   </span>
                 ) : (
                   <Skeleton width={200} animation="wave" />

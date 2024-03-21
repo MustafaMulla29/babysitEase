@@ -20,6 +20,7 @@ import moment from "moment";
 import { useParams } from "react-router-dom";
 import { hideLoading, showLoading } from "../../redux/features/alertSlice";
 import { openAlert } from "../../redux/features/messageSlice";
+import { PropTypes } from "prop-types";
 
 const ReviewDialog = ({ open, onClose }) => {
   const [rating, setRating] = useState(0);
@@ -154,15 +155,25 @@ const ReviewDialog = ({ open, onClose }) => {
 
       {/* Dialog Actions */}
       <DialogActions>
-        <Button onClick={handleClose} color="secondary">
+        <Button onClick={handleClose} color="error" variant="outlined">
           Cancel
         </Button>
-        <Button onClick={handleSubmit} color="primary">
+        <Button
+          onClick={handleSubmit}
+          color="primary"
+          variant="contained"
+          className="bg-[#1976d2] hover:bg-[#1565c0]"
+        >
           Submit
         </Button>
       </DialogActions>
     </Dialog>
   );
+};
+
+ReviewDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
 };
 
 export default ReviewDialog;

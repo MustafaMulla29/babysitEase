@@ -39,26 +39,6 @@ const AddFavourite = ({ clientId, isFavourited, caregiverId }) => {
     }
   };
 
-  //   useEffect(() => {
-  //     const checkFavourited = async () => {
-  //       try {
-  //         const res = await axios.get(
-  //           `http://localhost:8070/api/v1/user/checkFavourited/${user?._id}/${caregiverId}`,
-  //           {
-  //             headers: {
-  //               Authorization: `Bearer ${localStorage.getItem("token")}`,
-  //             },
-  //           }
-  //         );
-  //         if (res.data.success) {
-  //           setIsFavourited(res.data.success);
-  //         }
-  //       } catch (error) {
-  //         console.log(error);
-  //       }
-  //     };
-  //     checkFavourited();
-  //   }, [user?._id, caregiverId]);
   return (
     <>
       <div className="absolute top-2 right-2 ">

@@ -89,10 +89,11 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
     const { name, value } = e.target;
     const validationErrors = validateInput(name, value);
 
-    setValidationError((prevError) => ({
-      ...prevError,
-      ...validationErrors,
-    }));
+    if (name === "name")
+      setValidationError((prevError) => ({
+        ...prevError,
+        ...validationErrors,
+      }));
 
     // Special handling for preferredCities to convert the string to an array
     if (name === "preferredCities") {

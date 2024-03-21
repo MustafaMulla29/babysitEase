@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import axios from "axios";
 import { useParams } from "react-router-dom";
@@ -23,74 +23,77 @@ import {
   MdOutlineCurrencyRupee,
   MdOutlineWorkspacePremium,
 } from "react-icons/md";
+import React from "react";
 
-const CaregiverDetails = () => {
+const CaregiverDetails = React.memo(() => {
   const [caregiver, setCaregiver] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [caregiverReviews, setCaregiverReviews] = useState([]);
 
   const [modalOpen, setModalOpen] = useState(false);
 
-  const handleOpenModal = () => {
-    setModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-  };
-
   const params = useParams();
   const { user } = useSelector((state) => state.user);
 
-  useEffect(() => {
-    const getUserInfo = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:8070/api/v1/user/getCaregiverDetails/${params.userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        if (res.data.success) {
-          setCaregiver(res.data.data);
+  const getUserInfo = useCallback(async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8070/api/v1/user/getCaregiverDetails/${params.userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
-      } catch (error) {
-        console.log(error);
+      );
+      if (res.data.success) {
+        setCaregiver(res.data.data);
       }
-    };
-    getUserInfo();
+    } catch (error) {
+      console.log(error);
+    }
   }, [params.userId]);
 
-  const handleOpenDialog = () => {
+  const getReviews = useCallback(async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8070/api/v1/caregiver/getReviews/${params.userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (res.data.success) {
+        setCaregiverReviews(res.data.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }, [params.userId]);
+
+  const handleOpenDialog = useCallback(() => {
     setDialogOpen(true);
-  };
+  }, []);
 
-  const handleCloseDialog = () => {
+  const handleCloseDialog = useCallback(() => {
     setDialogOpen(false);
-  };
+  }, []);
+
+  const handleOpenModal = useCallback(() => {
+    setModalOpen(true);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setModalOpen(false);
+  }, []);
 
   useEffect(() => {
-    const getReviews = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:8070/api/v1/caregiver/getReviews/${params.userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        if (res.data.success) {
-          setCaregiverReviews(res.data.data);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
+    getUserInfo();
+  }, [getUserInfo]);
+
+  useEffect(() => {
     getReviews();
-  }, [params.userId]);
+  }, [getReviews]);
   return (
     <Layout>
       <div className="container mx-auto p-4">
@@ -112,14 +115,22 @@ const CaregiverDetails = () => {
               />
             )}
             <div className="">
-              <Typography variant="h4" className="mb-2 font-bold">
-                {caregiver ? (
-                  caregiver.name?.charAt(0).toUpperCase() +
-                  caregiver.name.slice(1, caregiver.name.length)
-                ) : (
-                  <Skeleton width={200} animation="wave" />
-                )}
-              </Typography>
+              {caregiver ? (
+                <Typography variant="div" className="mb-2 flex items-end gap-2">
+                  <Typography variant="h4" className="font-bold">
+                    {caregiver.name?.charAt(0).toUpperCase() +
+                      caregiver.name.slice(1, caregiver.name.length)}
+                  </Typography>
+                  <Typography
+                    variant="span"
+                    className="text-[13px] text-gray-600 pb-2"
+                  >
+                    {caregiver.gender === "male" ? "(He)" : "(She)"}
+                  </Typography>
+                </Typography>
+              ) : (
+                <Skeleton width={200} animation="wave" />
+              )}
               <Typography variant="span" className="mb-2">
                 {caregiver ? (
                   <span className="flex items-center gap-1 text-gray-600">
@@ -131,7 +142,7 @@ const CaregiverDetails = () => {
                 )}
               </Typography>
               {caregiver ? (
-                <div className="flex items-start gap-3 mb-2">
+                <div className="flex items-start gap-3 mb-2 mt-1">
                   <div
                     className={`${
                       caregiver?.availability === "Available"
@@ -154,18 +165,24 @@ const CaregiverDetails = () => {
                       className="rounded-3xl text-sm"
                       onClick={handleOpenModal}
                     >
-                      Book Me
+                      Book now
                     </Button>
                     // </a>
                   )}
                 </div>
               ) : (
-                <Skeleton
-                  animation="wave"
-                  width={70}
-                  height={50}
-                  className="rounded-3xl"
-                />
+                <>
+                  <Chip
+                    label={<Skeleton animation="wave" width={40} />}
+                    className="my-1 mr-2"
+                  />
+
+                  <Chip
+                    label={
+                      <Skeleton animation="wave" width={40} className="my-1" />
+                    }
+                  />
+                </>
               )}
               <Typography>
                 {caregiver ? (
@@ -198,205 +215,6 @@ const CaregiverDetails = () => {
             </Typography>
           </div>
           <hr className="mb-8" />
-
-          {/* Other Details Section */}
-          {/* <div className="mb-8">
-            <Typography variant="h6">
-              {caregiver ? (
-                "Other details"
-              ) : (
-                <Skeleton animation="wave" width={100} />
-              )}
-            </Typography>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <Typography>
-                {caregiver ? (
-                  `Lower age limit of client: ${caregiver?.ageRange?.lowerLimit}`
-                ) : (
-                  <Skeleton animation="wave" width={150} />
-                )}
-              </Typography>
-              <Typography>
-                {caregiver ? (
-                  `Upper age limit of client: ${caregiver?.ageRange?.upperLimit}`
-                ) : (
-                  <Skeleton animation="wave" width={150} />
-                )}
-              </Typography>
-              <Typography>
-                {caregiver ? (
-                  `Fees per day: ${caregiver?.feesPerDay}/rs`
-                ) : (
-                  <Skeleton animation="wave" width={100} />
-                )}
-              </Typography>
-              <Typography>
-                {caregiver ? (
-                  `Gender: ${caregiver?.gender}`
-                ) : (
-                  <Skeleton animation="wave" width={100} />
-                )}
-              </Typography>
-              <Typography>
-                {caregiver ? (
-                  `Experience: ${caregiver?.yearsExperience} years`
-                ) : (
-                  <Skeleton animation="wave" width={100} />
-                )}
-              </Typography>
-            </div>
-          </div>
-          <hr className="mb-8" /> */}
-
-          {/* Preferred Cities Section */}
-          {/* <div className="mb-8">
-            <Typography variant="h6">
-              {caregiver ? (
-                "Preferred cities"
-              ) : (
-                <Skeleton animation="wave" width={150} />
-              )}
-            </Typography>
-            <div className="flex flex-wrap gap-2">
-              {caregiver ? (
-                caregiver?.preferredCities?.map((city, index) => (
-                  <Chip
-                    key={index}
-                    label={city}
-                    className="text-base bg-[#f2f7f2]"
-                  />
-                ))
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  <Skeleton
-                    animation="wave"
-                    width={70}
-                    height={40}
-                    className="rounded-2xl"
-                  />
-                  <Skeleton
-                    animation="wave"
-                    width={70}
-                    height={40}
-                    className="rounded-2xl"
-                  />
-                  <Skeleton
-                    animation="wave"
-                    width={70}
-                    height={40}
-                    className="rounded-2xl"
-                  />
-                  <Skeleton
-                    animation="wave"
-                    width={70}
-                    height={40}
-                    className="rounded-2xl"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-          <hr className="mb-8" /> */}
-
-          {/* Qualification Section */}
-          {/* <div className="mb-8">
-            <Typography variant="h6">
-              {caregiver ? (
-                "Qualification"
-              ) : (
-                <Skeleton animation="wave" width={150} />
-              )}
-            </Typography>
-            <div className="flex flex-wrap gap-2">
-              {caregiver ? (
-                caregiver?.qualification?.map((qual, index) => (
-                  <Chip
-                    key={index}
-                    label={qual}
-                    className="text-base bg-[#f2f7f2]"
-                  />
-                ))
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  <Skeleton
-                    animation="wave"
-                    width={70}
-                    height={40}
-                    className="rounded-2xl"
-                  />
-                  <Skeleton
-                    animation="wave"
-                    width={70}
-                    height={40}
-                    className="rounded-2xl"
-                  />
-                  <Skeleton
-                    animation="wave"
-                    width={70}
-                    height={40}
-                    className="rounded-2xl"
-                  />
-                  <Skeleton
-                    animation="wave"
-                    width={70}
-                    height={40}
-                    className="rounded-2xl"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-          <hr className="mb-8" /> */}
-
-          {/* Specialisation Section */}
-          {/* <div className="mb-8">
-            <Typography variant="h6">
-              {caregiver ? (
-                "Specialisation"
-              ) : (
-                <Skeleton animation="wave" width={150} />
-              )}
-            </Typography>
-            <div className="flex flex-wrap gap-2">
-              {caregiver ? (
-                caregiver?.specialisation?.map((spec, index) => (
-                  <Chip
-                    key={index}
-                    label={spec}
-                    className="text-base bg-[#f2f7f2]"
-                  />
-                ))
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  <Skeleton
-                    animation="wave"
-                    width={70}
-                    height={40}
-                    className="rounded-2xl"
-                  />
-                  <Skeleton
-                    animation="wave"
-                    width={70}
-                    height={40}
-                    className="rounded-2xl"
-                  />
-                  <Skeleton
-                    animation="wave"
-                    width={70}
-                    height={40}
-                    className="rounded-2xl"
-                  />
-                  <Skeleton
-                    animation="wave"
-                    width={70}
-                    height={40}
-                    className="rounded-2xl"
-                  />
-                </div>
-              )}
-            </div>
-          </div> */}
-          {/* <hr className="mb-8" /> */}
 
           <div className="mb-8">
             {/* Client Details */}
@@ -439,7 +257,7 @@ const CaregiverDetails = () => {
             {/* Fees */}
             <div className="mb-8">
               <Typography variant="h6" className="mb-2 font-semibold">
-                Fees
+                {caregiver ? "Fees" : <Skeleton animation="wave" width={150} />}
               </Typography>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Typography variant="span">
@@ -461,7 +279,11 @@ const CaregiverDetails = () => {
             {/* Experience */}
             <div className="mt-8">
               <Typography variant="h6" className="mb-2 font-semibold">
-                Experience
+                {caregiver ? (
+                  "Experience"
+                ) : (
+                  <Skeleton animation="wave" width={150} />
+                )}
               </Typography>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Typography variant="span">
@@ -707,11 +529,10 @@ const CaregiverDetails = () => {
             </Typography>
             {user?.role === "client" && (
               <Button
-                variant="outlined"
-                color="primary"
                 onClick={handleOpenDialog}
+                className="hover:ring-1 hover:ring-gray-200 bg-slate-300 rounded-lg hover:bg-slate-200 transition-all duration-300 px-2 flex items-center gap-2 text-black"
               >
-                <FaPen className="mr-2" /> Write a review
+                <FaPen className="" /> Post a review
               </Button>
             )}
           </div>
@@ -743,6 +564,8 @@ const CaregiverDetails = () => {
       )}
     </Layout>
   );
-};
+});
+
+CaregiverDetails.displayName = "CaregiverDetails";
 
 export default CaregiverDetails;

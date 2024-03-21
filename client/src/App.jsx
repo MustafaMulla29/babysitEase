@@ -213,7 +213,6 @@ function App() {
     dispatch,
     subscriptionStatus,
   ]);
-
   // const subscriptionStatus = localStorage.getItem("subscriptionStatus");
   return (
     <>
@@ -246,7 +245,7 @@ function App() {
                       ) : (user?.role === "babysitter" ||
                           user?.role === "nurse") &&
                         user?.isCaregiver &&
-                        !isSubscribed ? (
+                        subscriptionStatus === "Expired" ? (
                         <Navigate to="/subscribe" replace={true} />
                       ) : (
                         <Homepage />

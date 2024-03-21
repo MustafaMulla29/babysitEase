@@ -100,9 +100,15 @@ const CaregiverCard = React.memo(({ caregiver, index }) => {
           >
             <Rating name="read-only" value={rating} readOnly precision={0.5} />
           </Typography>
-          <Typography variant="p" color="text.secondary" className="mb-2">
-            Age range - &#40; {ageRange.lowerLimit} - {ageRange.upperLimit}{" "}
-            years&#41;
+          <Typography
+            variant="p"
+            color="text.secondary"
+            className="mb-2 text-sm"
+          >
+            <p>
+              Age range - &#40; {ageRange.lowerLimit} - {ageRange.upperLimit}{" "}
+              years&#41;
+            </p>
           </Typography>
         </CardContent>
       </Card>

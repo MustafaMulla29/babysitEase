@@ -6,19 +6,20 @@ html {
   scroll-behavior: smooth;
 }
 
-/* ::-webkit-scrollbar {
+::-webkit-scrollbar {
   width: 0.5rem;
   height: 0.3rem;
   scroll-behavior: smooth;
 }
 
 ::-webkit-scrollbar-track {
-  background-color: #272629;
+  background-color: rgb(138, 136, 136);
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #5d6061;
-} */
+  background-color: rgba(210, 242, 247, 0.8);
+  border-radius: 10px;
+}
 
 /* h1,
 h2,
@@ -27,4 +28,5 @@ h4,
 h5,
 h6 {
   font-family: "Raleway", sans-serif;
-} */
+}
+*/

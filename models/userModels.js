@@ -119,6 +119,10 @@ const userSchema = mongoose.Schema({
     seenNotification: {
         type: Array,
         default: []
+    },
+    otpSecret: {
+        type: String,
+        default: ""
     }
 }, { timestamps: true })
 

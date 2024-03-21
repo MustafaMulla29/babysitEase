@@ -1600,4 +1600,6 @@ const getAdditionalAddressesController = async (req, res) => {
 //     }
 // }
 
+
+
 module.exports = { loginController, registerController, authController, applyCaregiverController, getNotificationsController, deleteNotificationsController, addDependentController, getAllCaregiversController, getCaregiverDetails, bookCaregiverController, getBookingsController, addReviewController, cancelBookingController, searchCaregiversController, deleteDependentController, addFavouritesController, getFavouritesController, updateUserController, getAdditionalAddressesController, getDependentNamesController }

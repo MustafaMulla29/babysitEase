@@ -154,7 +154,7 @@ const BookingDetails = ({ booking }) => {
 
         <Typography
           variant="span"
-          className={`flex items-center gap-1 absolute top-0 right-0 ${
+          className={`flex items-center gap-1 absolute top-0 right-0 bg-opacity-70 ${
             booking.status === "Pending"
               ? "bg-orange-400"
               : booking.status === "Approved"

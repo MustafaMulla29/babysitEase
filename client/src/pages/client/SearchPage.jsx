@@ -31,14 +31,6 @@ const SearchPage = () => {
   const [searchBy, setSearchBy] = useState(searchParams.get("searchby"));
 
   const dispatch = useDispatch();
-  useEffect(() => {
-    onSearch();
-  }, []);
-
-  useEffect(() => {
-    onSearch();
-  }, [tab]);
-
   const onSearch = async () => {
     try {
       if (searchString.length === 0 || searchBy === "-1") {
@@ -79,6 +71,14 @@ const SearchPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    onSearch();
+  }, []);
+
+  useEffect(() => {
+    onSearch();
+  }, [tab]);
 
   return (
     <Layout>
@@ -140,34 +140,6 @@ const SearchPage = () => {
         {loading ? (
           // <div className="flex gap-0 flex-col items-start space-y-1">
           <div>
-            {/* <CaregiverCardSkeleton />
-            <CaregiverCardSkeleton />
-            <CaregiverCardSkeleton />
-            <CaregiverCardSkeleton /> */}
-            {/* <Skeleton
-              animation="wave"
-              variant="text"
-              sx={{ fontSize: "6rem", margin: "0" }}
-              className="w-full"
-            />
-            <Skeleton
-              animation="wave"
-              variant="text"
-              sx={{ fontSize: "6rem", margin: "0" }}
-              className="w-full"
-            />
-            <Skeleton
-              animation="wave"
-              variant="text"
-              sx={{ fontSize: "6rem", margin: "0" }}
-              className="w-full "
-            />
-            <Skeleton
-              animation="wave"
-              variant="text"
-              sx={{ fontSize: "6rem", margin: "0" }}
-              className="w-full"
-            /> */}
             <Loading />
           </div>
         ) : searchResults.length > 0 ? (

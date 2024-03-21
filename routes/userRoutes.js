@@ -62,4 +62,5 @@ router.get("/getAdditionalAddresses/:clientId", authMiddleware, getAdditionalAdd
 // router.get("/checkFavourited/:clientId/:caregiverId", authMiddleware, checkFavouritedController)
 
 
+
 module.exports = router
