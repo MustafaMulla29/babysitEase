@@ -37,28 +37,79 @@ const DependentInputModal = ({ open, onClose, dependent }) => {
   const [allergyInput, setAllergyInput] = useState("");
   const [medicalInput, setMedicalInput] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
+  const [additionalInfo, setAdditionalInfo] = useState(
+    dependent?.additionalInfo ? dependent.additionalInfo : ""
+  );
 
   const { user } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
+  // const handleKeyEnter = (e) => {
+  //   if (e.target.name === "allergies" && e.key === "Enter") {
+  //     e.preventDefault(); // Prevent the default behavior of the Enter key in a text area or input
+
+  //     // const updatedAllergies = [allergyInput];
+  //     setDependentData((prevData) => ({
+  //       ...prevData,
+  //       allergies: [...prevData.allergies, allergyInput],
+  //     }));
+  //     setAllergyInput("");
+  //   }
+  //   if (e.target.name === "medicalConditions" && e.key === "Enter") {
+  //     e.preventDefault();
+  //     setDependentData((prevData) => ({
+  //       ...prevData,
+  //       medicalConditions: [...prevData.medicalConditions, medicalInput],
+  //     }));
+  //     setMedicalInput("");
+  //   }
+  // };
+
   const handleKeyEnter = (e) => {
     if (e.target.name === "allergies" && e.key === "Enter") {
-      e.preventDefault(); // Prevent the default behavior of the Enter key in a text area or input
+      e.preventDefault();
 
-      // const updatedAllergies = [allergyInput];
-      setDependentData((prevData) => ({
-        ...prevData,
-        allergies: [...prevData.allergies, allergyInput],
-      }));
-      setAllergyInput("");
+      const newAllergy = allergyInput.trim(); // Trim any leading or trailing spaces
+
+      if (newAllergy) {
+        if (!dependentData.allergies.includes(newAllergy)) {
+          setDependentData((prevData) => ({
+            ...prevData,
+            allergies: [...prevData.allergies, newAllergy],
+          }));
+          setAllergyInput("");
+        } else {
+          setValidationErrors((prevErrors) => ({
+            ...prevErrors,
+            allergies: "Value already exists",
+          }));
+        }
+        // setAllergyInput("");
+      }
     }
     if (e.target.name === "medicalConditions" && e.key === "Enter") {
       e.preventDefault();
-      setDependentData((prevData) => ({
-        ...prevData,
-        medicalConditions: [...prevData.medicalConditions, medicalInput],
-      }));
-      setMedicalInput("");
+
+      const newMedicalCondition = medicalInput.trim();
+
+      if (newMedicalCondition) {
+        if (!dependentData.medicalConditions.includes(newMedicalCondition)) {
+          setDependentData((prevData) => ({
+            ...prevData,
+            medicalConditions: [
+              ...prevData.medicalConditions,
+              newMedicalCondition,
+            ],
+          }));
+          setMedicalInput("");
+        } else {
+          setValidationErrors((prevErrors) => ({
+            ...prevErrors,
+            medicalConditions: "Value already exists",
+          }));
+        }
+        // setMedicalInput("");
+      }
     }
   };
 
@@ -113,16 +164,11 @@ const DependentInputModal = ({ open, onClose, dependent }) => {
     // Validate based on the field name
     switch (name) {
       case "name":
-        if (value.length === 0) {
-          setValidationErrors((prevErrors) => ({
-            ...prevErrors,
-            [name]: "",
-          }));
-        } else if (!isValidInput(nameRegex, value)) {
-          setValidationErrors((prevErrors) => ({
-            ...prevErrors,
-            [name]: "Name can only contain letters and spaces.",
-          }));
+        if (!isValidInput(nameRegex, value)) {
+          // setValidationErrors((prevErrors) => ({
+          //   ...prevErrors,
+          //   [name]: "Name can only contain letters and spaces.",
+          // }));
           return;
         } else {
           setValidationErrors((prevErrors) => ({
@@ -139,10 +185,19 @@ const DependentInputModal = ({ open, onClose, dependent }) => {
             [name]: "",
           }));
         } else if (!isValidInput(ageRegex, value)) {
-          setValidationErrors((prevErrors) => ({
-            ...prevErrors,
-            [name]: "Please enter a valid age.",
-          }));
+          // setValidationErrors((prevErrors) => ({
+          //   ...prevErrors,
+          //   [name]: "Please enter a valid age.",
+          // }));
+          return;
+        } else if (
+          (dependentData.type === "Child" && (value < 0 || value > 12)) ||
+          (dependentData.type === "Parent" && (value < 60 || value > 100))
+        ) {
+          // setValidationErrors((prevErrors) => ({
+          //   ...prevErrors,
+          //   age: "Please enter a valid age.",
+          // }));
           return;
         } else {
           setValidationErrors((prevErrors) => ({
@@ -160,9 +215,23 @@ const DependentInputModal = ({ open, onClose, dependent }) => {
             [name]: "",
           }));
         } else if (!isValidInput(allergyMedicalRegex, value)) {
+          // setValidationErrors((prevErrors) => ({
+          //   ...prevErrors,
+          //   [name]: "Please enter valid data.",
+          // }));
+          return;
+        } else {
           setValidationErrors((prevErrors) => ({
             ...prevErrors,
-            [name]: "Please enter valid data.",
+            [name]: "",
+          }));
+        }
+        break;
+      case "additionalInfo":
+        if (additionalInfo?.length > 250) {
+          setValidationErrors((prevErrors) => ({
+            ...prevErrors,
+            [name]: "Maximum length, 250 characters passed",
           }));
           return;
         } else {
@@ -183,6 +252,8 @@ const DependentInputModal = ({ open, onClose, dependent }) => {
       setAllergyInput(value);
     } else if (name === "medicalConditions") {
       setMedicalInput(value);
+    } else if (name === "additionalInfo") {
+      setAdditionalInfo(value);
     } else {
       setDependentData((prevData) => ({
         ...prevData,
@@ -204,7 +275,35 @@ const DependentInputModal = ({ open, onClose, dependent }) => {
     }
 
     // Additional validation for specific fields
-    if (dependentData.age < 0 || dependentData.age > 100) {
+    // if (
+    //   (dependentData.type === "Child" &&
+    //     (dependentData.age < 0 || dependentData.age > 12)) ||
+    //   (dependentData.type === "Parent" &&
+    //     (dependentData.age < 60 || dependentData.age > 100))
+    // ) {
+    //   setValidationErrors((prevErrors) => ({
+    //     ...prevErrors,
+    //     age: "Please enter a valid age.",
+    //   }));
+    //   return;
+    // }
+    // if (Object.keys(validationErrors).length > 0) {
+    //   return;
+    // }
+
+    if (allergyInput.trim()) {
+      setValidationErrors((prevErrors) => ({
+        ...prevErrors,
+        allergies: "Press enter to add",
+      }));
+      return;
+    }
+
+    if (medicalInput) {
+      setValidationErrors((prevErrors) => ({
+        ...prevErrors,
+        medicalConditions: "Press enter to add",
+      }));
       return;
     }
 
@@ -220,6 +319,7 @@ const DependentInputModal = ({ open, onClose, dependent }) => {
         _id: user?._id,
         edit: dependent ? true : false,
         dependentId: dependent?._id ? dependent._id : "",
+        additionalInfo: additionalInfo,
       };
 
       const res = await axios.post(
@@ -317,30 +417,32 @@ const DependentInputModal = ({ open, onClose, dependent }) => {
             </FormControl>
           </div>
 
-          <TextField
-            name="name"
-            label="Name"
-            value={dependentData.name}
-            onChange={handleInputChange}
-            fullWidth
-            required
-            helperText={validationErrors.name || " "}
-            error={Boolean(validationErrors.name)}
-            variant="filled"
-          />
+          <div className="flex items-center gap-4">
+            <TextField
+              name="name"
+              label="Name"
+              value={dependentData.name}
+              onChange={handleInputChange}
+              fullWidth
+              required
+              helperText={validationErrors.name || " "}
+              error={Boolean(validationErrors.name)}
+              variant="filled"
+            />
 
-          <TextField
-            name="age"
-            label="Age"
-            value={dependentData.age}
-            onChange={handleInputChange}
-            type="number"
-            required
-            helperText={validationErrors.age || " "}
-            error={Boolean(validationErrors.age)}
-            fullWidth
-            variant="filled"
-          />
+            <TextField
+              name="age"
+              label="Age"
+              value={dependentData.age}
+              onChange={handleInputChange}
+              type="text"
+              required
+              helperText={validationErrors.age || " "}
+              error={Boolean(validationErrors.age)}
+              fullWidth
+              variant="filled"
+            />
+          </div>
 
           <TextField
             label="Allergies"
@@ -390,6 +492,21 @@ const DependentInputModal = ({ open, onClose, dependent }) => {
                 );
               })}
           </div>
+          <TextField
+            id="outlined-textarea"
+            label="Additional Info"
+            variant="filled"
+            multiline
+            rows={4}
+            className={` w-full bg-[#f3f4f6]  text-sm rounded-md transition-[outline] duration-200 outline-blue-600 border`}
+            // error={descriptionError ? true : false}
+            type="text"
+            name="additionalInfo"
+            placeholder="Additional information about dependent..."
+            autoComplete="off"
+            value={additionalInfo}
+            onChange={handleInputChange}
+          />
           <Button
             type="submit"
             variant="contained"
@@ -415,6 +532,7 @@ DependentInputModal.propTypes = {
     allergies: PropTypes.arrayOf(PropTypes.string),
     medicalConditions: PropTypes.arrayOf(PropTypes.string),
     _id: PropTypes.string,
+    additionalInfo: PropTypes.string,
   }),
 };
 

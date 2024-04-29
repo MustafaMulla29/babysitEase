@@ -36,6 +36,11 @@ const userDependentSchema = mongoose.Schema({
         type: [String],
         default: [],
     },
+    additionalInfo: {
+        type: String,
+        trim: true,
+        lowercase: true
+    }
 });
 
 const userSchema = mongoose.Schema({
@@ -120,10 +125,7 @@ const userSchema = mongoose.Schema({
         type: Array,
         default: []
     },
-    otpSecret: {
-        type: String,
-        default: ""
-    }
+
 }, { timestamps: true })
 
 const userModel = mongoose.model('users', userSchema)

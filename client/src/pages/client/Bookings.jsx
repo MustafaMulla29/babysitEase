@@ -41,23 +41,6 @@ const Bookings = () => {
     getBookings();
   }, [getBookings]);
 
-  // useEffect(() => {
-  //   const bookingStatus = async () => {
-  //     try {
-  //       await axios.post(
-  //         "http://localhost:8070/api/v1/caregiver/bookingStatus",
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${localStorage.getItem("token")}`,
-  //           },
-  //         }
-  //       );
-  //     } catch (error) {
-  //       return;
-  //     }
-  //   };
-  //   bookingStatus();
-  // }, []);
   return (
     <Layout>
       <h1 className="text-3xl font-bold mb-4">Bookings page</h1>

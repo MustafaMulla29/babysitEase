@@ -149,6 +149,7 @@ const SearchPage = () => {
                 key={caregiver._id}
                 caregiver={caregiver}
                 index={index}
+                searchBy={searchBy}
               />
             ))}
           </div>

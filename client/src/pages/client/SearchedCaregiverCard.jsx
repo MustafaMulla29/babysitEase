@@ -1,4 +1,4 @@
-import { Avatar, Rating, Typography } from "@mui/material";
+import { Avatar, Chip, Rating, Typography } from "@mui/material";
 import { IoIosArrowUp } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import React from "react";
@@ -7,12 +7,14 @@ import { CiLocationOn } from "react-icons/ci";
 import { FaIndianRupeeSign } from "react-icons/fa6";
 import { PropTypes } from "prop-types";
 
-const SearchedCaregiverCard = React.memo(({ caregiver }) => {
+const SearchedCaregiverCard = React.memo(({ caregiver, searchBy }) => {
   const {
     user: { name, city, profilePicture },
     rating,
     feesPerDay,
     userId,
+    preferredCities,
+    specialisation,
   } = caregiver;
   const navigate = useNavigate();
 
@@ -30,7 +32,7 @@ const SearchedCaregiverCard = React.memo(({ caregiver }) => {
             sx={{ width: 70, height: 70 }}
           />
           <div className="ml-2">
-            <div className="space-y-[1px]">
+            <div className="space-y-[6px]">
               <Typography
                 variant="h6"
                 component="div"
@@ -39,7 +41,7 @@ const SearchedCaregiverCard = React.memo(({ caregiver }) => {
                 {name?.charAt(0).toUpperCase()}
                 {name?.slice(1, name.length)}
               </Typography>
-              <Typography
+              {/* <Typography
                 variant="span"
                 className=" flex items-center gap-1 text-gray-600"
               >
@@ -47,7 +49,29 @@ const SearchedCaregiverCard = React.memo(({ caregiver }) => {
                   <CiLocationOn />
                 </span>{" "}
                 <span>{city}</span>
-              </Typography>
+              </Typography> */}
+              <div className="flex items-center gap-2 ">
+                {searchBy === "preferredCities" &&
+                  preferredCities?.map((city, index) => {
+                    return (
+                      <Chip
+                        key={index}
+                        label={city}
+                        className="text-sm bg-slate-200 rounded-lg"
+                      />
+                    );
+                  })}
+                {searchBy === "specialisation" &&
+                  specialisation?.map((city, index) => {
+                    return (
+                      <Chip
+                        key={index}
+                        label={city}
+                        className="text-sm bg-slate-200 rounded-lg"
+                      />
+                    );
+                  })}
+              </div>
             </div>
             <div className="flex items-center gap-1 mt-1">
               {rating !== 0 && (
@@ -100,7 +124,10 @@ SearchedCaregiverCard.propTypes = {
     userId: PropTypes.string.isRequired,
     feesPerDay: PropTypes.number.isRequired,
     rating: PropTypes.number.isRequired,
+    preferredCities: PropTypes.array,
+    specialisation: PropTypes.array,
   }).isRequired,
+  searchBy: PropTypes.string.isRequired,
 };
 
 export default SearchedCaregiverCard;

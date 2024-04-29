@@ -579,7 +579,7 @@ const deleteNotificationsController = async (req, res) => {
 
 const addDependentController = async (req, res) => {
     try {
-        const { _id, type, gender, name, age, allergies, medicalConditions, edit, dependentId } = req.body;
+        const { _id, type, gender, name, age, allergies, medicalConditions, edit, dependentId, additionalInfo } = req.body;
 
         // Find the user by _id
         const existingUser = await userModel.findOne({ _id });
@@ -606,6 +606,7 @@ const addDependentController = async (req, res) => {
                         "dependents.$.age": age,
                         "dependents.$.allergies": allergies,
                         "dependents.$.medicalConditions": medicalConditions,
+                        "dependents.$.additionalInfo": additionalInfo
                     },
                 },
                 { new: true, runValidators: true }
@@ -617,7 +618,7 @@ const addDependentController = async (req, res) => {
                 {
                     $push: {
                         dependents: {
-                            type, gender, name, age, allergies, medicalConditions
+                            type, gender, name, age, allergies, medicalConditions, additionalInfo
                         },
                     },
                 },

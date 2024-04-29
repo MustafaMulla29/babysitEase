@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import {
   Avatar,
+  Button,
   Chip,
   IconButton,
   Skeleton,
@@ -104,7 +105,8 @@ const Profile = () => {
           </div>
         </div>
       )}
-      <div className="container mx-auto p-4 ">
+
+      <div className="container mx-auto p-4 relative">
         <div className="bg-white p-6 rounded-md shadow-md">
           <div className="flex items-center gap-4 mb-8">
             {loading ? (
@@ -141,20 +143,18 @@ const Profile = () => {
                 ) : (
                   client?.name
                 )}
-                <div className="items-start ml-3">
-                  {loading ? (
-                    <Skeleton
-                      animation="wave"
-                      variant="circular"
-                      width={20}
-                      height={20}
-                    />
-                  ) : (
-                    <FaRegEdit
+                {/* <FaRegEdit
                       className="text-base cursor-pointer"
                       onClick={handleOpenProfileModal}
-                    />
-                  )}
+                    /> */}
+                <div className="absolute top-12 right-12">
+                  <Button
+                    onClick={handleOpenProfileModal}
+                    className="hover:ring-1 hover:ring-gray-200 bg-slate-300 rounded-lg hover:bg-slate-200 transition-all duration-300  px-2 flex items-center gap-1 font-semibold text-sm text-black "
+                  >
+                    <FaRegEdit className="text-base cursor-pointer" />
+                    <span className="">Edit profile</span>
+                  </Button>
                 </div>
               </Typography>
               <Typography variant="p">

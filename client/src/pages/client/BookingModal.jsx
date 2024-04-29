@@ -67,13 +67,13 @@ const BookingModal = ({ open, onClose, userBlocked, params, clientId }) => {
       return;
     }
 
-    if (
-      moment(date).date() === currentDate.date() &&
-      currentDate.hours() >= 9
-    ) {
-      setBookingError("You cannot book today! Select another date");
-      return;
-    }
+    // if (
+    //   moment(date).date() === currentDate.date() &&
+    //   currentDate.hours() >= 9
+    // ) {
+    //   setBookingError("You cannot book today! Select another date");
+    //   return;
+    // }
 
     setBookingDate(date);
     setBookingError("");

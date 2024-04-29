@@ -18,7 +18,7 @@ const DependentCard = ({ dependent, loading }) => {
   };
 
   return (
-    <Card className="max-w-md relative my-4 shadow-lg rounded-md">
+    <Card className="max-w-[20rem] relative my-4 shadow-lg rounded-md">
       <CardContent className="text-center mt-6">
         {loading ? (
           <Skeleton
@@ -79,6 +79,26 @@ const DependentCard = ({ dependent, loading }) => {
               </ul>
             </div>
           )}
+        <div className="mt-4 text-left">
+          <Typography
+            variant="span"
+            gutterBottom
+            className="text-blue-500  text-lg flex items-center"
+          >
+            Additional Info
+          </Typography>
+          <Typography
+            variant="p"
+            gutterBottom
+            className=" text-gray-600 text-sm "
+          >
+            {dependent?.additionalInfo.charAt(0).toUpperCase()}
+            {dependent?.additionalInfo.slice(
+              1,
+              dependent?.additionalInfo.length
+            )}
+          </Typography>
+        </div>
         <div
           className="absolute top-2 right-12 p-2 rounded-full hover:bg-slate-100 transition-all cursor-pointer"
           onClick={handleOpenModal}
@@ -105,6 +125,7 @@ DependentCard.propTypes = {
     allergies: PropTypes.arrayOf(PropTypes.string),
     medicalConditions: PropTypes.arrayOf(PropTypes.string),
     _id: PropTypes.string,
+    additionalInfo: PropTypes.string,
   }),
   loading: PropTypes.bool.isRequired,
 };
