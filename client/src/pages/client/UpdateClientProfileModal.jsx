@@ -35,12 +35,64 @@ const UpdateClientProfileModal = ({ open, onClose, client }) => {
     }
   }, [client]);
 
+  // const handleInputChange = (e) => {
+  //   const { value, name } = e.target;
+  //   const regex = /^[a-zA-Z]+(\s[a-zA-Z]+)*$/;
+  //   const addressRegex = /^[A-Za-z0-9\s]+$/;
+  //   if ((name === "name" || name === "city") && !regex.test(value)) {
+  //     return;
+  //   } else {
+  //     setProfileData((prevData) => ({
+  //       ...prevData,
+  //       [name]: value,
+  //     }));
+  //   }
+
+  //   if (name === "address" && !addressRegex.test(value)) {
+  //     return;
+  //   } else {
+  //     setProfileData((prevData) => ({
+  //       ...prevData,
+  //       [name]: value,
+  //     }));
+  //   }
+
+  //   if (name === "additionalAddresses" && !addressRegex.test(value)) {
+  //     return;
+  //   } else {
+  //     setAdditionalAddressesInput(value);
+  //   }
+  // };
   const handleInputChange = (e) => {
     const { value, name } = e.target;
-    setProfileData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    const regex = /^[a-zA-Z]+(\s[a-zA-Z]+)*$/;
+    const addressRegex = /^[A-Za-z0-9\s]+$/;
+
+    // Check for 'name' and 'city' fields
+    if (name === "name" || name === "city") {
+      if (value === "" || regex.test(value)) {
+        setProfileData((prevData) => ({
+          ...prevData,
+          [name]: value,
+        }));
+      }
+      return;
+    }
+
+    // Check for 'address' and 'additionalAddresses' fields
+    if (name === "address" || name === "additionalAddresses") {
+      if (value === "" || addressRegex.test(value)) {
+        if (name === "additionalAddresses") {
+          setAdditionalAddressesInput(value);
+        } else {
+          setProfileData((prevData) => ({
+            ...prevData,
+            [name]: value,
+          }));
+        }
+      }
+      return;
+    }
   };
 
   const handleFileChange = (event) => {
@@ -94,6 +146,7 @@ const UpdateClientProfileModal = ({ open, onClose, client }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       dispatch(showLoading());
       const formData = new FormData();
@@ -196,6 +249,7 @@ const UpdateClientProfileModal = ({ open, onClose, client }) => {
               value={profileData?.name}
               onChange={handleInputChange}
               placeholder="Enter your name"
+              required
             />
             <TextField
               label="Address"
@@ -214,6 +268,7 @@ const UpdateClientProfileModal = ({ open, onClose, client }) => {
               value={profileData?.city}
               onChange={handleInputChange}
               fullWidth
+              required
               className="mb-2"
               variant="filled"
               placeholder="Enter your city"
@@ -222,7 +277,7 @@ const UpdateClientProfileModal = ({ open, onClose, client }) => {
               label="Additional addresses (optional)"
               name="additionalAddresses"
               value={additionalAddressesInput}
-              onChange={(e) => setAdditionalAddressesInput(e.target.value)}
+              onChange={handleInputChange}
               onKeyDown={addElement}
               error={additionalAddressesError ? true : false}
               helperText={additionalAddressesError}

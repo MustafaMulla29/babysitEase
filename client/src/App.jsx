@@ -10,11 +10,7 @@ import { Slide, ToastContainer } from "react-toastify";
 import Subscription from "./pages/Subscription";
 import { StyledEngineProvider } from "@mui/material";
 import Notification from "./pages/Notification";
-import { useCallback, useEffect, useMemo } from "react";
-import {
-  resetSubscription,
-  setSubscribed,
-} from "./redux/features/subscriptionSlice";
+import { useEffect } from "react";
 import ApplyNurse from "./pages/ApplyNurse";
 import Users from "./pages/admin/Users";
 import Caregivers from "./pages/admin/Caregivers";
@@ -39,7 +35,7 @@ function App() {
 
   const { user } = useSelector((state) => state.user);
   const { open, severity, content } = useSelector((state) => state.message);
-  const { isSubscribed } = useSelector((state) => state.subscription);
+  // const { isSubscribed } = useSelector((state) => state.subscription);
   const user_id = user?._id;
 
   useEffect(() => {
@@ -61,108 +57,37 @@ function App() {
     bookingStatus();
   }, []);
 
-  // useEffect(() => {
-  //   const changeSubscriptionStatus = async () => {
-  //     try {
-  //       const res = await axios.get(
-  //         `http://localhost:8070/api/v1/caregiver/changeSubscriptionStatus/${user_id}`,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${localStorage.getItem("token")}`,
-  //           },
-  //         }
-  //       );
-  //       if (res.data.success) {
-  //         if (res.data.data.subscriptionStatus === "Expired") {
-  //           // dispatch(resetSubscription());
-  //           localStorage.setItem(
-  //             "subscriptionStatus",
-  //             res.data.data.subscriptionStatus
-  //           );
-  //         }
-  //       } else {
-  //         // dispatch(setSubscribed());
+  // const changeSubscriptionStatus = useCallback(async () => {
+  //   try {
+  //     const res = await axios.get(
+  //       `http://localhost:8070/api/v1/caregiver/changeSubscriptionStatus/${user_id}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //         },
+  //       }
+  //     );
+  //     if (res.data.success) {
+  //       if (res.data.data.subscriptionStatus === "Expired") {
+  //         // dispatch(resetSubscription());
   //         localStorage.setItem(
   //           "subscriptionStatus",
   //           res.data.data.subscriptionStatus
   //         );
   //       }
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   };
-
-  //   const checkSubscription = async () => {
-  //     try {
-  //       const token = localStorage.getItem("token");
-  //       const res = await axios.get(
-  //         `http://localhost:8070/api/v1/caregiver/checkSubscription/${user_id}`,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         }
+  //     } else {
+  //       // dispatch(setSubscribed());
+  //       localStorage.setItem(
+  //         "subscriptionStatus",
+  //         res.data.data.subscriptionStatus
   //       );
-  //       if (res.data.success) {
-  //         // dispatch(setSubscribed());
-  //         localStorage.setItem("subscriptionStatus", "Active");
-  //       } else {
-  //         // dispatch(resetSubscription());
-  //         localStorage.setItem("subscriptionStatus", "Expired");
-  //       }
-  //     } catch (error) {
-  //       if (!error.response.data.success) {
-  //         localStorage.setItem("subscriptionStatus", "Expired");
-  //       }
-  //       console.log(error);
   //     }
-  //   };
-
-  //   if (user?.role !== "client") {
-  //     // changeSubscriptionStatus();
-  //     checkSubscription();
+  //   } catch (error) {
+  //     console.log(error);
   //   }
+  // }, [user_id]);
 
-  //   if (localStorage.getItem("subscriptionStatus") === "Active") {
-  //     dispatch(setSubscribed());
-  //   }
-
-  //   if (localStorage.getItem("subscriptionStatus") === "Expired") {
-  //     dispatch(resetSubscription());
-  //   }
-  // }, [user_id, dispatch, user]);
-
-  const changeSubscriptionStatus = useCallback(async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:8070/api/v1/caregiver/changeSubscriptionStatus/${user_id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      if (res.data.success) {
-        if (res.data.data.subscriptionStatus === "Expired") {
-          // dispatch(resetSubscription());
-          localStorage.setItem(
-            "subscriptionStatus",
-            res.data.data.subscriptionStatus
-          );
-        }
-      } else {
-        // dispatch(setSubscribed());
-        localStorage.setItem(
-          "subscriptionStatus",
-          res.data.data.subscriptionStatus
-        );
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }, [user_id]);
-
-  const checkSubscription = useCallback(async () => {
+  const checkSubscription = async () => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(
@@ -176,9 +101,12 @@ function App() {
       if (res.data.success) {
         // dispatch(setSubscribed());
         localStorage.setItem("subscriptionStatus", "Active");
-      } else {
+        console.log("if part", res.data.message);
+      }
+      if (!res.data.success) {
         // dispatch(resetSubscription());
         localStorage.setItem("subscriptionStatus", "Expired");
+        console.log("else part", res.data.message);
       }
     } catch (error) {
       if (!error.response.data.success) {
@@ -186,34 +114,28 @@ function App() {
       }
       console.log(error);
     }
-  }, [user_id]);
+  };
 
-  const subscriptionStatus = useMemo(
-    () => localStorage.getItem("subscriptionStatus"),
-    []
-  );
+  const subscriptionStatus = localStorage.getItem("subscriptionStatus");
 
-  useEffect(() => {
-    if (user?.role !== "client") {
-      // changeSubscriptionStatus();
-      checkSubscription();
-    }
+  // useEffect(() => {
 
-    if (subscriptionStatus === "Active") {
-      dispatch(setSubscribed());
-    }
+  // if (subscriptionStatus === "Active") {
+  //   dispatch(setSubscribed());
+  // }
 
-    if (subscriptionStatus === "Expired") {
-      dispatch(resetSubscription());
-    }
-  }, [
-    user,
-    changeSubscriptionStatus,
-    checkSubscription,
-    dispatch,
-    subscriptionStatus,
-  ]);
-  // const subscriptionStatus = localStorage.getItem("subscriptionStatus");
+  // if (subscriptionStatus === "Expired") {
+  //   dispatch(resetSubscription());
+  // }
+  // }, [user, checkSubscription]);
+
+  // useEffect(() => {
+  // Check subscription status after component mounts
+  if (user?.role !== "client" && user?.role !== "admin") {
+    // changeSubscriptionStatus();
+    checkSubscription();
+  }
+  // }, [checkSubscription, user?.role]);
   return (
     <>
       <ThemeProvider theme={Theme}>
@@ -225,6 +147,7 @@ function App() {
               content={content}
             />
           )}
+
           <BrowserRouter>
             <ToastContainer
               position="top-center"

@@ -79,26 +79,29 @@ const DependentCard = ({ dependent, loading }) => {
               </ul>
             </div>
           )}
-        <div className="mt-4 text-left">
-          <Typography
-            variant="span"
-            gutterBottom
-            className="text-blue-500  text-lg flex items-center"
-          >
-            Additional Info
-          </Typography>
-          <Typography
-            variant="p"
-            gutterBottom
-            className=" text-gray-600 text-sm "
-          >
-            {dependent?.additionalInfo.charAt(0).toUpperCase()}
-            {dependent?.additionalInfo.slice(
-              1,
-              dependent?.additionalInfo.length
-            )}
-          </Typography>
-        </div>
+        {dependent?.additionalInfo && (
+          <div className="mt-4 text-left">
+            <Typography
+              variant="span"
+              gutterBottom
+              className="text-blue-500  text-lg flex items-center"
+            >
+              Additional Info
+            </Typography>
+            <Typography
+              variant="p"
+              gutterBottom
+              className=" text-gray-600 text-[14px] "
+            >
+              {dependent?.additionalInfo.charAt(0).toUpperCase()}
+              {dependent?.additionalInfo.slice(
+                1,
+                dependent?.additionalInfo.length
+              )}
+            </Typography>
+          </div>
+        )}
+
         <div
           className="absolute top-2 right-12 p-2 rounded-full hover:bg-slate-100 transition-all cursor-pointer"
           onClick={handleOpenModal}

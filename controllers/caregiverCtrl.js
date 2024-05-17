@@ -557,7 +557,7 @@ const checkSubscriptionController = async (req, res) => {
 
         res.status(404).send({
             success: false,
-            message: "Subscription not found",
+            message: "Subscription not found or expired",
         });
     } catch (error) {
         console.log(error);

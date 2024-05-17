@@ -164,7 +164,12 @@ const DependentInputModal = ({ open, onClose, dependent }) => {
     // Validate based on the field name
     switch (name) {
       case "name":
-        if (!isValidInput(nameRegex, value)) {
+        if (value.length === 0) {
+          setValidationErrors((prevErrors) => ({
+            ...prevErrors,
+            [name]: "",
+          }));
+        } else if (!isValidInput(nameRegex, value)) {
           // setValidationErrors((prevErrors) => ({
           //   ...prevErrors,
           //   [name]: "Name can only contain letters and spaces.",
@@ -191,7 +196,7 @@ const DependentInputModal = ({ open, onClose, dependent }) => {
           // }));
           return;
         } else if (
-          (dependentData.type === "Child" && (value < 0 || value > 12)) ||
+          (dependentData.type === "Child" && (value < 0 || value > 10)) ||
           (dependentData.type === "Parent" && (value < 60 || value > 100))
         ) {
           // setValidationErrors((prevErrors) => ({

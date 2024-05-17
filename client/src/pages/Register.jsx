@@ -111,10 +111,13 @@ const Register = () => {
   };
 
   const handlePhoneChange = (e) => {
-    setPhoneNumber(e.target.value);
-    if (e.target.value.length == 0) {
+    const phoneNumber = e.target.value;
+    const phoneRegex = /^(\+91[-\s]?)?[0]?(91)?[789]\d{9}$/;
+    setPhoneNumber(phoneNumber);
+
+    if (phoneNumber.length === 0) {
       setPhoneError("");
-    } else if (isNaN(e.target.value) || e.target.value.length < 10) {
+    } else if (!phoneRegex.test(phoneNumber)) {
       setPhoneError("Enter a valid phone number");
     } else {
       setPhoneError("");

@@ -85,11 +85,52 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
     return errors;
   };
 
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target;
+  //   const validationErrors = validateInput(name, value);
+
+  //   if (validationErrors)
+  //     setValidationError((prevError) => ({
+  //       ...prevError,
+  //       ...validationErrors,
+  //     }));
+
+  //   // Special handling for preferredCities to convert the string to an array
+  //   if (name === "preferredCities") {
+  //     // Split the string based on commas and trim each city
+  //     const citiesArray = value.split(",").map((city) => city.trim());
+
+  //     setCaregiverData((prevData) => ({
+  //       ...prevData,
+  //       preferredCities: citiesArray,
+  //     }));
+  //   } else if (name === "qualification") {
+  //     const qualArray = value.split(",").map((qual) => qual.trim());
+  //     setCaregiverData((prevData) => ({
+  //       ...prevData,
+  //       [name]: qualArray,
+  //     }));
+  //   } else if (name === "specialisation") {
+  //     const specArray = value.split(",").map((spec) => spec.trim());
+  //     setCaregiverData((prevData) => ({
+  //       ...prevData,
+  //       [name]: specArray,
+  //     }));
+  //   } else {
+  //     // For other fields, directly update the state
+  //     setCaregiverData((prevData) => ({
+  //       ...prevData,
+  //       [name]: value,
+  //     }));
+  //   }
+  // };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const validationErrors = validateInput(name, value);
+    const regex = /^[a-zA-Z, ]+$/;
 
-    if (name === "name")
+    if (validationErrors)
       setValidationError((prevError) => ({
         ...prevError,
         ...validationErrors,
@@ -98,24 +139,77 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
     // Special handling for preferredCities to convert the string to an array
     if (name === "preferredCities") {
       // Split the string based on commas and trim each city
+      if (!regex.test(value)) {
+        return;
+      }
       const citiesArray = value.split(",").map((city) => city.trim());
 
+      if (hasDuplicates(citiesArray)) {
+        setValidationError((prevError) => ({
+          ...prevError,
+          [name]: "Duplicate values are not allowed",
+        }));
+      } else {
+        setValidationError((prevError) => ({
+          ...prevError,
+          [name]: "", // Clear any previous error for this field
+        }));
+
+        setCaregiverData((prevData) => ({
+          ...prevData,
+          preferredCities: citiesArray,
+        }));
+      }
+    } else if (name === "qualification" || name === "specialisation") {
+      if (!regex.test(value)) {
+        return;
+      }
+      const dataArray = value.split(",").map((item) => item.trim());
+
+      if (hasDuplicates(dataArray)) {
+        setValidationError((prevError) => ({
+          ...prevError,
+          [name]: "Duplicate values are not allowed",
+        }));
+      } else {
+        setValidationError((prevError) => ({
+          ...prevError,
+          [name]: "", // Clear any previous error for this field
+        }));
+
+        setCaregiverData((prevData) => ({
+          ...prevData,
+          [name]: dataArray,
+        }));
+      }
+    } else if (name === "yearsExperience") {
+      if (isNaN(value) || value > 90 || value < 0) {
+        setValidationError((prevError) => ({
+          ...prevError,
+          [name]: "Enter a valid experience",
+        }));
+      } else {
+        setCaregiverData((prevData) => ({
+          ...prevData,
+          [name]: value,
+        }));
+      }
+    } else if (name === "address") {
       setCaregiverData((prevData) => ({
         ...prevData,
-        preferredCities: citiesArray,
+        [name]: value,
       }));
-    } else if (name === "qualification") {
-      const qualArray = value.split(",").map((qual) => qual.trim());
-      setCaregiverData((prevData) => ({
-        ...prevData,
-        [name]: qualArray,
-      }));
-    } else if (name === "specialisation") {
-      const specArray = value.split(",").map((spec) => spec.trim());
-      setCaregiverData((prevData) => ({
-        ...prevData,
-        [name]: specArray,
-      }));
+      const regex = /^[A-Za-z0-9\s]+$/;
+      if (!regex.test(value)) {
+        setValidationError((prevError) => ({
+          ...prevError,
+          [name]: "Enter a valid address",
+        }));
+      } else
+        setCaregiverData((prevData) => ({
+          ...prevData,
+          [name]: value,
+        }));
     } else {
       // For other fields, directly update the state
       setCaregiverData((prevData) => ({
@@ -123,6 +217,11 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
         [name]: value,
       }));
     }
+  };
+
+  // Function to check for duplicates in an array
+  const hasDuplicates = (array) => {
+    return new Set(array).size !== array.length;
   };
 
   const handleFileChange = (event) => {
@@ -159,8 +258,98 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
     setDeleteCertificates((prevData) => [...prevData, certificate]);
   };
 
+  const handleLowerlimitChange = (e) => {
+    const validationErrors = validateInput(e.target.name, e.target.value);
+
+    if (validationErrors)
+      setValidationError((prevError) => ({
+        ...prevError,
+        ...validationErrors,
+      }));
+
+    setAgeRange((prevAgeRange) => ({
+      ...prevAgeRange,
+      lowerLimit: e.target.value,
+    }));
+    if (
+      isNaN(e.target.value) ||
+      (user?.role === "babysitter" &&
+        (e.target.value < 0 || e.target.value > 10)) ||
+      (user?.role === "nurse" && (e.target.value < 60 || e.target.value > 100))
+    ) {
+      setValidationError((prevError) => ({
+        ...prevError,
+        ["lowerLimit"]: "Enter a valid lower limit",
+      }));
+    } else if (ageRange.lowerLimit > ageRange.upperLimit) {
+      setValidationError((prevError) => ({
+        ...prevError,
+        ["lowerLimit"]: "Lower limit cannot be greater than upper limit",
+      }));
+    } else {
+      setValidationError((prevError) => ({
+        ...prevError,
+        ["lowerLimit"]: "",
+      }));
+    }
+  };
+  const handleUpperLimitChange = (e) => {
+    const validationErrors = validateInput(e.target.name, e.target.value);
+
+    if (validationErrors)
+      setValidationError((prevError) => ({
+        ...prevError,
+        ...validationErrors,
+      }));
+
+    setAgeRange((prevAgeRange) => ({
+      ...prevAgeRange,
+      upperLimit: e.target.value,
+    }));
+    if (
+      isNaN(e.target.value) ||
+      (user?.role === "babysitter" &&
+        (e.target.value > 10 || e.target.value < 0)) ||
+      (user?.role === "nurse" && (e.target.value > 100 || e.target.value < 60))
+    ) {
+      setValidationError((prevError) => ({
+        ...prevError,
+        ["upperLimit"]: "Enter a valid upper limit",
+      }));
+    } else if (e.target.value < ageRange.lowerLimit) {
+      setValidationError((prevError) => ({
+        ...prevError,
+        ["upperLimit"]: "Upper limit cannot be lesser than lower limit",
+      }));
+    } else {
+      setValidationError((prevError) => ({
+        ...prevError,
+        ["upperLimit"]: "",
+      }));
+    }
+  };
+
   const handleSumbit = async (e) => {
     e.preventDefault();
+
+    if (Object.values(validationError).some((error) => error !== "")) {
+      dispatch(
+        openAlert({
+          severity: "warning",
+          content: "Please ensure the form is filled correctly",
+        })
+      );
+      return;
+    }
+    const preferredCityArray = CaregiverData?.preferredCities.filter(
+      (city) => city !== ""
+    );
+    const qualificationArray = CaregiverData?.qualification.filter(
+      (qual) => qual !== ""
+    );
+    const specialisationArray = CaregiverData?.specialisation.filter(
+      (spec) => spec !== ""
+    );
 
     const formdata = new FormData();
     formdata.append("userId", user._id);
@@ -171,13 +360,13 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
     formdata.append("description", CaregiverData.description);
     formdata.append("availability", CaregiverData.availability);
     formdata.append("ageRange", JSON.stringify(ageRange));
-    CaregiverData.preferredCities.forEach((city) => {
+    preferredCityArray.forEach((city) => {
       formdata.append(`preferredCities[]`, city);
     });
-    CaregiverData.qualification.forEach((qual) => {
+    qualificationArray.forEach((qual) => {
       formdata.append("qualification[]", qual);
     });
-    CaregiverData.specialisation.forEach((spec) => {
+    specialisationArray.forEach((spec) => {
       formdata.append("specialisation[]", spec);
     });
     deleteCertificates.forEach((cert) => {
@@ -327,6 +516,8 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         className="mb-2"
                         required
                         variant="filled"
+                        helperText={validationError.address}
+                        error={validationError.address && true}
                       />
                       <TextField
                         label="Years of experience"
@@ -337,6 +528,8 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         className="mb-2"
                         required
                         variant="filled"
+                        helperText={validationError.yearsExperience}
+                        error={validationError.yearsExperience && true}
                       />
                     </div>
 
@@ -347,32 +540,26 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         // id="lowerLimit"
                         value={ageRange?.lowerLimit}
                         name="ageRange"
-                        onChange={(e) =>
-                          setAgeRange((prevAgeRange) => ({
-                            ...prevAgeRange,
-                            lowerLimit: e.target.value,
-                          }))
-                        }
+                        onChange={handleLowerlimitChange}
                         fullWidth
                         className="mb-2"
                         required
                         variant="filled"
+                        helperText={validationError.lowerLimit}
+                        error={validationError.lowerLimit && true}
                       />
                       <TextField
                         label="Age Range Upper Limit"
                         // id="upperLimit"
                         value={ageRange?.upperLimit}
                         name="ageRange"
-                        onChange={(e) =>
-                          setAgeRange((prevAgeRange) => ({
-                            ...prevAgeRange,
-                            upperLimit: e.target.value,
-                          }))
-                        }
+                        onChange={handleUpperLimitChange}
                         fullWidth
                         className="mb-2"
                         required
                         variant="filled"
+                        helperText={validationError.upperLimit}
+                        error={validationError.upperLimit && true}
                       />
                       <FormControl
                         fullWidth
@@ -415,7 +602,10 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                       multiline
                       value={CaregiverData?.description}
                       rows={6}
+                      required
                       className="mb-2"
+                      helperText={validationError.description}
+                      error={validationError.description && true}
                     />
 
                     {/* Certifications */}
@@ -495,13 +685,19 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         fullWidth
                         className="mb-2"
                         variant="filled"
+                        required
+                        helperText={validationError.city}
+                        error={validationError.city && true}
                       />
                       <TextField
                         label="Preferred cities"
                         name="preferredCities"
                         value={CaregiverData?.preferredCities?.join(", ")}
                         onChange={handleInputChange}
+                        helperText={validationError.preferredCities}
+                        error={validationError.preferredCities && true}
                         fullWidth
+                        required
                         className="mb-2"
                         variant="filled"
                       />
@@ -510,7 +706,10 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                         name="qualification"
                         value={CaregiverData?.qualification?.join(", ")}
                         onChange={handleInputChange}
+                        helperText={validationError.qualification}
+                        error={validationError.qualification && true}
                         fullWidth
+                        required
                         className="mb-2"
                         variant="filled"
                       />
@@ -526,7 +725,10 @@ const UpdateProfileModal = ({ isOpen, onClose, caregiver }) => {
                       name="specialisation"
                       value={CaregiverData?.specialisation?.join(", ")}
                       onChange={handleInputChange}
+                      helperText={validationError.specialisation}
+                      error={validationError.specialisation && true}
                       fullWidth
+                      required
                       className="mb-2"
                       variant="filled"
                     />

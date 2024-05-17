@@ -158,28 +158,6 @@ const Homepage = React.memo(() => {
             </Tabs>
           </div>
 
-          {/* {selectedTab === 0 &&
-            (loading ? (
-              <div className="flex flex-wrap justify-start items-center gap-6 mt-5">
-                <CaregiverCardSkeleton />
-                <CaregiverCardSkeleton />
-                <CaregiverCardSkeleton />
-                <CaregiverCardSkeleton />
-              </div>
-            ) : (
-              <div className="flex flex-wrap justify-start items-center gap-11 mt-5">
-                {caregivers
-                  ?.filter((caregiver) => caregiver.user?.role === "babysitter")
-                  .map((caregiver, index) => (
-                    <CaregiverCard
-                      key={caregiver._id}
-                      caregiver={caregiver}
-                      index={index}
-                    />
-                  ))}
-              </div>
-            ))} */}
-
           {selectedTab === 0 && (
             <div>
               <div className="flex flex-wrap justify-start items-center gap-9 mt-5">
@@ -204,27 +182,6 @@ const Homepage = React.memo(() => {
               )}
             </div>
           )}
-
-          {/* {selectedTab === 1 && loading ? (
-            <div className="flex flex-wrap justify-start items-center gap-6 mt-5">
-              <CaregiverCardSkeleton />
-              <CaregiverCardSkeleton />
-              <CaregiverCardSkeleton />
-              <CaregiverCardSkeleton />
-            </div>
-          ) : (
-            <div className="flex flex-wrap justify-start items-center gap-11 mt-5">
-              {caregivers
-                ?.filter((caregiver) => caregiver.user?.role === "nurse")
-                .map((caregiver, index) => (
-                  <CaregiverCard
-                    key={caregiver._id}
-                    caregiver={caregiver}
-                    index={index}
-                  />
-                ))}
-            </div>
-          )} */}
 
           {selectedTab === 1 && (
             <div>

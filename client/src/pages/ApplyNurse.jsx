@@ -10,7 +10,7 @@ import { openAlert } from "../redux/features/messageSlice";
 import { LocalizationProvider, TimePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import moment from "moment";
-import { format, parse, parseISO } from "date-fns";
+import { format, parse, differenceInHours } from "date-fns";
 
 const ApplyNurse = () => {
   const [yearsExperience, setExperience] = useState(null);
@@ -48,11 +48,28 @@ const ApplyNurse = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.user);
 
+  // const handleExperienceChange = (e) => {
+  //   setExperience(e.target.value);
+  //   if (e.target.value.length == 0) {
+  //     setExperienceError("");
+  //   } else if (
+  //     isNaN(e.target.value) ||
+  //     e.target.value < 0 ||
+  //     e.target.value > 60
+  //   ) {
+  //     setExperienceError("Enter a valid number of experience");
+  //   } else {
+  //     setExperienceError("");
+  //   }
+  // };
+
   const handleExperienceChange = (e) => {
-    setExperience(e.target.value);
-    if (e.target.value.length == 0) {
+    const experience = parseInt(e.target.value) || ""; // Convert NaN to empty string
+    setExperience(experience);
+
+    if (experience === "") {
       setExperienceError("");
-    } else if (isNaN(e.target.value) || e.target.value > 60) {
+    } else if (experience < 0 || experience > 60) {
       setExperienceError("Enter a valid number of experience");
     } else {
       setExperienceError("");
@@ -60,11 +77,12 @@ const ApplyNurse = () => {
   };
 
   const handleFeesPerDayChange = (e) => {
-    setFeesPerDay(e.target.value);
-    if (e.target.value.length == 0) {
+    const fees = parseFloat(e.target.value) || "";
+    setFeesPerDay(fees);
+    if (fees === "") {
       setFeesPerDayError("");
-    } else if (isNaN(e.target.value)) {
-      setFeesPerDayError("Enter a valid number");
+    } else if (fees < 0 || fees > 5000) {
+      setFeesPerDayError("Fees cannot be more than 5,000");
     } else {
       setFeesPerDayError("");
     }
@@ -89,20 +107,35 @@ const ApplyNurse = () => {
     }
   };
 
+  // const handleDescriptionChange = (e) => {
+  //   setDescription(e.target.value);
+  //   // const descRegex = /^[a-zA-Z]+(\s[a-zA-Z]+)*$/;
+  //   // if (e.target.value.length === 0) {
+  //   //   setDescriptionError("");
+  //   // } else if (
+  //   //   !descRegex.test(e.target.value) ||
+  //   //   !/[aeiouAEIOU]/.test(e.target.value) ||
+  //   //   e.target.value.length < 30
+  //   // ) {
+  //   //   setDescriptionError("Enter a proper description");
+  //   // } else {
+  //   //   setDescriptionError("");
+  //   // }
+  // };
+
   const handleDescriptionChange = (e) => {
-    setDescription(e.target.value);
-    // const descRegex = /^[a-zA-Z]+(\s[a-zA-Z]+)*$/;
-    // if (e.target.value.length === 0) {
-    //   setDescriptionError("");
-    // } else if (
-    //   !descRegex.test(e.target.value) ||
-    //   !/[aeiouAEIOU]/.test(e.target.value) ||
-    //   e.target.value.length < 30
-    // ) {
-    //   setDescriptionError("Enter a proper description");
-    // } else {
-    //   setDescriptionError("");
-    // }
+    const description = e.target.value;
+    setDescription(description);
+
+    if (description.trim().length === 0) {
+      setDescriptionError("");
+    } else if (description.trim().length < 30) {
+      setDescriptionError("Description should be at least 30 characters long");
+    } else if (!/[a-zA-Z]/.test(description)) {
+      setDescriptionError("Description should contain at least one letter");
+    } else {
+      setDescriptionError("");
+    }
   };
 
   const handleQualificationChange = (e) => {
@@ -238,16 +271,16 @@ const ApplyNurse = () => {
   }
 
   const handleLowerLimitChange = (e) => {
-    const newValue = e.target.value;
+    const newValue = parseInt(e.target.value) || "";
     const role = user?.role;
 
     if (newValue.length === 0) {
       setLowerLimitError("");
-    } else if (isNaN(newValue)) {
+    } else if (isNaN(newValue) || newValue < 0) {
       setLowerLimitError("Enter a valid number");
     } else if (role === "babysitter" && newValue > 10) {
       setLowerLimitError("Lower limit cannot exceed 10 for babysitters");
-    } else if (role === "nurse" && newValue < 10) {
+    } else if (role === "nurse" && newValue < 30) {
       setLowerLimitError("Lower limit cannot be less than 10 for nurse");
     } else if (parseInt(newValue) > parseInt(ageRange.upperLimit)) {
       setLowerLimitError("Lower limit cannot be greater than upper limit");
@@ -262,14 +295,14 @@ const ApplyNurse = () => {
   };
 
   const handleUpperLimitChange = (e) => {
-    const newValue = e.target.value;
+    const newValue = parseInt(e.target.value) || "";
     const role = user?.role; // Assuming you have the user's role available
 
     if (newValue.length === 0) {
       setupperLimitError("");
-    } else if (isNaN(newValue)) {
+    } else if (isNaN(newValue) | (newValue < 0)) {
       setupperLimitError("Enter a valid number");
-    } else if (role === "nurse" && newValue < 10) {
+    } else if (role === "nurse" && newValue < 30) {
       setupperLimitError("Upper limit cannot be less than 10 for nurses");
     } else if (role === "babysitter" && newValue > 10) {
       setupperLimitError("Upper limit cannot exceed 10 for babysitters");
@@ -347,10 +380,84 @@ const ApplyNurse = () => {
   //     console.error("Error in handleStartTimeChange:", error);
   //   }
   // };
+
+  // const handleStartTimeChange = (newTime) => {
+  //   try {
+  //     if (!newTime) {
+  //       setStartTimeError("");
+  //       return;
+  //     }
+
+  //     const dateTime = new Date(newTime);
+
+  //     if (isNaN(dateTime.getTime())) {
+  //       console.error("Invalid time value after parsing:", newTime);
+  //       return;
+  //     }
+
+  //     const hours = dateTime.getHours();
+  //     const minutes = dateTime.getMinutes();
+  //     const parsedTime = parse(`${hours}:${minutes}`, "HH:mm", new Date());
+
+  //     if (isNaN(parsedTime.getTime())) {
+  //       console.error("Invalid time value after parsing:", newTime);
+  //       return;
+  //     }
+
+  //     const startTimeTime = format(parsedTime, "HH:mm");
+  //     setStartTime(startTimeTime);
+
+  //     if (endTime && startTimeTime >= endTime) {
+  //       setStartTimeError("Start time must be earlier than end time");
+  //     } else if (endTime && startTimeTime <= endTime) {
+  //       setStartTimeError("Start time must be greater than end time");
+  //     } else {
+  //       setStartTimeError("");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error in handleStartTimeChange:", error);
+  //   }
+  // };
+
+  // const handleEndTimeChange = (newTime) => {
+  //   try {
+  //     if (!newTime) {
+  //       setEndTimeError("");
+  //       return;
+  //     }
+
+  //     const dateTime = new Date(newTime);
+
+  //     if (isNaN(dateTime.getTime())) {
+  //       console.error("Invalid time value after parsing:", newTime);
+  //       return;
+  //     }
+
+  //     const hours = dateTime.getHours();
+  //     const minutes = dateTime.getMinutes();
+  //     const endTimeTime = format(
+  //       parse(`${hours}:${minutes}`, "HH:mm", new Date()),
+  //       "HH:mm"
+  //     );
+  //     setEndTime(endTimeTime);
+
+  //     if (startTime && endTimeTime <= startTime) {
+  //       setEndTimeError("End time must be greater than start time");
+  //     } else if (startTime && endTimeTime >= startTime) {
+  //       setEndTimeError("");
+  //     } else {
+  //       setEndTimeError("End time must be earlier than start time");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error in handleEndTimeChange:", error);
+  //   }
+  // };
+
   const handleStartTimeChange = (newTime) => {
     try {
       if (!newTime) {
         setStartTimeError("");
+        setStartTime("");
         return;
       }
 
@@ -358,6 +465,7 @@ const ApplyNurse = () => {
 
       if (isNaN(dateTime.getTime())) {
         console.error("Invalid time value after parsing:", newTime);
+        setStartTimeError("Invalid start time");
         return;
       }
 
@@ -367,22 +475,30 @@ const ApplyNurse = () => {
 
       if (isNaN(parsedTime.getTime())) {
         console.error("Invalid time value after parsing:", newTime);
+        setStartTimeError("Invalid start time");
         return;
       }
 
       const startTimeTime = format(parsedTime, "HH:mm");
       setStartTime(startTimeTime);
-      console.log(startTimeTime);
 
-      if (endTime && startTimeTime >= endTime) {
-        setStartTimeError("Start time must be earlier than end time");
-      } else if (endTime && startTimeTime <= endTime) {
-        setStartTimeError("Start time must be greater than end time");
+      if (endTime) {
+        const parsedEndTime = parse(endTime, "HH:mm", new Date());
+        if (startTimeTime >= endTime) {
+          setStartTimeError("Start time must be earlier than end time");
+        } else if (differenceInHours(parsedEndTime, parsedTime) < 2) {
+          setStartTimeError(
+            "There must be at least 2 hours between start time and end time"
+          );
+        } else {
+          setStartTimeError("");
+        }
       } else {
         setStartTimeError("");
       }
     } catch (error) {
       console.error("Error in handleStartTimeChange:", error);
+      setStartTimeError("An error occurred while setting the start time");
     }
   };
 
@@ -390,6 +506,7 @@ const ApplyNurse = () => {
     try {
       if (!newTime) {
         setEndTimeError("");
+        setEndTime("");
         return;
       }
 
@@ -397,27 +514,40 @@ const ApplyNurse = () => {
 
       if (isNaN(dateTime.getTime())) {
         console.error("Invalid time value after parsing:", newTime);
+        setEndTimeError("Invalid end time");
         return;
       }
 
       const hours = dateTime.getHours();
       const minutes = dateTime.getMinutes();
-      const endTimeTime = format(
-        parse(`${hours}:${minutes}`, "HH:mm", new Date()),
-        "HH:mm"
-      );
-      setEndTime(endTimeTime);
-      console.log(endTimeTime);
+      const parsedTime = parse(`${hours}:${minutes}`, "HH:mm", new Date());
 
-      if (startTime && endTimeTime <= startTime) {
-        setEndTimeError("End time must be later than start time");
-      } else if (startTime && endTimeTime >= startTime) {
-        setEndTimeError("");
+      if (isNaN(parsedTime.getTime())) {
+        console.error("Invalid time value after parsing:", newTime);
+        setEndTimeError("Invalid end time");
+        return;
+      }
+
+      const endTimeTime = format(parsedTime, "HH:mm");
+      setEndTime(endTimeTime);
+
+      if (startTime) {
+        const parsedStartTime = parse(startTime, "HH:mm", new Date());
+        if (endTimeTime <= startTime) {
+          setEndTimeError("End time must be greater than start time");
+        } else if (differenceInHours(parsedTime, parsedStartTime) < 2) {
+          setEndTimeError(
+            "There must be at least 2 hours between start time and end time"
+          );
+        } else {
+          setEndTimeError("");
+        }
       } else {
-        setEndTimeError("End time must be earlier than start time");
+        setEndTimeError("");
       }
     } catch (error) {
       console.error("Error in handleEndTimeChange:", error);
+      setEndTimeError("An error occurred while setting the end time");
     }
   };
 
